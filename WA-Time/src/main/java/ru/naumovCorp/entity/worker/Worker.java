@@ -22,7 +22,7 @@ public class Worker implements Serializable {
     @GeneratedValue(generator = "WorkerId")
     @SequenceGenerator(name = "WorkerId", sequenceName = "GEN_WORKER_ID", allocationSize = 1)
     @Column(name = "WORKER_ID")
-    private Long workerId;
+    private Long id;
 
     @Column(name = "FAMILY", nullable = false, length = 64)
     private String family;
@@ -33,7 +33,7 @@ public class Worker implements Serializable {
     @Column(name = "SURNAME", nullable = false, length = 32)
     private String surname;
 
-    public Worker() {
+    protected Worker() {
     }
 
     public Worker(String family, String firstName, String surname) {
@@ -42,12 +42,12 @@ public class Worker implements Serializable {
         this.surname = surname;
     }
 
-    public Long getWorkerId() {
-        return workerId;
+    public Long getId() {
+        return id;
     }
 
-    public void setWorkerId(Long workerId) {
-        this.workerId = workerId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getFamily() {
@@ -81,14 +81,14 @@ public class Worker implements Serializable {
 
         Worker worker = (Worker) o;
 
-        if (workerId != null ? !workerId.equals(worker.workerId) : worker.workerId != null) return false;
+        if (id != null ? !id.equals(worker.id) : worker.id != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return workerId != null ? workerId.hashCode() : 0;
+        return id != null ? id.hashCode() : 0;
     }
 
 }
