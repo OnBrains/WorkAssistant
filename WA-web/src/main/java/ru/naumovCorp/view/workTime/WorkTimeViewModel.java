@@ -2,6 +2,7 @@ package ru.naumovCorp.view.workTime;
 
 
 import ru.naumovCorp.dao.DAOHelper;
+import ru.naumovCorp.entity.workTime.WorkDayState;
 import ru.naumovCorp.entity.worker.Worker;
 import ru.naumovCorp.dao.workTime.WorkTimeDAOInterface;
 import ru.naumovCorp.entity.workTime.WorkTime;
@@ -32,6 +33,10 @@ public class WorkTimeViewModel {
             timeByCurrentMonth = wtDAO.getTimeInfoByMonth(new Date(), getCurrentWorker());
         }
         return timeByCurrentMonth;
+    }
+
+    public WorkDayState[] getStates() {
+        return WorkDayState.values();
     }
 
     //TODO: при реализации авторизации, переделать на залогиненого работника

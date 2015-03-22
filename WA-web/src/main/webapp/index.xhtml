@@ -65,6 +65,17 @@
                     <f:facet name="input"><p:calendar value="#{timeInfo.outTime}"/></f:facet>
                 </p:cellEditor>
             </p:column>
+            <p:column headerText="Состояние">
+                <p:cellEditor>
+                    <f:facet name="output"><h:outputText value="#{timeInfo.state.desc}" /></f:facet>
+                    <f:facet name="input">
+                        <p:selectOneMenu value="#{timeInfo.state}">
+                            <f:selectItems value="#{workTimeViewModel.states}" var="state"
+                                    itemValue="#{state}" itemLabel="#{state.desc}"/>
+                        </p:selectOneMenu>
+                    </f:facet>
+                </p:cellEditor>
+            </p:column>
             <p:column style="width:32px">
                 <p:rowEditor />
             </p:column>
