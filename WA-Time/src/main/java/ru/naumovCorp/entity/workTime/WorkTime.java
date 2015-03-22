@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import ru.naumovCorp.entity.worker.Worker;
+
 import static ru.naumovCorp.entity.workTime.WorkDayState.NO_WORK;
 
 /**
@@ -14,7 +15,11 @@ import static ru.naumovCorp.entity.workTime.WorkDayState.NO_WORK;
 
 @Entity
 @Table(name = "WORK_TIME", uniqueConstraints = {@UniqueConstraint(columnNames = {"DAY"})})
+@NamedQuery(name = WorkTime.GET_TIME_INFO_BY_MONTH,
+            query = "select wt from WorkTime wt where wt.worker = :worker and to_char(wt.day, 'yyyyMM') = to_char(:day, 'yyyyMM')")
 public class WorkTime implements Serializable {
+
+    public static final String GET_TIME_INFO_BY_MONTH = "WorkTimeDAO.getTimeInfoByMonth";
 
     @Id
     @GeneratedValue(generator = "WorkTimeId")
