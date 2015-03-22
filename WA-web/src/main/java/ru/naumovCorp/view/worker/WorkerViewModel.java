@@ -7,8 +7,8 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.primefaces.event.RowEditEvent;
+import ru.naumovCorp.dao.worker.WorkerDAOInterface;
 import ru.naumovCorp.entity.worker.Worker;
-import ru.naumovCorp.dao.worker.implementation.WorkerDAO;
 
 /**
  * @author Naumov Oleg on 21.03.2015 20:34.
@@ -19,7 +19,7 @@ import ru.naumovCorp.dao.worker.implementation.WorkerDAO;
 public class WorkerViewModel implements Serializable {
 
     @Inject
-    private WorkerDAO wDAO;
+    private WorkerDAOInterface wDAO;
 
     private List<Worker> workers;
 
