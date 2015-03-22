@@ -5,7 +5,7 @@
     <groupId>ru.naumovCorp</groupId>
     <artifactId>WorkAssistent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0</version>
+    <version>1.0.0</version>
     <name>WorkAssistent</name>
 
     <modules>

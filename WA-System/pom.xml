@@ -4,7 +4,7 @@
     <parent>
         <groupId>ru.naumovCorp</groupId>
         <artifactId>WorkAssistent</artifactId>
-        <version>1.0</version>
+        <version>1.0.0</version>
     </parent>
     <artifactId>WA-System</artifactId>
     <name>WA-System</name>
