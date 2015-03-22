@@ -1,4 +1,4 @@
-package dao;
+package ru.naumovCorp.dao;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
