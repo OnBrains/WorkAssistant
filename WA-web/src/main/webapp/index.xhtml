@@ -38,5 +38,37 @@
             </p:column>
         </p:dataTable>
     </h:form>
+    <h:form>
+        <p:dataTable value="#{workTimeViewModel.timeByCurrentMonth}" var="timeInfo" editable="true" >
+            <p:ajax event="rowEdit" />
+            <p:column headerText="День">
+                <p:cellEditor>
+                    <f:facet name="output"><h:outputText value="#{timeInfo.day}"/></f:facet>
+                    <f:facet name="input"><p:calendar value="#{timeInfo.day}"/></f:facet>
+                </p:cellEditor>
+            </p:column>
+            <p:column headerText="Выходной">
+                <p:cellEditor>
+                    <f:facet name="output"><h:outputText value="#{timeInfo.holiday}"/></f:facet>
+                    <f:facet name="input"><p:selectBooleanCheckbox value="#{timeInfo.holiday}"/></f:facet>
+                </p:cellEditor>
+            </p:column>
+            <p:column headerText="Начал">
+                <p:cellEditor>
+                    <f:facet name="output"><h:outputText value="#{timeInfo.comingTime}"/></f:facet>
+                    <f:facet name="input"><p:calendar value="#{timeInfo.comingTime}"/></f:facet>
+                </p:cellEditor>
+            </p:column>
+            <p:column headerText="Закочнил">
+                <p:cellEditor>
+                    <f:facet name="output"><h:outputText value="#{timeInfo.outTime}"/></f:facet>
+                    <f:facet name="input"><p:calendar value="#{timeInfo.outTime}"/></f:facet>
+                </p:cellEditor>
+            </p:column>
+            <p:column style="width:32px">
+                <p:rowEditor />
+            </p:column>
+        </p:dataTable>
+    </h:form>
 </h:body>
 </html>
