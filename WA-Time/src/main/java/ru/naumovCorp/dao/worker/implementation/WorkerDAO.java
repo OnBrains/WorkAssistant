@@ -1,6 +1,6 @@
 package ru.naumovCorp.dao.worker.implementation;
 
-import dao.DAOHelper;
+import ru.naumovCorp.dao.DAOHelper;
 import ru.naumovCorp.dao.worker.WorkerDAOInterface;
 import ru.naumovCorp.entity.worker.Worker;
 
