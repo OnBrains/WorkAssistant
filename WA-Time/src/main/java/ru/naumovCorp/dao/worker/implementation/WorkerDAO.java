@@ -9,7 +9,6 @@ import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.NamedQuery;
 import java.util.List;
 
 /**
@@ -18,10 +17,7 @@ import java.util.List;
 
 @Stateless
 @TransactionManagement(TransactionManagementType.BEAN)
-@NamedQuery(name = WorkerDAO.GET_ALL_WORKER, query = "select w from Worker w")
 public class WorkerDAO implements WorkerDAOInterface {
-
-    public static final String GET_ALL_WORKER = "WorkerDAO.getWorkers";
 
     @Inject
     DAOHelper dh;
@@ -44,7 +40,7 @@ public class WorkerDAO implements WorkerDAOInterface {
     @Override
     public List<Worker> getWorkers() {
         EntityManager em = dh.getEntityManager();
-        return em.createNamedQuery(GET_ALL_WORKER, Worker.class).getResultList();
+        return em.createNamedQuery(Worker.GET_ALL_WORKER, Worker.class).getResultList();
     }
 
 }

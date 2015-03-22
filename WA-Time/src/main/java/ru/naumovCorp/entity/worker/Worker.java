@@ -2,13 +2,7 @@ package ru.naumovCorp.entity.worker;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 
 /**
  * @author Naumov Oleg on 21.03.2015 20:34.
@@ -16,7 +10,10 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "WORKER", uniqueConstraints = {@UniqueConstraint(columnNames = {"FAMILY", "FIRSTNAME", "SURNAME"})})
+@NamedQuery(name = Worker.GET_ALL_WORKER, query = "select w from Worker w")
 public class Worker implements Serializable {
+
+    public static final String GET_ALL_WORKER = "WorkerDAO.getWorkers";
 
     @Id
     @GeneratedValue(generator = "WorkerId")
