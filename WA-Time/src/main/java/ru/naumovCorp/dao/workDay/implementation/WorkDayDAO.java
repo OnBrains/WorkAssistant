@@ -1,8 +1,8 @@
-package ru.naumovCorp.dao.workTime.implementation;
+package ru.naumovCorp.dao.workDay.implementation;
 
 import ru.naumovCorp.dao.DAOHelper;
-import ru.naumovCorp.dao.workTime.WorkTimeDAOInterface;
-import ru.naumovCorp.entity.workTime.WorkTime;
+import ru.naumovCorp.dao.workDay.WorkDayDAOInterface;
+import ru.naumovCorp.entity.workDay.WorkDay;
 import ru.naumovCorp.entity.worker.Worker;
 
 import javax.ejb.Stateless;
@@ -20,32 +20,32 @@ import java.util.List;
 
 @Stateless
 @TransactionManagement(TransactionManagementType.BEAN)
-public class WorkTimeDAO implements WorkTimeDAOInterface {
+public class WorkDayDAO implements WorkDayDAOInterface {
 
     @Inject
     private DAOHelper dh;
 
     @Override
-    public void create(WorkTime workTime) {
-        dh.persist(workTime);
+    public void create(WorkDay workDay) {
+        dh.persist(workDay);
     }
 
     @Override
-    public void update(WorkTime workTime) {
-        dh.merge(workTime);
+    public void update(WorkDay workDay) {
+        dh.merge(workDay);
     }
 
     @Override
-    public void remove(WorkTime workTime) {
-        dh.remove(workTime);
+    public void remove(WorkDay workDay) {
+        dh.remove(workDay);
     }
 
     @Override
-    public WorkTime getCurrentDayInfo(Date day, Worker currentWorker) {
+    public WorkDay getCurrentDayInfo(Date day, Worker currentWorker) {
         EntityManager em = dh.getEntityManager();
-        WorkTime currentDay;
+        WorkDay currentDay;
         try {
-            currentDay = em.createNamedQuery(WorkTime.GET_CURRENT_DAY, WorkTime.class)
+            currentDay = em.createNamedQuery(WorkDay.GET_CURRENT_DAY, WorkDay.class)
                     .setParameter("worker", currentWorker).setParameter("day", day).getSingleResult();
         } catch (NoResultException ex) {
             return null;
@@ -54,9 +54,9 @@ public class WorkTimeDAO implements WorkTimeDAOInterface {
     }
 
     @Override
-    public List<WorkTime> getTimeInfoByMonth(Date month, Worker currentWorker) {
+    public List<WorkDay> getDayInfoByMonth(Date month, Worker currentWorker) {
         EntityManager em = dh.getEntityManager();
-        return em.createNamedQuery(WorkTime.GET_TIME_INFO_BY_MONTH, WorkTime.class)
+        return em.createNamedQuery(WorkDay.GET_TIME_INFO_BY_MONTH, WorkDay.class)
                 .setParameter("worker", currentWorker).setParameter("month", month).getResultList();
     }
 

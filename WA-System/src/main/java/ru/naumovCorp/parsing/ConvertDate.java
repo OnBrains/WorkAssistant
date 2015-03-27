@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * @author Naumov Oleg on 06.04.2015 23:00.
+ * @author Naumov Oleg on 26.03.2015 23:00.
  */
 public class ConvertDate {
 

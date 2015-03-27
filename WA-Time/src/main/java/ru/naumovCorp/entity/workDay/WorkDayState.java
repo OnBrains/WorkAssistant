@@ -1,4 +1,4 @@
-package ru.naumovCorp.entity.workTime;
+package ru.naumovCorp.entity.workDay;
 
 /**
  * @author Naumov Oleg on 21.03.2015 22:06.

@@ -6,7 +6,7 @@
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
         <jta-data-source>java:/OracleWA</jta-data-source>
         <class>ru.naumovCorp.entity.worker.Worker</class>
-        <class>ru.naumovCorp.entity.workTime.WorkTime</class>
+        <class>ru.naumovCorp.entity.workDay.WorkDay</class>
         <properties>
             <property name="hibernate.transaction.manager_lookup_class"
                       value="org.hibernate.transaction.JBossTransactionManagerLookup"/>

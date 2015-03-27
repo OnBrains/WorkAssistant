@@ -1,12 +1,12 @@
-package ru.naumovCorp.view.workTime;
+package ru.naumovCorp.view.workDay;
 
 
 import org.primefaces.event.RowEditEvent;
 import ru.naumovCorp.dao.DAOHelper;
-import ru.naumovCorp.entity.workTime.WorkDayState;
+import ru.naumovCorp.entity.workDay.WorkDayState;
 import ru.naumovCorp.entity.worker.Worker;
-import ru.naumovCorp.dao.workTime.WorkTimeDAOInterface;
-import ru.naumovCorp.entity.workTime.WorkTime;
+import ru.naumovCorp.dao.workDay.WorkDayDAOInterface;
+import ru.naumovCorp.entity.workDay.WorkDay;
 import ru.naumovCorp.parsing.ConvertDate;
 
 import javax.faces.bean.ManagedBean;
@@ -22,16 +22,16 @@ import java.util.List;
 
 @ManagedBean
 @ViewScoped
-public class WorkTimeViewModel {
+public class WorkDayViewModel {
 
     @Inject
-    private WorkTimeDAOInterface wtDAO;
+    private WorkDayDAOInterface wdDAO;
     @Inject
     private DAOHelper dh;
 
     private Calendar selectedMonth;
-    private List<WorkTime> daysBySelectedMonth;
-    private WorkTime currentDay;
+    private List<WorkDay> daysBySelectedMonth;
+    private WorkDay currentDay;
 
     /**
      * Получает следующий месяц
@@ -52,16 +52,16 @@ public class WorkTimeViewModel {
     /**
      * Получаем все дни, из БД, по выбранному месяцу(selectedMonth)
      */
-    private List<WorkTime> initializationDaysForMonth() {
+    private List<WorkDay> initializationDaysForMonth() {
         if (selectedMonth == null) {
             selectedMonth = Calendar.getInstance();
         }
-        return wtDAO.getTimeInfoByMonth(selectedMonth.getTime(), getCurrentWorker());
+        return wdDAO.getDayInfoByMonth(selectedMonth.getTime(), getCurrentWorker());
     }
 
-    public WorkTime getCurrentDay() {
+    public WorkDay getCurrentDay() {
         if (currentDay == null) {
-            currentDay = wtDAO.getCurrentDayInfo(new Date(), getCurrentWorker());
+            currentDay = wdDAO.getCurrentDayInfo(new Date(), getCurrentWorker());
         }
         return currentDay;
     }
@@ -81,11 +81,11 @@ public class WorkTimeViewModel {
         Calendar calendar = selectedMonth;
         for (int i = 1; i <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH); i++) {
             calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), i);
-            WorkTime day = new WorkTime(getCurrentWorker(), calendar.getTime(), false);
+            WorkDay day = new WorkDay(getCurrentWorker(), calendar.getTime(), false);
             if (isHoliday(calendar)) {
                 day.setHoliday(true);
             }
-            wtDAO.create(day);
+            wdDAO.create(day);
         }
         daysBySelectedMonth = initializationDaysForMonth();
     }
@@ -111,7 +111,7 @@ public class WorkTimeViewModel {
      */
     //TODO: прикрутить логику редактирования
     public void onRowEdit(RowEditEvent event) {
-        wtDAO.update((WorkTime) event.getObject());
+        wdDAO.update((WorkDay) event.getObject());
     }
 
     /**
@@ -135,7 +135,7 @@ public class WorkTimeViewModel {
         return selectedMonth;
     }
 
-    public List<WorkTime> getDaysBySelectedMonth() {
+    public List<WorkDay> getDaysBySelectedMonth() {
         if (daysBySelectedMonth == null) {
             daysBySelectedMonth = initializationDaysForMonth();
         }

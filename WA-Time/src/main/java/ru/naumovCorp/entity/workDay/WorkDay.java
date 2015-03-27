@@ -1,4 +1,4 @@
-package ru.naumovCorp.entity.workTime;
+package ru.naumovCorp.entity.workDay;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -7,32 +7,32 @@ import java.util.Date;
 
 import ru.naumovCorp.entity.worker.Worker;
 
-import static ru.naumovCorp.entity.workTime.WorkDayState.NO_WORK;
+import static ru.naumovCorp.entity.workDay.WorkDayState.NO_WORK;
 
 /**
  * @author Naumov Oleg on 21.03.2015 21:20.
  */
 
 @Entity
-@Table(name = "WORK_TIME", uniqueConstraints = {@UniqueConstraint(columnNames = {"DAY"})})
+@Table(name = "WORK_DAY", uniqueConstraints = {@UniqueConstraint(columnNames = {"DAY"})})
 @NamedQueries
     ({
-        @NamedQuery(name = WorkTime.GET_TIME_INFO_BY_MONTH,
-                query = "select wt from WorkTime wt where wt.worker = :worker and to_char(wt.day, 'yyyyMM') = to_char(:month, 'yyyyMM') order by wt.day"),
-        @NamedQuery(name = WorkTime.GET_CURRENT_DAY,
-                query = "select wt from WorkTime wt where wt.worker = :worker and to_char(wt.day, 'yyyyMMdd') = to_char(:day, 'yyyyMMdd')")
+        @NamedQuery(name = WorkDay.GET_TIME_INFO_BY_MONTH,
+                query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day, 'yyyyMM') = to_char(:month, 'yyyyMM') order by wt.day"),
+        @NamedQuery(name = WorkDay.GET_CURRENT_DAY,
+                query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day, 'yyyyMMdd') = to_char(:day, 'yyyyMMdd')")
     })
 
 // TODO: переименовать в WorkDay
-public class WorkTime implements Serializable {
+public class WorkDay implements Serializable {
 
-    public static final String GET_TIME_INFO_BY_MONTH = "WorkTimeDAO.getTimeInfoByMonth";
+    public static final String GET_TIME_INFO_BY_MONTH = "WorkTimeDAO.getDayInfoByMonth";
     public static final String GET_CURRENT_DAY = "WorkTimeDAO.getCurrentDay";
 
     @Id
     @GeneratedValue(generator = "WorkTimeId")
-    @SequenceGenerator(name = "WorkTimeId", sequenceName = "GEN_WORK_TIME_ID", allocationSize = 1)
-    @Column(name = "WORK_TIME_ID")
+    @SequenceGenerator(name = "WorkTimeId", sequenceName = "GEN_WORK_DAY_ID", allocationSize = 1)
+    @Column(name = "WORK_DAY_ID")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -54,20 +54,21 @@ public class WorkTime implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar outTime;
 
-    @Column(name = "SUMMARY_WORKED_TIME")
-    private Float summaryWorkedTime;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "STATE", length = 16)
     private WorkDayState state = NO_WORK;
 
-    protected WorkTime() {
+    @Transient
+    private Long summaryWorkedTime;
+
+    protected WorkDay() {
     }
 
-    public WorkTime(Worker worker, Date day, boolean isHoliday) {
+    public WorkDay(Worker worker, Date day, boolean isHoliday) {
         this.worker = worker;
         this.day = day;
         this.isHoliday = isHoliday;
+        //TODO: надо ли сетить состояние тут?
         this.state = WorkDayState.NO_WORK;
     }
 
@@ -119,12 +120,8 @@ public class WorkTime implements Serializable {
         this.outTime = outTime;
     }
 
-    public Float getSummaryWorkedTime() {
-        return summaryWorkedTime;
-    }
-
-    public void setSummaryWorkedTime(Float summaryWorkedTime) {
-        this.summaryWorkedTime = summaryWorkedTime;
+    public Long getSummaryWorkedTime() {
+        return outTime.getTimeInMillis() - comingTime.getTimeInMillis();
     }
 
     public WorkDayState getState() {
@@ -140,9 +137,9 @@ public class WorkTime implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        WorkTime workTime = (WorkTime) o;
+        WorkDay workDay = (WorkDay) o;
 
-        if (id != null ? !id.equals(workTime.id) : workTime.id != null) return false;
+        if (id != null ? !id.equals(workDay.id) : workDay.id != null) return false;
 
         return true;
     }

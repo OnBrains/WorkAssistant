@@ -22,52 +22,52 @@
         <p:layoutUnit position="center" resizable="true">
             <h:form id="month_info_form">
 
-                <p:commandButton id="create_days_for_month" value="+" action="#{workTimeViewModel.createDaysForMonth}"
-                                 rendered="#{workTimeViewModel.daysBySelectedMonth.size() == 0}"
+                <p:commandButton id="create_days_for_month" value="+" action="#{workDayViewModel.createDaysForMonth}"
+                                 rendered="#{workDayViewModel.daysBySelectedMonth.size() == 0}"
                                  style="float:left; margin: 7px"
                                  update="month_info_form"/>
-                <p:commandButton id="next_month" value="+" action="#{workTimeViewModel.nextMonth}"
+                <p:commandButton id="next_month" value="+" action="#{workDayViewModel.nextMonth}"
                                  update="month_info_form" style="float:right; margin: 7px"/>
-                <p:commandButton id="previous_month" value="-" action="#{workTimeViewModel.previousMonth}"
+                <p:commandButton id="previous_month" value="-" action="#{workDayViewModel.previousMonth}"
                                  update="month_info_form" style="float:right; margin: 7px"/>
 
-                <p:dataTable id="month_info_table" value="#{workTimeViewModel.daysBySelectedMonth}" var="timeInfo"
+                <p:dataTable id="month_info_table" value="#{workDayViewModel.daysBySelectedMonth}" var="dayInfo"
                              editable="true">
                     <f:facet name="header">
-                        <h:outputText value="#{workTimeViewModel.selectedMonth.time}"/>
+                        <h:outputText value="#{workDayViewModel.selectedMonth.time}"/>
                     </f:facet>
-                    <p:ajax event="rowEdit" listener="#{workTimeViewModel.onRowEdit}"/>
+                    <p:ajax event="rowEdit" listener="#{workDayViewModel.onRowEdit}"/>
                     <p:column headerText="День">
-                        <h:outputText value="#{timeInfo.day}"/>
+                        <h:outputText value="#{dayInfo.day}"/>
                     </p:column>
                     <p:column headerText="Выходной">
                         <p:cellEditor>
-                            <f:facet name="output"><h:outputText value="#{timeInfo.holiday}"/></f:facet>
-                            <f:facet name="input"><p:selectBooleanCheckbox value="#{timeInfo.holiday}"/></f:facet>
+                            <f:facet name="output"><h:outputText value="#{dayInfo.holiday}"/></f:facet>
+                            <f:facet name="input"><p:selectBooleanCheckbox value="#{dayInfo.holiday}"/></f:facet>
                         </p:cellEditor>
                     </p:column>
                     <p:column headerText="Начал">
                         <p:cellEditor>
                             <f:facet name="output"><h:outputText
-                                    value="#{workTimeViewModel.getTime(timeInfo.comingTime.time)}"/></f:facet>
-                            <f:facet name="input"><p:calendar id="coming_time" value="#{timeInfo.comingTime.time}"
+                                    value="#{workDayViewModel.getTime(dayInfo.comingTime.time)}"/></f:facet>
+                            <f:facet name="input"><p:calendar id="coming_time" value="#{dayInfo.comingTime.time}"
                                                               pattern="HH:mm" timeOnly="true"/></f:facet>
                         </p:cellEditor>
                     </p:column>
                     <p:column headerText="Закочнил">
                         <p:cellEditor>
                             <f:facet name="output"><h:outputText
-                                    value="#{workTimeViewModel.getTime(timeInfo.outTime.time)}"/></f:facet>
-                            <f:facet name="input"><p:calendar id="out_time" value="#{timeInfo.outTime.time}"
+                                    value="#{workDayViewModel.getTime(dayInfo.outTime.time)}"/></f:facet>
+                            <f:facet name="input"><p:calendar id="out_time" value="#{dayInfo.outTime.time}"
                                                               pattern="HH:mm" timeOnly="true"/></f:facet>
                         </p:cellEditor>
                     </p:column>
                     <p:column headerText="Состояние">
                         <p:cellEditor>
-                            <f:facet name="output"><h:outputText value="#{timeInfo.state.desc}"/></f:facet>
+                            <f:facet name="output"><h:outputText value="#{dayInfo.state.desc}"/></f:facet>
                             <f:facet name="input">
-                                <p:selectOneMenu value="#{timeInfo.state}">
-                                    <f:selectItems value="#{workTimeViewModel.states}" var="state"
+                                <p:selectOneMenu value="#{dayInfo.state}">
+                                    <f:selectItems value="#{workDayViewModel.states}" var="state"
                                                    itemValue="#{state}" itemLabel="#{state.desc}"/>
                                 </p:selectOneMenu>
                             </f:facet>
