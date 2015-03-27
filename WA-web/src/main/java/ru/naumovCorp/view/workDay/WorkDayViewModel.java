@@ -78,16 +78,25 @@ public class WorkDayViewModel {
      * Создает все дни, для выбранного месяца (selectedMonth)
      */
     public void createDaysForMonth() {
-        Calendar calendar = selectedMonth;
+        Calendar calendar = setZeroTime(selectedMonth);
         for (int i = 1; i <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH); i++) {
             calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), i);
             WorkDay day = new WorkDay(getCurrentWorker(), calendar.getTime(), false);
             if (isHoliday(calendar)) {
                 day.setHoliday(true);
             }
+            day.setComingTime(calendar);
+            day.setOutTime(calendar);
             wdDAO.create(day);
         }
         daysBySelectedMonth = initializationDaysForMonth();
+    }
+
+    private Calendar setZeroTime(Calendar calendar) {
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        return calendar;
     }
 
     /**
