@@ -22,7 +22,7 @@
 
     <p:layout>
         <p:layoutUnit position="west" resizable="true" size="200" minSize="200" maxSize="300">
-            information by current day
+            <h:outputText value="#{workTimeViewModel.currentDay ? workTimeViewModel.currentDay.day : 'Нет данных'}"/>
         </p:layoutUnit>
         <p:layoutUnit position="center" resizable="true">
             <h:form>

@@ -27,12 +27,20 @@ public class WorkTimeViewModel {
     private DAOHelper dh;
 
     private List<WorkTime> timeByCurrentMonth;
+    private WorkTime currentDay;
 
     public List<WorkTime> getTimeByCurrentMonth() {
         if (timeByCurrentMonth == null) {
             timeByCurrentMonth = wtDAO.getTimeInfoByMonth(new Date(), getCurrentWorker());
         }
         return timeByCurrentMonth;
+    }
+
+    public WorkTime getCurrentDay() {
+        if (currentDay == null) {
+            currentDay = wtDAO.getCurrentDayInfo(new Date(), getCurrentWorker());
+        }
+        return currentDay;
     }
 
     public WorkDayState[] getStates() {
