@@ -15,6 +15,7 @@ public interface WorkTimeDAOInterface {
     public void create(WorkTime workTime);
     public void update(WorkTime workTime);
     public void remove(WorkTime workTime);
+    public WorkTime getCurrentDayInfo(Date day, Worker currentWorker);
     public List<WorkTime> getTimeInfoByMonth(Date month, Worker currentWorker);
 
 }

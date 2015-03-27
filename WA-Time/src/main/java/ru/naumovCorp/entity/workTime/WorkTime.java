@@ -15,11 +15,19 @@ import static ru.naumovCorp.entity.workTime.WorkDayState.NO_WORK;
 
 @Entity
 @Table(name = "WORK_TIME", uniqueConstraints = {@UniqueConstraint(columnNames = {"DAY"})})
-@NamedQuery(name = WorkTime.GET_TIME_INFO_BY_MONTH,
-            query = "select wt from WorkTime wt where wt.worker = :worker and to_char(wt.day, 'yyyyMM') = to_char(:day, 'yyyyMM')")
+@NamedQueries
+    ({
+        @NamedQuery(name = WorkTime.GET_TIME_INFO_BY_MONTH,
+                query = "select wt from WorkTime wt where wt.worker = :worker and to_char(wt.day, 'yyyyMM') = to_char(:month, 'yyyyMM')"),
+        @NamedQuery(name = WorkTime.GET_CURRENT_DAY,
+                query = "select wt from WorkTime wt where wt.worker = :worker and to_char(wt.day, 'yyyyMMdd') = to_char(:day, 'yyyyMMdd')")
+    })
+
+// TODO: переименовать в WorkDay
 public class WorkTime implements Serializable {
 
     public static final String GET_TIME_INFO_BY_MONTH = "WorkTimeDAO.getTimeInfoByMonth";
+    public static final String GET_CURRENT_DAY = "WorkTimeDAO.getCurrentDay";
 
     @Id
     @GeneratedValue(generator = "WorkTimeId")

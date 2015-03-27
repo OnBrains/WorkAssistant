@@ -10,6 +10,7 @@ import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import java.util.Date;
 import java.util.List;
 
@@ -40,11 +41,23 @@ public class WorkTimeDAO implements WorkTimeDAOInterface {
     }
 
     @Override
+    public WorkTime getCurrentDayInfo(Date day, Worker currentWorker) {
+        EntityManager em = dh.getEntityManager();
+        WorkTime currentDay;
+        try {
+            currentDay = em.createNamedQuery(WorkTime.GET_CURRENT_DAY, WorkTime.class)
+                    .setParameter("worker", currentWorker).setParameter("day", day).getSingleResult();
+        } catch (NoResultException ex) {
+            return null;
+        }
+        return currentDay;
+    }
+
+    @Override
     public List<WorkTime> getTimeInfoByMonth(Date month, Worker currentWorker) {
         EntityManager em = dh.getEntityManager();
-        currentWorker = em.find(Worker.class, 1L);
         return em.createNamedQuery(WorkTime.GET_TIME_INFO_BY_MONTH, WorkTime.class)
-                .setParameter("worker", currentWorker).setParameter("day", month).getResultList();
+                .setParameter("worker", currentWorker).setParameter("month", month).getResultList();
     }
 
 }
