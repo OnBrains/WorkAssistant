@@ -241,6 +241,14 @@ public class WorkDayViewModel {
         return ConvertDate.getTime(date);
     }
 
+    public String dateFormatForDayInTable(Date date) {
+        return ConvertDate.dateFormatWithWeekDay(date);
+    }
+
+    public String dateFormatForFeaderTable(Date date) {
+        return ConvertDate.dateFormatMonthYear(date);
+    }
+
     //TODO: при реализации авторизации, переделать на залогиненого работника
     private Worker getCurrentWorker() {
         return dh.getEntityManager().find(Worker.class, 1L);

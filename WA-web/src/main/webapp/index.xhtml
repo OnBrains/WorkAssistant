@@ -18,7 +18,7 @@
     <p:layout>
         <p:layoutUnit position="west" resizable="true" size="400" minSize="400" maxSize="500">
             <h:form id="current_day_info_form">
-                <p:fieldset legend="#{workDayViewModel.currentDay != null ? workDayViewModel.currentDay.day : 'Не найдено'}">
+                <p:fieldset legend="#{workDayViewModel.currentDay != null ? workDayViewModel.dateFormatForDayInTable(workDayViewModel.currentDay.day) : 'Не найдено'}">
                     <h:panelGrid columns="4" cellpadding="2">
                         <h:outputLabel for="current_day_coming_time" value="Работаю с"/>
                         <h:outputText id="current_day_coming_time" value="#{workDayViewModel.comingTimeByCurrentDay},"/>
@@ -57,11 +57,11 @@
                 <p:dataTable id="month_info_table" value="#{workDayViewModel.daysBySelectedMonth}" var="dayInfo"
                              editable="true">
                     <f:facet name="header">
-                        <h:outputText value="#{workDayViewModel.selectedMonth.time}"/>
+                        <h:outputText value="#{workDayViewModel.dateFormatForFeaderTable(workDayViewModel.selectedMonth.time)}"/>
                     </f:facet>
                     <p:ajax event="rowEdit" listener="#{workDayViewModel.onRowEdit}"/>
                     <p:column headerText="День">
-                        <h:outputText value="#{dayInfo.day}"/>
+                        <h:outputText value="#{workDayViewModel.dateFormatForDayInTable(dayInfo.day)}"/>
                     </p:column>
                     <p:column headerText="Выходной">
                         <p:cellEditor>
