@@ -67,6 +67,113 @@ public class WorkDayViewModel {
     }
 
     /**
+     * Обработка изменения состояния по текущему дню
+     */
+    public void currentDayStateChangeHandle() {
+        if (currentDay.getState().equals(WorkDayState.WORKING)) {
+            workDayStart();
+        } else if (currentDay.getState().equals(WorkDayState.WORKED)) {
+            workDayEnd();
+        }
+        wdDAO.update(currentDay);
+    }
+
+    /**
+     * Проставляет время прихода для текущего дня, проставляется текущее время
+     */
+    private void workDayStart() {
+        currentDay.setComingTime(Calendar.getInstance());
+    }
+
+    /**
+     * Проставляет время ухода для текущего дня, проставляется текущее время
+     */
+    private void workDayEnd() {
+        currentDay.setOutTime(Calendar.getInstance());
+    }
+
+    /**
+     * Возвращает отформатированное время прихода, для текущего дня
+     *
+     * @return - если день не найден, то "-  "
+     */
+    public String getComingTimeByCurrentDay() {
+        if (getCurrentDay() != null) {
+            return getTime(currentDay.getComingTime().getTime());
+        } else {
+            return "-";
+        }
+    }
+
+    public boolean isCurrentDayEnd() {
+        return currentDay.getState().equals(WorkDayState.WORKED);
+    }
+
+    /**
+     * Вычисляет возможное время ухода, в зависимости от времени прихода
+     *
+     * @return - время прихода + 8.5 часов, если день не найден, то "-"
+     */
+    //TODO: переименовать, так как тут могуть быть как недоработки так и переработки
+    public String getPossibleOutTime() {
+        if (getCurrentDay() != null) {
+            Calendar possibleOutComeTime = Calendar.getInstance();
+            possibleOutComeTime.setTimeInMillis(getPossibleOutTimeInMSecond());
+            return getTime(possibleOutComeTime.getTime());
+        } else {
+            return "-";
+        }
+    }
+
+    /**
+     * @return - возможное время ухода в милисекундах
+     */
+    private Long getPossibleOutTimeInMSecond() {
+        if (getCurrentDay() != null) {
+            Long commingTimeInMSeconds = getCurrentDay().getComingTime().getTimeInMillis();
+            Long possibleOutTimeInMSecond = commingTimeInMSeconds + WorkDay.mSecondsInWorkDay;
+            return possibleOutTimeInMSecond;
+        } else {
+            return 0L;
+        }
+    }
+
+    /**
+     * Вычисляет оставщееся время до окончания рабочего дня или переработанное время
+     *
+     * @return - оставшееся/переработанное время, если день не найден, то "-"
+     */
+    public String getTimeForEndWorkDay() {
+        if (getCurrentDay() != null) {
+            Calendar diffTime = Calendar.getInstance();
+            Long possibleOutTime = getPossibleOutTimeInMSecond();
+            Long diffTimeInMSecond;
+            if (!ifCurrentTimeMoreOutTime()) {
+                diffTimeInMSecond = possibleOutTime - diffTime.getTimeInMillis();
+            } else {
+                diffTimeInMSecond = diffTime.getTimeInMillis() - possibleOutTime;
+            }
+            return ConvertDate.formattedTimeFromMSec(diffTimeInMSecond);
+        } else {
+            return "-";
+        }
+    }
+
+    /**
+     * Сравнивает текущее время с возможным временем ухода для текущего дня
+     *
+     * @return - true если текущее время больше
+     */
+    public boolean ifCurrentTimeMoreOutTime() {
+        Calendar currentTime = Calendar.getInstance();
+        if (getCurrentDay() != null && currentTime.getTimeInMillis() > getPossibleOutTimeInMSecond()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * @return массив возможных состояний рабочего дня
      */
     public WorkDayState[] getStates() {
@@ -74,6 +181,7 @@ public class WorkDayViewModel {
     }
 
     // TODO: вынести создание дней в DAO и сделать метод транзакционным?
+
     /**
      * Создает все дни, для выбранного месяца (selectedMonth)
      */
@@ -120,6 +228,8 @@ public class WorkDayViewModel {
      */
     //TODO: прикрутить логику редактирования
     public void onRowEdit(RowEditEvent event) {
+        WorkDay day = (WorkDay) event.getObject();
+        day.getDay();
         wdDAO.update((WorkDay) event.getObject());
     }
 
@@ -136,9 +246,11 @@ public class WorkDayViewModel {
         return dh.getEntityManager().find(Worker.class, 1L);
     }
 
-    /*******************************************************************************************************************
+    /**
+     * ****************************************************************************************************************
      * Simple getters and setters
-     ******************************************************************************************************************/
+     * ****************************************************************************************************************
+     */
 
     public Calendar getSelectedMonth() {
         return selectedMonth;
