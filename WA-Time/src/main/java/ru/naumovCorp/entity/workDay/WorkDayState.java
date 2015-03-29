@@ -8,7 +8,7 @@ public enum WorkDayState {
 
     NO_WORK  ("Не работал", 1),
     WORKING  ("На работе", 2),
-    COMEAWAY ("Отлучился", 3),
+//    COMEAWAY ("Отлучился", 3), // пока отлучения не реализованы
     WORKED   ("Отработал", 4);
 
     private String desc;
