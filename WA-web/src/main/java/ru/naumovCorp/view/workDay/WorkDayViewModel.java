@@ -98,7 +98,7 @@ public class WorkDayViewModel {
      * @return - если день не найден, то "-  "
      */
     public String getComingTimeByCurrentDay() {
-        if (getCurrentDay() != null) {
+        if (getCurrentDay() != null && isCurrentDayStart()) {
             return getTime(currentDay.getComingTime().getTime());
         } else {
             return "-";
@@ -109,13 +109,33 @@ public class WorkDayViewModel {
         return currentDay.getState().equals(WorkDayState.WORKED);
     }
 
+    private boolean isCurrentDayStart() {
+        return !currentDay.getState().equals(WorkDayState.NO_WORK);
+    }
+
+    public String getOutTimeForCurrentDay() {
+        if (isCurrentDayStart()) {
+            if (isCurrentDayEnd()) {
+                return getRealOutTime();
+            } else {
+                return getPossibleOutTime();
+            }
+        } else {
+            return "-";
+        }
+    }
+
+    private String getRealOutTime() {
+        return getTime(currentDay.getOutTime().getTime());
+    }
+
     /**
      * Вычисляет возможное время ухода, в зависимости от времени прихода
      *
      * @return - время прихода + 8.5 часов, если день не найден, то "-"
      */
     //TODO: переименовать, так как тут могуть быть как недоработки так и переработки
-    public String getPossibleOutTime() {
+    private String getPossibleOutTime() {
         if (getCurrentDay() != null) {
             Calendar possibleOutComeTime = Calendar.getInstance();
             possibleOutComeTime.setTimeInMillis(getPossibleOutTimeInMSecond());
@@ -138,12 +158,28 @@ public class WorkDayViewModel {
         }
     }
 
+    public String getResultWorkedTimeForCurrentDay() {
+        if (isCurrentDayStart()) {
+            if (isCurrentDayEnd()) {
+                return getResultWorkedTime();
+            } else {
+                return getTimeForEndWorkDay();
+            }
+        } else {
+            return "-";
+        }
+    }
+
+    private String getResultWorkedTime() {
+        return ConvertDate.formattedTimeFromMSec(currentDay.getSummaryWorkedTime());
+    }
+
     /**
      * Вычисляет оставщееся время до окончания рабочего дня или переработанное время
      *
      * @return - оставшееся/переработанное время, если день не найден, то "-"
      */
-    public String getTimeForEndWorkDay() {
+    private String getTimeForEndWorkDay() {
         if (getCurrentDay() != null) {
             Calendar diffTime = Calendar.getInstance();
             Long possibleOutTime = getPossibleOutTimeInMSecond();

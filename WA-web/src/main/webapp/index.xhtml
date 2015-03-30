@@ -22,11 +22,11 @@
                     <h:panelGrid columns="4" cellpadding="2">
                         <h:outputLabel for="current_day_coming_time" value="Работаю с"/>
                         <h:outputText id="current_day_coming_time" value="#{workDayViewModel.comingTimeByCurrentDay},"/>
-                        <h:outputLabel for="current_day_out_time" value="#{workDayViewModel.currentDay.state == WORKED ? 'Закончил' : 'могу закочить в'}"/>
-                        <h:outputText id="current_day_out_time" value="#{workDayViewModel.possibleOutTime}"/>
+                        <h:outputLabel for="current_day_out_time" value="#{workDayViewModel.currentDayEnd ? 'закончил' : 'могу закочить в'}"/>
+                        <h:outputText id="current_day_out_time" value="#{workDayViewModel.outTimeForCurrentDay}"/>
 
                         <h:outputLabel for="time_for_end_work_day" value="#{workDayViewModel.ifCurrentTimeMoreOutTime() ? 'Переработал' : 'Осталось'}"/>
-                        <h:outputText id="time_for_end_work_day" value="#{workDayViewModel.timeForEndWorkDay}."/>
+                        <h:outputText id="time_for_end_work_day" value="#{workDayViewModel.resultWorkedTimeForCurrentDay}."/>
                     </h:panelGrid>
                     <h:panelGrid columns="2" cellpadding="2">
                         <h:outputLabel for="current_day_state" value="Состояние"/>
@@ -39,7 +39,7 @@
                             </p:selectOneMenu></f:facet>
                         </p:inplace>
                     </h:panelGrid>
-                    <p:poll interval="60" update="time_for_end_work_day" stop="#{workDayViewModel.currentDay.state == 'WORKED'}"/>
+                    <p:poll interval="60" update="time_for_end_work_day" stop="#{workDayViewModel.currentDay.state != 'WORKING'}"/>
                 </p:fieldset>
             </h:form>
         </p:layoutUnit>
