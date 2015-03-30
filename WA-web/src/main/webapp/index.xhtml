@@ -30,14 +30,11 @@
                     </h:panelGrid>
                     <h:panelGrid columns="2" cellpadding="2">
                         <h:outputLabel for="current_day_state" value="Состояние"/>
-                        <p:inplace editor="true">
-                            <p:ajax event="save" listener="#{workDayViewModel.currentDayStateChangeHandle()}"/>
-                            <f:facet name="output"><h:outputText value="#{workDayViewModel.currentDay.state.desc}"/></f:facet>
-                            <f:facet name="input"><p:selectOneMenu id="current_day_state" value="#{workDayViewModel.currentDay.state}">
-                                <f:selectItems value="#{workDayViewModel.states}" var="state"
-                                               itemValue="#{state}" itemLabel="#{state.desc}"/>
-                            </p:selectOneMenu></f:facet>
-                        </p:inplace>
+                        <h:outputText id ="current_day_state" value="#{workDayViewModel.currentDay.state.desc}"/>
+                        <p:menuButton value="Действие">
+                            <p:menuitem value="Начать" actionListener="#{workDayViewModel.workDayStart()}" update="current_day_info_form"/>
+                            <p:menuitem value="Закончить" actionListener="#{workDayViewModel.workDayEnd()}" update="current_day_info_form"/>
+                        </p:menuButton>
                     </h:panelGrid>
                     <p:poll interval="60" update="time_for_end_work_day" stop="#{workDayViewModel.currentDay.state != 'WORKING'}"/>
                 </p:fieldset>

@@ -67,29 +67,21 @@ public class WorkDayViewModel {
     }
 
     /**
-     * Обработка изменения состояния по текущему дню
-     */
-    public void currentDayStateChangeHandle() {
-        if (currentDay.getState().equals(WorkDayState.WORKING)) {
-            workDayStart();
-        } else if (currentDay.getState().equals(WorkDayState.WORKED)) {
-            workDayEnd();
-        }
-        wdDAO.update(currentDay);
-    }
-
-    /**
      * Проставляет время прихода для текущего дня, проставляется текущее время
      */
-    private void workDayStart() {
+    public void workDayStart() {
         currentDay.setComingTime(Calendar.getInstance());
+        currentDay.setState(WorkDayState.WORKING);
+        wdDAO.update(currentDay);
     }
 
     /**
      * Проставляет время ухода для текущего дня, проставляется текущее время
      */
-    private void workDayEnd() {
+    public void workDayEnd() {
         currentDay.setOutTime(Calendar.getInstance());
+        currentDay.setState(WorkDayState.WORKED);
+        wdDAO.update(currentDay);
     }
 
     /**
