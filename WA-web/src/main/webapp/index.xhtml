@@ -31,12 +31,15 @@
                     <h:panelGrid columns="2" cellpadding="2">
                         <h:outputLabel for="current_day_state" value="Состояние"/>
                         <h:outputText id ="current_day_state" value="#{workDayViewModel.currentDay.state.desc}"/>
-                        <p:menuButton value="Действие">
-                            <p:menuitem value="Начать" actionListener="#{workDayViewModel.workDayStart()}" update="current_day_info_form"/>
-                            <p:menuitem value="Закончить" actionListener="#{workDayViewModel.workDayEnd()}" update="current_day_info_form"/>
+                        <p:menuButton value="Действие" rendered="#{workDayViewModel.currentDay.state != 'WORKED'}">
+                            <p:menuitem value="Начать" actionListener="#{workDayViewModel.workDayStart()}"
+                                        update="current_day_info_form, :month_info_form" rendered="#{!workDayViewModel.currentDayStart}"/>
+                            <p:menuitem value="Закончить" actionListener="#{workDayViewModel.workDayEnd()}"
+                                        update="current_day_info_form"
+                                        rendered="#{workDayViewModel.currentDay.state == 'WORKING'}"/>
                         </p:menuButton>
                     </h:panelGrid>
-                    <p:poll interval="60" update="time_for_end_work_day" stop="#{workDayViewModel.currentDay.state != 'WORKING'}"/>
+                    <p:poll interval="60" update="time_for_end_work_day" stop="#{workDayViewModel.currentDay.state == 'WORKING'}"/>
                 </p:fieldset>
             </h:form>
         </p:layoutUnit>
@@ -68,18 +71,22 @@
                     </p:column>
                     <p:column headerText="Начал">
                         <p:cellEditor>
-                            <f:facet name="output"><h:outputText
-                                    value="#{workDayViewModel.getTime(dayInfo.comingTime.time)}"/></f:facet>
-                            <f:facet name="input"><p:calendar id="coming_time" value="#{dayInfo.comingTime.time}"
-                                                              pattern="MM/dd/yyyy HH:mm"/></f:facet>
+                            <f:facet name="output">
+                                <h:outputText value="#{dayInfo.state == 'NO_WORK' ? '-' : workDayViewModel.getTime(dayInfo.comingTime.time)}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:calendar id="coming_time" value="#{dayInfo.comingTime.time}" pattern="MM/dd/yyyy HH:mm"/>
+                            </f:facet>
                         </p:cellEditor>
                     </p:column>
                     <p:column headerText="Закочнил">
                         <p:cellEditor>
-                            <f:facet name="output"><h:outputText
-                                    value="#{workDayViewModel.getTime(dayInfo.outTime.time)}"/></f:facet>
-                            <f:facet name="input"><p:calendar id="out_time" value="#{dayInfo.outTime.time}"
-                                                              pattern="MM/dd/yyyy HH:mm"/></f:facet>
+                            <f:facet name="output">
+                                <h:outputText value="#{dayInfo.state != 'WORKED' ? '-' : workDayViewModel.getTime(dayInfo.outTime.time)}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:calendar id="out_time" value="#{dayInfo.outTime.time}" pattern="MM/dd/yyyy HH:mm"/>
+                            </f:facet>
                         </p:cellEditor>
                     </p:column>
                     <p:column headerText="Состояние">

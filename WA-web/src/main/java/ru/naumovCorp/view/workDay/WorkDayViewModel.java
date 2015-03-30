@@ -101,7 +101,7 @@ public class WorkDayViewModel {
         return currentDay.getState().equals(WorkDayState.WORKED);
     }
 
-    private boolean isCurrentDayStart() {
+    public boolean isCurrentDayStart() {
         return !currentDay.getState().equals(WorkDayState.NO_WORK);
     }
 
