@@ -122,7 +122,12 @@ public class WorkDay implements Serializable {
     }
 
     public Long getSummaryWorkedTime() {
-        return outTime.getTimeInMillis() - comingTime.getTimeInMillis();
+        Long diffTimeInMSecond = outTime.getTimeInMillis() - comingTime.getTimeInMillis();
+        if (diffTimeInMSecond > mSecondsInWorkDay) {
+            return diffTimeInMSecond - mSecondsInWorkDay;
+        } else {
+            return mSecondsInWorkDay - diffTimeInMSecond;
+        }
     }
 
     public WorkDayState getState() {
