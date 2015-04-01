@@ -1,0 +1,9 @@
+.color_for_holiday {
+    background-color: darkgray;
+    background-image:none;
+}
+
+.color_for_current_day {
+    background-color: lightblue;
+    background-image:none;
+}
