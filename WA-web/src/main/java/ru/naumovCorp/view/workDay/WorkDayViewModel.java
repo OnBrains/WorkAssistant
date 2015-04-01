@@ -98,11 +98,19 @@ public class WorkDayViewModel {
     }
 
     public boolean isCurrentDayEnd() {
-        return currentDay.getState().equals(WorkDayState.WORKED);
+        if (getCurrentDay() != null) {
+            return currentDay.getState().equals(WorkDayState.WORKED);
+        } else {
+            return false;
+        }
     }
 
     public boolean isCurrentDayStart() {
-        return !currentDay.getState().equals(WorkDayState.NO_WORK);
+        if (getCurrentDay() != null) {
+            return !currentDay.getState().equals(WorkDayState.NO_WORK);
+        } else {
+            return false;
+        }
     }
 
     public String getOutTimeForCurrentDay() {
@@ -275,6 +283,16 @@ public class WorkDayViewModel {
 
     public String dateFormatForFeaderTable(Date date) {
         return ConvertDate.dateFormatMonthYear(date);
+    }
+
+    public String getStyleClassForRow(WorkDay dayInfo) {
+        if (dayInfo.isHoliday()) {
+            return "color_for_holiday";
+        } if (dayInfo.equals(currentDay)) {
+            return "color_for_current_day";
+        } else {
+            return "";
+        }
     }
 
     //TODO: при реализации авторизации, переделать на залогиненого работника
