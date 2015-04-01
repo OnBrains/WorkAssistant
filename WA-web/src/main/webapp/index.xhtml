@@ -11,6 +11,11 @@
 <h:head>
     <title>Влияй на свое будующее</title>
 </h:head>
+
+<ui:define name="head">
+    <h:outputStylesheet name="wa-time.css" />
+</ui:define>
+
 <h:body>
     <h:form id="main_menu">
     </h:form>
@@ -55,7 +60,7 @@
                                  update="month_info_form" style="float:right; margin: 7px"/>
 
                 <p:dataTable id="month_info_table" value="#{workDayViewModel.daysBySelectedMonth}" var="dayInfo"
-                             editable="true">
+                             editable="true" rowStyleClass="#{workDayViewModel.getStyleClassForRow(dayInfo)}">
                     <f:facet name="header">
                         <h:outputText value="#{workDayViewModel.dateFormatForFeaderTable(workDayViewModel.selectedMonth.time)}"/>
                     </f:facet>
