@@ -68,6 +68,7 @@ public class WorkTime implements Serializable {
         this.worker = worker;
         this.day = day;
         this.isHoliday = isHoliday;
+        this.state = WorkDayState.NO_WORK;
     }
 
     public Long getId() {
