@@ -10,6 +10,7 @@ import ru.naumovCorp.entity.workTime.WorkTime;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.inject.Inject;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -29,7 +30,8 @@ public class WorkTimeViewModel {
     private List<WorkTime> timeByCurrentMonth;
     private WorkTime currentDay;
 
-    public List<WorkTime> getTimeByCurrentMonth() {
+    // TODO: сделать метод получающий данные не по тякущему мес, а по выбранному и завязать на выбиралку все.
+    public List<WorkTime> getDaysByCurrentMonth() {
         if (timeByCurrentMonth == null) {
             timeByCurrentMonth = wtDAO.getTimeInfoByMonth(new Date(), getCurrentWorker());
         }
@@ -45,6 +47,34 @@ public class WorkTimeViewModel {
 
     public WorkDayState[] getStates() {
         return WorkDayState.values();
+    }
+
+    // TODO: подумать как лучше передовать сюда значение мес, для которого надо создать дни
+    // при переключении мес. запоминать его и предлогать создать дни???
+    // TODO: вынести создание дней в DAO и сделать метод транзакционным?
+    public void createWorkDaysMonth() {
+        Calendar calendar = Calendar.getInstance();
+        for (int i = 1; i <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH); i++) {
+            calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), i);
+            WorkTime day = new WorkTime(getCurrentWorker(), calendar.getTime(), false);
+            if (isHoliday(calendar)) {
+                day.setHoliday(true);
+            }
+            wtDAO.create(day);
+        }
+    }
+
+    /**
+     * Проверяет является ли создаваемый день субботой или воскресеньем
+     * @return true если выходной
+     */
+    private boolean isHoliday(Calendar calendar) {
+        if (calendar.get(Calendar.DAY_OF_WEEK) != 6
+                && calendar.get(Calendar.DAY_OF_WEEK) != 7) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     //TODO: при реализации авторизации, переделать на залогиненого работника
