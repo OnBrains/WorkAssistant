@@ -27,15 +27,28 @@ public class WorkTimeViewModel {
     @Inject
     private DAOHelper dh;
 
-    private List<WorkTime> timeByCurrentMonth;
+    private Calendar selectedMonth = Calendar.getInstance();
+    private List<WorkTime> daysBySelectedMonth;
     private WorkTime currentDay;
 
+    public Calendar getSelectedMonth() {
+        return selectedMonth;
+    }
+
+    public void nextMonth() {
+        selectedMonth.add(Calendar.MONTH, 1);
+    }
+
+    public void previousMonth() {
+        selectedMonth.set(Calendar.MONTH, selectedMonth.get(Calendar.MONTH) - 1);
+    }
+
     // TODO: сделать метод получающий данные не по тякущему мес, а по выбранному и завязать на выбиралку все.
-    public List<WorkTime> getDaysByCurrentMonth() {
-        if (timeByCurrentMonth == null) {
-            timeByCurrentMonth = wtDAO.getTimeInfoByMonth(new Date(), getCurrentWorker());
+    public List<WorkTime> getDaysBySelectedMonth() {
+        if (daysBySelectedMonth == null && !selectedMonth.equals(Calendar.getInstance())) {
+            daysBySelectedMonth = wtDAO.getTimeInfoByMonth(selectedMonth.getTime(), getCurrentWorker());
         }
-        return timeByCurrentMonth;
+        return daysBySelectedMonth;
     }
 
     public WorkTime getCurrentDay() {
