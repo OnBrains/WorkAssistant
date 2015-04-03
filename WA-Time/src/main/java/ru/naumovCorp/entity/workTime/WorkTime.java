@@ -18,7 +18,7 @@ import static ru.naumovCorp.entity.workTime.WorkDayState.NO_WORK;
 @NamedQueries
     ({
         @NamedQuery(name = WorkTime.GET_TIME_INFO_BY_MONTH,
-                query = "select wt from WorkTime wt where wt.worker = :worker and to_char(wt.day, 'yyyyMM') = to_char(:month, 'yyyyMM')"),
+                query = "select wt from WorkTime wt where wt.worker = :worker and to_char(wt.day, 'yyyyMM') = to_char(:month, 'yyyyMM') order by wt.day"),
         @NamedQuery(name = WorkTime.GET_CURRENT_DAY,
                 query = "select wt from WorkTime wt where wt.worker = :worker and to_char(wt.day, 'yyyyMMdd') = to_char(:day, 'yyyyMMdd')")
     })
