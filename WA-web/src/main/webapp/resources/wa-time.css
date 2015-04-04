@@ -1,9 +1,19 @@
+/*Страница авторизации*/
+
+.login_panel {
+    width: 350px;
+    margin: 0 auto;
+    margin-top: 10%;
+}
+
+/*Таблица с информацией по рабочим дням*/
+
 .color_for_holiday {
     background-color: darkgray;
     background-image:none;
 }
 
 .color_for_current_day {
-    background-color: lightblue;
+    background-color: #1584de;
     background-image:none;
 }

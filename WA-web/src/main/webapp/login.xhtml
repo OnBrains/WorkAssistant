@@ -9,41 +9,29 @@
       xmlns:pe="http://primefaces.org/ui/extensions">
 
 <h:head>
-    <title>login</title>
+    <h:outputStylesheet name="wa-time.css" />
+    <title>Авторизация</title>
 </h:head>
 
 <h:body>
-    <h:form id="loginForm">
+    <h:form id="login_form">
         <p:growl id="msg" showDetail="true" life="3000" />
-        <p:panel header="Login" style="width: 360px;">
+        <p:panel header="Вход в систему" styleClass="login_panel">
+            <h:panelGrid id="login_panel" columns="3">
 
-            <h:panelGrid id="loginPanel" columns="2">
+                <h:outputText value="Логин"/>
+                <p:inputText id="login" value="#{loginViewModel.login}"/>
+                <p:spacer/>
 
-                <h:outputText value="Username" />
+                <h:outputText value="Пароль" />
+                <p:password id="password" value="#{loginViewModel.password}"  feedback="false"/>
+                <p:spacer/>
 
-                <p:inputText id="username" value="#{loginViewModel.login}" ></p:inputText>
-
-                <p:spacer></p:spacer>
-
-                <p:message for="username" ></p:message>
-
-                <h:outputText value="Password" />
-
-                <p:password id="password" value="#{loginViewModel.password}"  feedback="false"></p:password>
-
-                <p:spacer></p:spacer>
-
-                <p:message for="password"></p:message>
-
-                <p:spacer></p:spacer>
-
-                <p:commandButton action="#{loginViewModel.checkLogin}" value="Login" update="loginForm" ajax="true"></p:commandButton>
+                <p:spacer/>
+                <p:commandButton action="#{loginViewModel.checkLogin}" value="Вход" update="login_form" ajax="true"/>
 
             </h:panelGrid>
-
         </p:panel>
-
     </h:form>
-
 </h:body>
 </html>
