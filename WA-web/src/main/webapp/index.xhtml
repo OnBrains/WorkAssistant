@@ -19,11 +19,12 @@
 
 <h:body>
     <pe:layout>
-    <pe:layoutPane position="north" closable="false">
-        Место под главную менюшку
-    </pe:layoutPane>
-    <pe:layoutPane position="west" size="350" resizable="false">
-        <!--<pe:layoutPane position="north">-->
+
+        <pe:layoutPane position="north" closable="false">
+            Место под главную менюшку
+        </pe:layoutPane>
+
+        <pe:layoutPane position="west" size="350" resizable="false">
             <h:form id="current_day_info_form">
                 <p:fieldset legend="#{workDayViewModel.currentDay != null ? workDayViewModel.dateFormatForDayInTable(workDayViewModel.currentDay.day) : 'Не найдено'}">
                     <h:panelGrid columns="4" cellpadding="2">
@@ -49,9 +50,9 @@
                     <p:poll interval="60" update="time_for_end_work_day" stop="#{workDayViewModel.currentDay.state == 'WORKING'}"/>
                 </p:fieldset>
             </h:form>
-        <!--</pe:layoutPane>-->
-    </pe:layoutPane>
-    <pe:layoutPane position="center">
+        </pe:layoutPane>
+
+        <pe:layoutPane position="center">
             <h:form id="month_info_form">
 
                 <p:commandButton id="create_days_for_month" value="+" action="#{workDayViewModel.createDaysForMonth}"
@@ -114,9 +115,9 @@
                     </p:column>
                 </p:dataTable>
             </h:form>
-    </pe:layoutPane>
+        </pe:layoutPane>
 
-    <pe:layoutPane position="east" size="500">
+        <pe:layoutPane position="east" size="500">
             <h:form>
                 <p:dataTable value="#{workerViewModel.workers}" var="worker" editable="true">
                     <p:ajax event="rowEdit" listener="#{workerViewModel.onRowEdit}"/>
@@ -143,10 +144,12 @@
                     </p:column>
                 </p:dataTable>
             </h:form>
-    </pe:layoutPane>
-    <pe:layoutPane position="south" closable="false">
-        Develop by "Naumov-Corp"
-    </pe:layoutPane>
+        </pe:layoutPane>
+
+        <pe:layoutPane position="south" closable="false">
+            Develop by "Naumov-Corp"
+        </pe:layoutPane>
+        
     </pe:layout>
 </h:body>
 </html>
