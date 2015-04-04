@@ -50,6 +50,10 @@ public class LoginViewModel implements Serializable {
         return "login";
     }
 
+    public Worker getWorker() {
+        return SessionUtil.getWorker();
+    }
+
     /**
      * ****************************************************************************************************************
      * Simple getters and setters

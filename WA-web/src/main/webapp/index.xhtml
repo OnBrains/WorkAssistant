@@ -21,7 +21,12 @@
     <pe:layout>
 
         <pe:layoutPane position="north" closable="false">
-            Место под главную менюшку
+            <p:menubar>
+                <f:facet name="options">
+                    <h:outputText value="#{loginViewModel.worker.toString()}  "/>
+                    <p:commandButton value="Выйти" action="#{loginViewModel.logout}" icon="ui-icon-extlink" />
+                </f:facet>
+            </p:menubar>
         </pe:layoutPane>
 
         <pe:layoutPane position="west" size="350" resizable="false">
@@ -149,7 +154,7 @@
         <pe:layoutPane position="south" closable="false">
             Develop by "Naumov-Corp"
         </pe:layoutPane>
-        
+
     </pe:layout>
 </h:body>
 </html>
