@@ -9,6 +9,7 @@
       xmlns:pe="http://primefaces.org/ui/extensions">
 
 <h:head>
+    <h:outputStylesheet name="wa-time.css" />
     <title>Влияй на свое будующее</title>
 </h:head>
 
@@ -17,11 +18,12 @@
 </ui:define>
 
 <h:body>
-    <h:form id="main_menu">
-    </h:form>
-
-    <p:layout>
-        <p:layoutUnit position="west" resizable="true" size="400" minSize="400" maxSize="500">
+    <pe:layout>
+    <pe:layoutPane position="north" closable="false">
+        Место под главную менюшку
+    </pe:layoutPane>
+    <pe:layoutPane position="west" size="350" resizable="false">
+        <!--<pe:layoutPane position="north">-->
             <h:form id="current_day_info_form">
                 <p:fieldset legend="#{workDayViewModel.currentDay != null ? workDayViewModel.dateFormatForDayInTable(workDayViewModel.currentDay.day) : 'Не найдено'}">
                     <h:panelGrid columns="4" cellpadding="2">
@@ -47,8 +49,9 @@
                     <p:poll interval="60" update="time_for_end_work_day" stop="#{workDayViewModel.currentDay.state == 'WORKING'}"/>
                 </p:fieldset>
             </h:form>
-        </p:layoutUnit>
-        <p:layoutUnit position="center" resizable="true">
+        <!--</pe:layoutPane>-->
+    </pe:layoutPane>
+    <pe:layoutPane position="center">
             <h:form id="month_info_form">
 
                 <p:commandButton id="create_days_for_month" value="+" action="#{workDayViewModel.createDaysForMonth}"
@@ -60,7 +63,8 @@
                                  update="month_info_form" style="float:right; margin: 7px"/>
 
                 <p:dataTable id="month_info_table" value="#{workDayViewModel.daysBySelectedMonth}" var="dayInfo"
-                             editable="true" rowStyleClass="#{workDayViewModel.getStyleClassForRow(dayInfo)}">
+                             editable="true" rowStyleClass="#{workDayViewModel.getStyleClassForRow(dayInfo)}"
+                             scrollable="true" scrollHeight="800">
                     <f:facet name="header">
                         <h:outputText value="#{workDayViewModel.dateFormatForFeaderTable(workDayViewModel.selectedMonth.time)}"/>
                     </f:facet>
@@ -110,9 +114,9 @@
                     </p:column>
                 </p:dataTable>
             </h:form>
-        </p:layoutUnit>
+    </pe:layoutPane>
 
-        <p:layoutUnit position="east" resizable="true" size="400" minSize="400" maxSize="500">
+    <pe:layoutPane position="east" size="500">
             <h:form>
                 <p:dataTable value="#{workerViewModel.workers}" var="worker" editable="true">
                     <p:ajax event="rowEdit" listener="#{workerViewModel.onRowEdit}"/>
@@ -139,7 +143,10 @@
                     </p:column>
                 </p:dataTable>
             </h:form>
-        </p:layoutUnit>
-    </p:layout>
+    </pe:layoutPane>
+    <pe:layoutPane position="south" closable="false">
+        Develop by "Naumov-Corp"
+    </pe:layoutPane>
+    </pe:layout>
 </h:body>
 </html>
