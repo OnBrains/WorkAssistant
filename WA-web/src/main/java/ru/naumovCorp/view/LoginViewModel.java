@@ -1,6 +1,7 @@
 package ru.naumovCorp.view;
 
-import ru.naumovCorp.SessionUtil;
+import ru.naumovCorp.entity.worker.Worker;
+import ru.naumovCorp.service.SessionUtil;
 import ru.naumovCorp.dao.worker.LoginDAOInterface;
 
 import javax.faces.application.FacesMessage;
@@ -26,10 +27,12 @@ public class LoginViewModel implements Serializable {
     private String password;
 
     public String checkLogin() {
-        boolean result = ld.checkLogin(login, password);
-        if (result) {
+        Worker worker = ld.checkLogin(login, password);
+        if (worker != null) {
             HttpSession session = SessionUtil.getSession();
             session.setAttribute("login", login);
+            session.setAttribute("workerId", worker.getId());
+            session.setAttribute("worker", worker);
             return "home";
         } else {
             FacesContext.getCurrentInstance().addMessage(

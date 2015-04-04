@@ -21,15 +21,15 @@ public class LoginDAO implements LoginDAOInterface {
     private DAOHelper dh;
 
     @Override
-    public boolean checkLogin(String login, String password) {
+    public Worker checkLogin(String login, String password) {
         EntityManager em = dh.getEntityManager();
         try {
             Worker worker = em.createNamedQuery(Login.CHECK_LOGIN, Worker.class)
                     .setParameter("login", login)
                     .setParameter("password", password).getSingleResult();
-            return true;
+            return worker;
         } catch (NoResultException ex) {
-            return false;
+            return null;
         }
     }
 

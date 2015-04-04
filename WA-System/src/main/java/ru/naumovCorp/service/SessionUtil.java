@@ -2,6 +2,8 @@ package ru.naumovCorp.service;
 
 import javax.ejb.Stateless;
 
+import ru.naumovCorp.entity.worker.Worker;
+
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -36,6 +38,14 @@ public class SessionUtil {
         HttpSession session = getSession();
         if (session != null)
             return (Long) session.getAttribute("workerId");
+        else
+            return null;
+    }
+
+    public static Worker getWorker() {
+        HttpSession session = getSession();
+        if (session != null)
+            return (Worker) session.getAttribute("worker");
         else
             return null;
     }

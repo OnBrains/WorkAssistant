@@ -8,6 +8,7 @@ import ru.naumovCorp.entity.worker.Worker;
 import ru.naumovCorp.dao.workDay.WorkDayDAOInterface;
 import ru.naumovCorp.entity.workDay.WorkDay;
 import ru.naumovCorp.parsing.ConvertDate;
+import ru.naumovCorp.service.SessionUtil;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
@@ -28,6 +29,8 @@ public class WorkDayViewModel {
     private WorkDayDAOInterface wdDAO;
     @Inject
     private DAOHelper dh;
+    @Inject
+    private SessionUtil sUtil;
 
     private Calendar selectedMonth;
     private List<WorkDay> daysBySelectedMonth;
@@ -56,12 +59,12 @@ public class WorkDayViewModel {
         if (selectedMonth == null) {
             selectedMonth = Calendar.getInstance();
         }
-        return wdDAO.getDayInfoByMonth(selectedMonth.getTime(), getCurrentWorker());
+        return wdDAO.getDayInfoByMonth(selectedMonth.getTime(), sUtil.getWorker());
     }
 
     public WorkDay getCurrentDay() {
         if (currentDay == null) {
-            currentDay = wdDAO.getCurrentDayInfo(new Date(), getCurrentWorker());
+            currentDay = wdDAO.getCurrentDayInfo(new Date(), sUtil.getWorker());
         }
         return currentDay;
     }
@@ -225,7 +228,7 @@ public class WorkDayViewModel {
         Calendar calendar = setZeroTime(selectedMonth);
         for (int i = 1; i <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH); i++) {
             calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), i);
-            WorkDay day = new WorkDay(getCurrentWorker(), calendar.getTime(), false);
+            WorkDay day = new WorkDay(sUtil.getWorker(), calendar.getTime(), false);
             if (isHoliday(calendar)) {
                 day.setHoliday(true);
             }
@@ -293,11 +296,6 @@ public class WorkDayViewModel {
         } else {
             return "";
         }
-    }
-
-    //TODO: при реализации авторизации, переделать на залогиненого работника
-    private Worker getCurrentWorker() {
-        return dh.getEntityManager().find(Worker.class, 1L);
     }
 
     /**
