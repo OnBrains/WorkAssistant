@@ -1,4 +1,4 @@
-package ru.naumovCorp;
+package ru.naumovCorp.service;
 
 import javax.ejb.Stateless;
 
