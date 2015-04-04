@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+
+<h:head>
+    <title>login</title>
+</h:head>
+
+<h:body>
+    <h:form id="loginForm">
+        <p:growl id="msg" showDetail="true" life="3000" />
+        <p:panel header="Login" style="width: 360px;">
+
+            <h:panelGrid id="loginPanel" columns="2">
+
+                <h:outputText value="Username" />
+
+                <p:inputText id="username" value="#{loginViewModel.login}" ></p:inputText>
+
+                <p:spacer></p:spacer>
+
+                <p:message for="username" ></p:message>
+
+                <h:outputText value="Password" />
+
+                <p:password id="password" value="#{loginViewModel.password}"  feedback="false"></p:password>
+
+                <p:spacer></p:spacer>
+
+                <p:message for="password"></p:message>
+
+                <p:spacer></p:spacer>
+
+                <p:commandButton action="#{loginViewModel.checkLogin}" value="Login" update="loginForm" ajax="true"></p:commandButton>
+
+            </h:panelGrid>
+
+        </p:panel>
+
+    </h:form>
+
+</h:body>
+</html>
