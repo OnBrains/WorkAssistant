@@ -38,8 +38,8 @@ public class LoginViewModel implements Serializable {
             FacesContext.getCurrentInstance().addMessage(
                     null,
                     new FacesMessage(FacesMessage.SEVERITY_WARN,
-                            "Invalid Login!",
-                            "Please Try Again!"));
+                            "Ошибка при авторизации",
+                            "Повторите попытку входа"));
             return "login";
         }
     }
