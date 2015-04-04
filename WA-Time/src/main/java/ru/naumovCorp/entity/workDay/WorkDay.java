@@ -23,7 +23,6 @@ import static ru.naumovCorp.entity.workDay.WorkDayState.NO_WORK;
                 query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day, 'yyyyMMdd') = to_char(:day, 'yyyyMMdd')")
     })
 
-// TODO: переименовать в WorkDay
 public class WorkDay implements Serializable {
 
     public static final String GET_TIME_INFO_BY_MONTH = "WorkTimeDAO.getDayInfoByMonth";
