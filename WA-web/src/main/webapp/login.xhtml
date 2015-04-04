@@ -20,11 +20,11 @@
             <h:panelGrid id="login_panel" columns="3">
 
                 <h:outputText value="Логин"/>
-                <p:inputText id="login" value="#{loginViewModel.login}"/>
+                <p:inputText id="login" value="#{loginViewModel.login}" required="true"/>
                 <p:spacer/>
 
                 <h:outputText value="Пароль" />
-                <p:password id="password" value="#{loginViewModel.password}"  feedback="false"/>
+                <p:password id="password" value="#{loginViewModel.password}" feedback="false" required="true"/>
                 <p:spacer/>
 
                 <p:spacer/>
