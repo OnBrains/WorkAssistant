@@ -289,7 +289,7 @@ public class WorkDayViewModel {
     }
 
     public String getStyleClassForRow(WorkDay dayInfo) {
-        if (dayInfo.isHoliday()) {
+        if (dayInfo.isHoliday() && !dayInfo.equals(currentDay)) {
             return "color_for_holiday";
         } if (dayInfo.equals(currentDay)) {
             return "color_for_current_day";
