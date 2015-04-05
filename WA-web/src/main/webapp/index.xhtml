@@ -43,7 +43,7 @@
                                  update="month_info_form" style="float:right; margin: 7px"/>
                 <p:commandButton id="previous_month" value="-" action="#{workDayViewModel.previousMonth}"
                                  update="month_info_form" style="float:right; margin: 7px"/>
-
+                <p:spacer height="20"/>
                 <p:dataTable id="month_info_table" value="#{workDayViewModel.daysBySelectedMonth}" var="dayInfo"
                              editable="true" rowStyleClass="#{workDayViewModel.getStyleClassForRow(dayInfo)}"
                              scrollable="true" scrollHeight="800">
