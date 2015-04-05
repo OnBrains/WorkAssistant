@@ -20,7 +20,7 @@
 <h:body>
     <pe:layout>
 
-        <pe:layoutPane position="north" closable="false">
+        <pe:layoutPane position="north" closable="false" resizable="false">
             <p:menubar>
                 <f:facet name="options">
                     <h:outputText value="#{loginViewModel.worker.toString()}  "/>
@@ -29,7 +29,7 @@
             </p:menubar>
         </pe:layoutPane>
 
-        <pe:layoutPane position="west" size="350" resizable="false">
+        <pe:layoutPane position="west" closable="true" resizable="false" size="350" minSize="350">
             <h:form id="current_day_info_form">
                 <p:fieldset legend="#{workDayViewModel.currentDay != null ? workDayViewModel.dateFormatForDayInTable(workDayViewModel.currentDay.day) : 'Не найдено'}">
                     <h:panelGrid columns="4" cellpadding="2">
@@ -57,7 +57,7 @@
             </h:form>
         </pe:layoutPane>
 
-        <pe:layoutPane position="center">
+        <pe:layoutPane position="center" resizable="true">
             <h:form id="month_info_form">
 
                 <p:commandButton id="create_days_for_month" value="+" action="#{workDayViewModel.createDaysForMonth}"
@@ -122,7 +122,7 @@
             </h:form>
         </pe:layoutPane>
 
-        <pe:layoutPane position="east" size="500">
+        <pe:layoutPane position="east" closable="true" resizable="true" size="500" minSize="500">
             <h:form>
                 <p:dataTable value="#{workerViewModel.workers}" var="worker" editable="true">
                     <p:ajax event="rowEdit" listener="#{workerViewModel.onRowEdit}"/>
@@ -151,8 +151,8 @@
             </h:form>
         </pe:layoutPane>
 
-        <pe:layoutPane position="south" closable="false">
-            Develop by "Naumov-Corp"
+        <pe:layoutPane position="south" closable="false" resizable="false" styleContent="text-align: center">
+            <p:graphicImage name="img/iconNC.jpg"/>
         </pe:layoutPane>
 
     </pe:layout>
