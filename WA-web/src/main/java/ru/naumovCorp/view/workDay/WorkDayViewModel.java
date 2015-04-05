@@ -28,8 +28,6 @@ public class WorkDayViewModel {
     @Inject
     private WorkDayDAOInterface wdDAO;
     @Inject
-    private DAOHelper dh;
-    @Inject
     private SessionUtil sUtil;
 
     private Calendar selectedMonth;
@@ -60,156 +58,6 @@ public class WorkDayViewModel {
             selectedMonth = Calendar.getInstance();
         }
         return wdDAO.getDayInfoByMonth(selectedMonth.getTime(), sUtil.getWorker());
-    }
-
-    public WorkDay getCurrentDay() {
-        if (currentDay == null) {
-            currentDay = wdDAO.getCurrentDayInfo(new Date(), sUtil.getWorker());
-        }
-        return currentDay;
-    }
-
-    /**
-     * Проставляет время прихода для текущего дня, проставляется текущее время
-     */
-    public void workDayStart() {
-        currentDay.setComingTime(Calendar.getInstance());
-        currentDay.setState(WorkDayState.WORKING);
-        wdDAO.update(currentDay);
-    }
-
-    /**
-     * Проставляет время ухода для текущего дня, проставляется текущее время
-     */
-    public void workDayEnd() {
-        currentDay.setOutTime(Calendar.getInstance());
-        currentDay.setState(WorkDayState.WORKED);
-        wdDAO.update(currentDay);
-    }
-
-    /**
-     * Возвращает отформатированное время прихода, для текущего дня
-     *
-     * @return - если день не найден, то "-  "
-     */
-    public String getComingTimeByCurrentDay() {
-        if (getCurrentDay() != null && isCurrentDayStart()) {
-            return getTime(currentDay.getComingTime().getTime());
-        } else {
-            return "-";
-        }
-    }
-
-    public boolean isCurrentDayEnd() {
-        if (getCurrentDay() != null) {
-            return currentDay.getState().equals(WorkDayState.WORKED);
-        } else {
-            return false;
-        }
-    }
-
-    public boolean isCurrentDayStart() {
-        if (getCurrentDay() != null) {
-            return !currentDay.getState().equals(WorkDayState.NO_WORK);
-        } else {
-            return false;
-        }
-    }
-
-    public String getOutTimeForCurrentDay() {
-        if (isCurrentDayStart()) {
-            if (isCurrentDayEnd()) {
-                return getRealOutTime();
-            } else {
-                return getPossibleOutTime();
-            }
-        } else {
-            return "-";
-        }
-    }
-
-    private String getRealOutTime() {
-        return getTime(currentDay.getOutTime().getTime());
-    }
-
-    /**
-     * Вычисляет возможное время ухода, в зависимости от времени прихода
-     *
-     * @return - время прихода + 8.5 часов, если день не найден, то "-"
-     */
-    //TODO: переименовать, так как тут могуть быть как недоработки так и переработки
-    private String getPossibleOutTime() {
-        if (getCurrentDay() != null) {
-            Calendar possibleOutComeTime = Calendar.getInstance();
-            possibleOutComeTime.setTimeInMillis(getPossibleOutTimeInMSecond());
-            return getTime(possibleOutComeTime.getTime());
-        } else {
-            return "-";
-        }
-    }
-
-    /**
-     * @return - возможное время ухода в милисекундах
-     */
-    private Long getPossibleOutTimeInMSecond() {
-        if (getCurrentDay() != null) {
-            Long commingTimeInMSeconds = getCurrentDay().getComingTime().getTimeInMillis();
-            Long possibleOutTimeInMSecond = commingTimeInMSeconds + WorkDay.mSecondsInWorkDay;
-            return possibleOutTimeInMSecond;
-        } else {
-            return 0L;
-        }
-    }
-
-    public String getResultWorkedTimeForCurrentDay() {
-        if (isCurrentDayStart()) {
-            if (isCurrentDayEnd()) {
-                return getResultWorkedTime();
-            } else {
-                return getTimeForEndWorkDay();
-            }
-        } else {
-            return "-";
-        }
-    }
-
-    private String getResultWorkedTime() {
-        return ConvertDate.formattedTimeFromMSec(currentDay.getSummaryWorkedTime());
-    }
-
-    /**
-     * Вычисляет оставщееся время до окончания рабочего дня или переработанное время
-     *
-     * @return - оставшееся/переработанное время, если день не найден, то "-"
-     */
-    private String getTimeForEndWorkDay() {
-        if (getCurrentDay() != null) {
-            Calendar diffTime = Calendar.getInstance();
-            Long possibleOutTime = getPossibleOutTimeInMSecond();
-            Long diffTimeInMSecond;
-            if (!ifCurrentTimeMoreOutTime()) {
-                diffTimeInMSecond = possibleOutTime - diffTime.getTimeInMillis();
-            } else {
-                diffTimeInMSecond = diffTime.getTimeInMillis() - possibleOutTime;
-            }
-            return ConvertDate.formattedTimeFromMSec(diffTimeInMSecond);
-        } else {
-            return "-";
-        }
-    }
-
-    /**
-     * Сравнивает текущее время с возможным временем ухода для текущего дня
-     *
-     * @return - true если текущее время больше
-     */
-    public boolean ifCurrentTimeMoreOutTime() {
-        Calendar currentTime = Calendar.getInstance();
-        if (getCurrentDay() != null && currentTime.getTimeInMillis() > getPossibleOutTimeInMSecond()) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
     /**
@@ -289,9 +137,9 @@ public class WorkDayViewModel {
     }
 
     public String getStyleClassForRow(WorkDay dayInfo) {
-        if (dayInfo.isHoliday() && !dayInfo.equals(currentDay)) {
+        if (dayInfo.isHoliday() && !dayInfo.equals(getCurrentDay())) {
             return "color_for_holiday";
-        } if (dayInfo.equals(currentDay)) {
+        } if (dayInfo.equals(getCurrentDay())) {
             return "color_for_current_day";
         } else {
             return "";
@@ -313,6 +161,13 @@ public class WorkDayViewModel {
             daysBySelectedMonth = initializationDaysForMonth();
         }
         return daysBySelectedMonth;
+    }
+
+    private WorkDay getCurrentDay() {
+        if (currentDay == null) {
+            currentDay = wdDAO.getCurrentDayInfo(new Date(), sUtil.getWorker());
+        }
+        return currentDay;
     }
 
 }

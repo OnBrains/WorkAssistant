@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+
+<ui:define name="head">
+    <h:outputStylesheet name="wa-time.css" />
+</ui:define>
+
+<h:body>
+    <ui:composition>
+        <h:form id="current_day_info_form">
+            <p:fieldset legend="#{currentDayFrameModel.currentDay != null ? currentDayFrameModel.currentDay.day : 'Не найдено'}">
+                <h:panelGrid columns="4" cellpadding="2">
+                    <h:outputLabel for="current_day_coming_time" value="Работаю с"/>
+                    <h:outputText id="current_day_coming_time" value="#{currentDayFrameModel.comingTime},"/>
+                    <h:outputLabel for="current_day_out_time" value="#{currentDayFrameModel.isWorked() ? 'закончил' : 'могу закочить в'}"/>
+                    <h:outputText id="current_day_out_time" value="#{currentDayFrameModel.outTime}"/>
+
+                    <h:outputLabel for="time_for_end_work_day" value="#{currentDayFrameModel.ifCurrentTimeMoreOutTime() ? 'Переработал' : 'Осталось'}"/>
+                    <h:outputText id="time_for_end_work_day" value="#{currentDayFrameModel.resultWorkedTime}."/>
+                </h:panelGrid>
+                <h:panelGrid columns="2" cellpadding="2">
+                    <h:outputLabel for="current_day_state" value="Состояние"/>
+                    <h:outputText id ="current_day_state" value="#{currentDayFrameModel.currentDay.state.desc}"/>
+                    <p:menuButton value="Действие" rendered="#{currentDayFrameModel.currentDay.state != 'WORKED'}">
+                        <p:menuitem value="Начать" actionListener="#{currentDayFrameModel.startWork()}"
+                                    update="current_day_info_form, :month_info_form" rendered="#{!currentDayFrameModel.isWorking()}"/>
+                        <p:menuitem value="Закончить" actionListener="#{currentDayFrameModel.endWork()}"
+                                    update="current_day_info_form"
+                                    rendered="#{currentDayFrameModel.currentDay.state == 'WORKING'}"/>
+                    </p:menuButton>
+                </h:panelGrid>
+                <p:poll interval="60" update="time_for_end_work_day" stop="#{currentDayFrameModel.currentDay.state == 'WORKING'}"/>
+            </p:fieldset>
+        </h:form>
+    </ui:composition>
+</h:body>
+
+</html>
