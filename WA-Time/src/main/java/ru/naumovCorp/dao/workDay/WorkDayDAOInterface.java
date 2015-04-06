@@ -17,5 +17,6 @@ public interface WorkDayDAOInterface {
     public void remove(WorkDay workDay);
     public WorkDay getCurrentDayInfo(Date day, Worker currentWorker);
     public List<WorkDay> getDayInfoByMonth(Date month, Worker currentWorker);
+    public List<WorkDay> getDaysPriorCurrentDay(Date month, Worker currentWorker);
 
 }

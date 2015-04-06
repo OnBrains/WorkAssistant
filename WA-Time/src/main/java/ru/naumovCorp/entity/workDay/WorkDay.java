@@ -20,13 +20,16 @@ import static ru.naumovCorp.entity.workDay.WorkDayState.NO_WORK;
         @NamedQuery(name = WorkDay.GET_TIME_INFO_BY_MONTH,
                 query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day, 'yyyyMM') = to_char(:month, 'yyyyMM') order by wt.day"),
         @NamedQuery(name = WorkDay.GET_CURRENT_DAY,
-                query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day, 'yyyyMMdd') = to_char(:day, 'yyyyMMdd')")
+                query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day, 'yyyyMMdd') = to_char(:day, 'yyyyMMdd')"),
+        @NamedQuery(name = WorkDay.GET_DAYS_PRIOR_CURRENT_DAY,
+                query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day, 'yyyyMM') = to_char(:month, 'yyyyMM') and wt.day <= :month order by wt.day")
     })
 
 public class WorkDay implements Serializable {
 
     public static final String GET_TIME_INFO_BY_MONTH = "WorkTimeDAO.getDayInfoByMonth";
     public static final String GET_CURRENT_DAY = "WorkTimeDAO.getCurrentDay";
+    public static final String GET_DAYS_PRIOR_CURRENT_DAY = "WorkTimeDAO.getDaysPriorCurrentDay";
     public static final Long mSecondsInWorkDay = 30600000L;
 
     @Id
@@ -60,6 +63,12 @@ public class WorkDay implements Serializable {
 
     @Transient
     private Long summaryWorkedTime;
+
+    @Transient
+    private boolean workedFullDay;
+
+    @Transient
+    private Long deltaTime;
 
     protected WorkDay() {
     }
@@ -120,13 +129,35 @@ public class WorkDay implements Serializable {
         this.outTime = outTime;
     }
 
+    /**
+     * Суммарное отработаное время в мил. секундах.
+     * Равняется время ухода минус время прихода. Если рабочий день не закончен = 0.
+     *
+     * @return - разница между временем ухода и временем прихода
+     */
     public Long getSummaryWorkedTime() {
-        Long diffTimeInMSecond = outTime.getTimeInMillis() - comingTime.getTimeInMillis();
-        if (diffTimeInMSecond > mSecondsInWorkDay) {
-            return diffTimeInMSecond - mSecondsInWorkDay;
-        } else {
-            return mSecondsInWorkDay - diffTimeInMSecond;
+        return getState().equals(WorkDayState.WORKED) ? outTime.getTimeInMillis() - comingTime.getTimeInMillis() : 0;
+    }
+
+    /**
+     * Определяет отработано ли рабочий день полностью (8.5 часов)
+     *
+     * @return - true если отработан весь день
+     */
+    public boolean isWorkedFullDay() {
+        return getSummaryWorkedTime() > mSecondsInWorkDay;
+    }
+
+    /**
+     * Вычисляет переработанное или недоработанное время, для завершенного дня.
+     *
+     * @return - переработанное/недоработанное время в мил. секундах, если день не закончен вернет 0
+     */
+    public Long getDeltaTime() {
+        if (getState().equals(WorkDayState.WORKED)) {
+            return isWorkedFullDay() ? getSummaryWorkedTime() - mSecondsInWorkDay : mSecondsInWorkDay - getSummaryWorkedTime();
         }
+        return 0L;
     }
 
     public WorkDayState getState() {

@@ -121,11 +121,42 @@ public class WorkDayViewModel {
     }
 
     /**
+     * Вычисляет результирующие переработки/недоработки за месяц.
+     * Вычисляется до текущего дня. Складываются все отработанное время за эти дни и сравнивается за идеальным.
+     *
+     * @return - итоговоые переработки/недоработки за месяц
+     */
+    //TODO: нужно по разному вычислять для текущего мес. и для всех остальных
+    public String getMonthDeltaTime() {
+        return "00:00";
+    }
+
+//    public boolean workedAllTime() {
+//        return realWorkedTime >= idealWorkedTime;
+//    }
+
+    private Long calculateDeltaTime(List<WorkDay> days) {
+        Long idealWorkedTime = 0L;
+        Long realWorkedTime = 0L;
+        for (WorkDay wd: days) {
+            if (!wd.isHoliday()) {
+                realWorkedTime = realWorkedTime + wd.getSummaryWorkedTime();
+                idealWorkedTime = idealWorkedTime + WorkDay.mSecondsInWorkDay;
+            }
+        }
+        return realWorkedTime > idealWorkedTime ? realWorkedTime - idealWorkedTime : idealWorkedTime - realWorkedTime;
+    }
+
+    /**
      * @param date - дата в полном формате
      * @return - строковое значение времени
      */
     public String getTime(Date date) {
         return ConvertDate.getTime(date);
+    }
+
+    public String getTime(Long mSecond) {
+        return ConvertDate.formattedTimeFromMSec(mSecond);
     }
 
     public String dateFormatForDayInTable(Date date) {

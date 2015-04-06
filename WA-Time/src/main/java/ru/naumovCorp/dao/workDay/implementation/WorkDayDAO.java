@@ -60,4 +60,10 @@ public class WorkDayDAO implements WorkDayDAOInterface {
                 .setParameter("worker", currentWorker).setParameter("month", month).getResultList();
     }
 
+    @Override
+    public List<WorkDay> getDaysPriorCurrentDay(Date month, Worker currentWorker) {
+        EntityManager em = dh.getEntityManager();
+        return em.createNamedQuery(WorkDay.GET_DAYS_PRIOR_CURRENT_DAY, WorkDay.class)
+                .setParameter("month", month).setParameter("worker", currentWorker).getResultList();
+    }
 }

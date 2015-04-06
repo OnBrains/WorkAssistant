@@ -135,7 +135,7 @@ public class CurrentDayFrameModel implements Serializable {
     public String getResultWorkedTime() {
         if (isWorking()) {
             if (isWorked()) {
-                return ConvertDate.formattedTimeFromMSec(currentDay.getSummaryWorkedTime());
+                return ConvertDate.formattedTimeFromMSec(currentDay.getDeltaTime());
             } else {
                 return getTimeForEndWorkDay();
             }
