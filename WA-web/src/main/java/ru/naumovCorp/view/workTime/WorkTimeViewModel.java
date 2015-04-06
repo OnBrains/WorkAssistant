@@ -12,6 +12,7 @@ import javax.faces.bean.ViewScoped;
 import javax.inject.Inject;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -27,28 +28,34 @@ public class WorkTimeViewModel {
     @Inject
     private DAOHelper dh;
 
-    private Calendar selectedMonth = Calendar.getInstance();
+    private Calendar selectedMonth;
     private List<WorkTime> daysBySelectedMonth;
     private WorkTime currentDay;
 
-    public Calendar getSelectedMonth() {
-        return selectedMonth;
-    }
-
+    /**
+     * Получает следующий месяц
+     */
     public void nextMonth() {
         selectedMonth.add(Calendar.MONTH, 1);
+        daysBySelectedMonth = initializationDaysForMonth();
     }
 
+    /**
+     * Получает предыдущий месяц
+     */
     public void previousMonth() {
-        selectedMonth.set(Calendar.MONTH, selectedMonth.get(Calendar.MONTH) - 1);
+        selectedMonth.add(Calendar.MONTH, -1);
+        daysBySelectedMonth = initializationDaysForMonth();
     }
 
-    // TODO: сделать метод получающий данные не по тякущему мес, а по выбранному и завязать на выбиралку все.
-    public List<WorkTime> getDaysBySelectedMonth() {
-        if (daysBySelectedMonth == null && !selectedMonth.equals(Calendar.getInstance())) {
-            daysBySelectedMonth = wtDAO.getTimeInfoByMonth(selectedMonth.getTime(), getCurrentWorker());
+    /**
+     * Получаем все дни, из БД, по выбранному месяцу(selectedMonth)
+     */
+    private List<WorkTime> initializationDaysForMonth() {
+        if (selectedMonth == null) {
+            selectedMonth = Calendar.getInstance();
         }
-        return daysBySelectedMonth;
+        return wtDAO.getTimeInfoByMonth(selectedMonth.getTime(), getCurrentWorker());
     }
 
     public WorkTime getCurrentDay() {
@@ -58,15 +65,19 @@ public class WorkTimeViewModel {
         return currentDay;
     }
 
+    /**
+     * @return массив возможных состояний рабочего дня
+     */
     public WorkDayState[] getStates() {
         return WorkDayState.values();
     }
 
-    // TODO: подумать как лучше передовать сюда значение мес, для которого надо создать дни
-    // при переключении мес. запоминать его и предлогать создать дни???
     // TODO: вынести создание дней в DAO и сделать метод транзакционным?
-    public void createWorkDaysMonth() {
-        Calendar calendar = Calendar.getInstance();
+    /**
+     * Создает все дни, для выбранного месяца (selectedMonth)
+     */
+    public void createDaysForMonth() {
+        Calendar calendar = selectedMonth;
         for (int i = 1; i <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH); i++) {
             calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), i);
             WorkTime day = new WorkTime(getCurrentWorker(), calendar.getTime(), false);
@@ -75,14 +86,16 @@ public class WorkTimeViewModel {
             }
             wtDAO.create(day);
         }
+        daysBySelectedMonth = initializationDaysForMonth();
     }
 
     /**
      * Проверяет является ли создаваемый день субботой или воскресеньем
+     *
      * @return true если выходной
      */
     private boolean isHoliday(Calendar calendar) {
-        if (calendar.get(Calendar.DAY_OF_WEEK) != 6
+        if (calendar.get(Calendar.DAY_OF_WEEK) != 1
                 && calendar.get(Calendar.DAY_OF_WEEK) != 7) {
             return false;
         } else {
@@ -93,6 +106,21 @@ public class WorkTimeViewModel {
     //TODO: при реализации авторизации, переделать на залогиненого работника
     private Worker getCurrentWorker() {
         return dh.getEntityManager().find(Worker.class, 1L);
+    }
+
+    /*******************************************************************************************************************
+     * Simple getters and setters
+     ******************************************************************************************************************/
+
+    public Calendar getSelectedMonth() {
+        return selectedMonth;
+    }
+
+    public List<WorkTime> getDaysBySelectedMonth() {
+        if (daysBySelectedMonth == null) {
+            daysBySelectedMonth = initializationDaysForMonth();
+        }
+        return daysBySelectedMonth;
     }
 
 }
