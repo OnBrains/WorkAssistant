@@ -54,31 +54,31 @@
                     <p:column headerText="День">
                         <h:outputText value="#{workDayViewModel.dateFormatForDayInTable(dayInfo.day)}"/>
                     </p:column>
-                    <p:column headerText="Выходной">
-                        <p:cellEditor>
-                            <f:facet name="output"><h:outputText value="#{dayInfo.holiday}"/></f:facet>
-                            <f:facet name="input"><p:selectBooleanCheckbox value="#{dayInfo.holiday}"/></f:facet>
-                        </p:cellEditor>
-                    </p:column>
-                    <p:column headerText="Начал">
+                    <p:column headerText="Начало">
                         <p:cellEditor>
                             <f:facet name="output">
-                                <h:outputText value="#{dayInfo.state == 'NO_WORK' ? '-' : workDayViewModel.getTime(dayInfo.comingTime.time)}"/>
+                                <h:outputText value="#{dayInfo.state == 'NO_WORK' ? '--:--' : workDayViewModel.getTime(dayInfo.comingTime.time)}"/>
                             </f:facet>
                             <f:facet name="input">
                                 <p:calendar id="coming_time" value="#{dayInfo.comingTime.time}" pattern="MM/dd/yyyy HH:mm"/>
                             </f:facet>
                         </p:cellEditor>
                     </p:column>
-                    <p:column headerText="Закочнил">
+                    <p:column headerText="Конец">
                         <p:cellEditor>
                             <f:facet name="output">
-                                <h:outputText value="#{dayInfo.state != 'WORKED' ? '-' : workDayViewModel.getTime(dayInfo.outTime.time)}"/>
+                                <h:outputText value="#{dayInfo.state != 'WORKED' ? '--:--' : workDayViewModel.getTime(dayInfo.outTime.time)}"/>
                             </f:facet>
                             <f:facet name="input">
                                 <p:calendar id="out_time" value="#{dayInfo.outTime.time}" pattern="MM/dd/yyyy HH:mm"/>
                             </f:facet>
                         </p:cellEditor>
+                    </p:column>
+                    <p:column headerText="Итог">
+                        <h:outputText value="#{workDayViewModel.getTime(dayInfo.summaryWorkedTime)}"/>
+                    </p:column>
+                    <p:column headerText="Бонусы">
+                        <h:outputText value="#{workDayViewModel.getTime(dayInfo.deltaTime)}"/>
                     </p:column>
                     <p:column headerText="Состояние">
                         <p:cellEditor>
