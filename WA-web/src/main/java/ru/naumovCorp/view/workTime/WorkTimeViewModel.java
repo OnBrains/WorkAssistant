@@ -1,18 +1,19 @@
 package ru.naumovCorp.view.workTime;
 
 
+import org.primefaces.event.RowEditEvent;
 import ru.naumovCorp.dao.DAOHelper;
 import ru.naumovCorp.entity.workTime.WorkDayState;
 import ru.naumovCorp.entity.worker.Worker;
 import ru.naumovCorp.dao.workTime.WorkTimeDAOInterface;
 import ru.naumovCorp.entity.workTime.WorkTime;
+import ru.naumovCorp.parsing.ConvertDate;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.inject.Inject;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -101,6 +102,24 @@ public class WorkTimeViewModel {
         } else {
             return true;
         }
+    }
+
+    /**
+     * Изменяем запись в таблице
+     *
+     * @param event - запись, которая редактируется
+     */
+    //TODO: прикрутить логику редактирования
+    public void onRowEdit(RowEditEvent event) {
+        wtDAO.update((WorkTime) event.getObject());
+    }
+
+    /**
+     * @param date - дата в полном формате
+     * @return - строковое значение времени
+     */
+    public String getTime(Date date) {
+        return ConvertDate.getTime(date);
     }
 
     //TODO: при реализации авторизации, переделать на залогиненого работника
