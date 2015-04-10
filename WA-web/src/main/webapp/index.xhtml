@@ -78,7 +78,7 @@
                         <h:outputText value="#{workDayViewModel.getTime(dayInfo.summaryWorkedTime)}"/>
                     </p:column>
                     <p:column headerText="Бонусы">
-                        <h:outputText value="#{workDayViewModel.getTime(dayInfo.deltaTime)}"/>
+                        <h:outputText value="#{workDayViewModel.getTime(dayInfo.deltaTime)}" style="#{workDayViewModel.getStyleForDeltaTime(dayInfo)}"/>
                     </p:column>
                     <p:column headerText="Состояние">
                         <p:cellEditor>

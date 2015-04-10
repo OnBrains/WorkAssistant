@@ -3,6 +3,7 @@ package ru.naumovCorp.view.workDay;
 
 import org.primefaces.event.RowEditEvent;
 import ru.naumovCorp.dao.DAOHelper;
+import ru.naumovCorp.entity.workDay.DayType;
 import ru.naumovCorp.entity.workDay.WorkDayState;
 import ru.naumovCorp.entity.worker.Worker;
 import ru.naumovCorp.dao.workDay.WorkDayDAOInterface;
@@ -78,7 +79,7 @@ public class WorkDayViewModel {
             calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), i);
             WorkDay day = new WorkDay(sUtil.getWorker(), calendar.getTime(), false);
             if (isHoliday(calendar)) {
-                day.setHoliday(true);
+                day.setType(DayType.HOLIDAY);
             }
             day.setComingTime(calendar);
             day.setOutTime(calendar);
@@ -168,13 +169,17 @@ public class WorkDayViewModel {
     }
 
     public String getStyleClassForRow(WorkDay dayInfo) {
-        if (dayInfo.isHoliday() && !dayInfo.equals(getCurrentDay())) {
+        if (dayInfo.getType().equals(DayType.HOLIDAY) && !dayInfo.equals(getCurrentDay())) {
             return "color_for_holiday";
         } if (dayInfo.equals(getCurrentDay())) {
             return "color_for_current_day";
         } else {
             return "";
         }
+    }
+
+    public String getStyleForDeltaTime(WorkDay dayInfo) {
+        return dayInfo.isWorkedFullDay() ? "color: green;" : "color: red;";
     }
 
     /**

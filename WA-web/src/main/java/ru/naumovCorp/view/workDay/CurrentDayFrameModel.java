@@ -72,7 +72,7 @@ public class CurrentDayFrameModel implements Serializable {
     /**
      * Возвращает отформатированное время прихода, для текущего дня
      *
-     * @return - если день не найден, то "-  "
+     * @return - если день не найден, то "-"
      */
     public String getComingTime() {
         if (getCurrentDay() != null && isWorking()) {
@@ -125,7 +125,7 @@ public class CurrentDayFrameModel implements Serializable {
     private Long getPossibleOutTimeInMSecond() {
         if (getCurrentDay() != null) {
             Long commingTimeInMSeconds = getCurrentDay().getComingTime().getTimeInMillis();
-            Long possibleOutTimeInMSecond = commingTimeInMSeconds + WorkDay.mSecondsInWorkDay;
+            Long possibleOutTimeInMSecond = commingTimeInMSeconds + currentDay.getType().getWorkTimeInMSecond();
             return possibleOutTimeInMSecond;
         } else {
             return 0L;

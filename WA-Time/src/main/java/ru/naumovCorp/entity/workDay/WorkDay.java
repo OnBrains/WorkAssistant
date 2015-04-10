@@ -46,6 +46,10 @@ public class WorkDay implements Serializable {
     @Temporal(TemporalType.DATE)
     private Date day;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "DAY_TYPE", length = 16)
+    private DayType type;
+
     @Column(name = "IS_HOLIDAY", nullable = false)
     private boolean isHoliday;
 
@@ -105,6 +109,14 @@ public class WorkDay implements Serializable {
         this.day = day;
     }
 
+    public DayType getType() {
+        return type;
+    }
+
+    public void setType(DayType type) {
+        this.type = type;
+    }
+
     public boolean isHoliday() {
         return isHoliday;
     }
@@ -140,12 +152,12 @@ public class WorkDay implements Serializable {
     }
 
     /**
-     * Определяет отработано ли рабочий день полностью (8.5 часов)
+     * Определяет отработано ли рабочий день полностью
      *
      * @return - true если отработан весь день
      */
     public boolean isWorkedFullDay() {
-        return getSummaryWorkedTime() > mSecondsInWorkDay;
+        return getSummaryWorkedTime() > type.getWorkTimeInMSecond();
     }
 
     /**
@@ -155,7 +167,7 @@ public class WorkDay implements Serializable {
      */
     public Long getDeltaTime() {
         if (getState().equals(WorkDayState.WORKED)) {
-            return isWorkedFullDay() ? getSummaryWorkedTime() - mSecondsInWorkDay : mSecondsInWorkDay - getSummaryWorkedTime();
+            return isWorkedFullDay() ? getSummaryWorkedTime() - type.getWorkTimeInMSecond() : type.getWorkTimeInMSecond() - getSummaryWorkedTime();
         }
         return 0L;
     }
