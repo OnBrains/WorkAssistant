@@ -94,6 +94,11 @@
                     <p:column style="width:32px">
                         <p:rowEditor/>
                     </p:column>
+                    <f:facet name="footer">
+                        <h:outputText value="Требуемое время за месяц: #{workDayViewModel.getTime(workDayViewModel.idealWorkedTimeByAllMonth)}"/>
+                        <h:outputText value="Отработать до текущего дня: #{workDayViewModel.getTime(workDayViewModel.idealWorkedTimeByCurrentDay)}"/>
+                        <h:outputText value="Отработано на текущий день: #{workDayViewModel.getTime(workDayViewModel.realWorkedTime)}"/>
+                    </f:facet>
                 </p:dataTable>
             </h:form>
         </pe:layoutPane>

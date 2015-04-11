@@ -11,9 +11,12 @@ import ru.naumovCorp.entity.workDay.WorkDay;
 import ru.naumovCorp.parsing.ConvertDate;
 import ru.naumovCorp.service.SessionUtil;
 
+import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.inject.Inject;
+import javax.persistence.PostPersist;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -35,12 +38,17 @@ public class WorkDayViewModel {
     private List<WorkDay> daysBySelectedMonth;
     private WorkDay currentDay;
 
+    private List<WorkDay> daysByMonthType;
+    private Long idealWorkedTimeByAllMonth;
+    private Long idealWorkedTimeByCurrentDay;
+    private Long realWorkedTime;
+
     /**
      * Получает следующий месяц
      */
     public void nextMonth() {
         selectedMonth.add(Calendar.MONTH, 1);
-        daysBySelectedMonth = initializationDaysForMonth();
+        initializationDaysForMonth();
     }
 
     /**
@@ -48,17 +56,19 @@ public class WorkDayViewModel {
      */
     public void previousMonth() {
         selectedMonth.add(Calendar.MONTH, -1);
-        daysBySelectedMonth = initializationDaysForMonth();
+        initializationDaysForMonth();
     }
 
     /**
      * Получаем все дни, из БД, по выбранному месяцу(selectedMonth)
      */
-    private List<WorkDay> initializationDaysForMonth() {
+    private void initializationDaysForMonth() {
+        cleanSummeryTimes();
         if (selectedMonth == null) {
             selectedMonth = Calendar.getInstance();
         }
-        return wdDAO.getDayInfoByMonth(selectedMonth.getTime(), sUtil.getWorker());
+        daysBySelectedMonth = wdDAO.getDayInfoByMonth(selectedMonth.getTime(), sUtil.getWorker());
+        calculateDeltaTime();
     }
 
     /**
@@ -85,7 +95,7 @@ public class WorkDayViewModel {
             day.setOutTime(calendar);
             wdDAO.create(day);
         }
-        daysBySelectedMonth = initializationDaysForMonth();
+        initializationDaysForMonth();
     }
 
     private Calendar setZeroTime(Calendar calendar) {
@@ -121,31 +131,59 @@ public class WorkDayViewModel {
         wdDAO.update((WorkDay) event.getObject());
     }
 
-    /**
-     * Вычисляет результирующие переработки/недоработки за месяц.
-     * Вычисляется до текущего дня. Складываются все отработанное время за эти дни и сравнивается за идеальным.
-     *
-     * @return - итоговоые переработки/недоработки за месяц
-     */
-    //TODO: нужно по разному вычислять для текущего мес. и для всех остальных
-    public String getMonthDeltaTime() {
-        return "00:00";
+    private void cleanSummeryTimes() {
+        idealWorkedTimeByAllMonth = 0L;
+        idealWorkedTimeByCurrentDay = 0L;
+        realWorkedTime = 0L;
     }
 
-//    public boolean workedAllTime() {
-//        return realWorkedTime >= idealWorkedTime;
-//    }
-
-    private Long calculateDeltaTime(List<WorkDay> days) {
-        Long idealWorkedTime = 0L;
-        Long realWorkedTime = 0L;
-        for (WorkDay wd: days) {
-            if (!wd.isHoliday()) {
-                realWorkedTime = realWorkedTime + wd.getSummaryWorkedTime();
-                idealWorkedTime = idealWorkedTime + WorkDay.mSecondsInWorkDay;
+    private List<WorkDay> getDaysPriorCurrentDay() {
+        List<WorkDay> daysPriorCurrentDay = new ArrayList<>();
+        for (WorkDay wd: daysBySelectedMonth) {
+            if (wd.getDay().getTime() < getCurrentDay().getDay().getTime()) {
+                daysPriorCurrentDay.add(wd);
+            }
+            if (wd.getDay().equals(getCurrentDay().getDay()) && getCurrentDay().getState().equals(WorkDayState.WORKED)) {
+                daysPriorCurrentDay.add(wd);
             }
         }
-        return realWorkedTime > idealWorkedTime ? realWorkedTime - idealWorkedTime : idealWorkedTime - realWorkedTime;
+        return daysPriorCurrentDay;
+    }
+
+    private void getDaysByMonthType() {
+        if (isCurrentMonth()) {
+            daysByMonthType = getDaysPriorCurrentDay();
+        }
+        if (isLastMonth()) {
+            daysByMonthType = getDaysBySelectedMonth();
+        }
+    }
+
+    private void calculateDeltaTime() {
+        getDaysByMonthType();
+        if (daysByMonthType != null && (isCurrentMonth() || isLastMonth())) {
+            for (WorkDay wd : daysByMonthType) {
+                realWorkedTime = realWorkedTime + wd.getSummaryWorkedTime();
+                idealWorkedTimeByCurrentDay = idealWorkedTimeByCurrentDay + wd.getType().getWorkTimeInMSecond();
+            }
+            if (daysByMonthType.equals(daysBySelectedMonth)) {
+                idealWorkedTimeByAllMonth = idealWorkedTimeByCurrentDay;
+            } else {
+                for (WorkDay wd: daysBySelectedMonth) {
+                    idealWorkedTimeByAllMonth = idealWorkedTimeByAllMonth + wd.getType().getWorkTimeInMSecond();
+                }
+            }
+        }
+    }
+
+    private boolean isCurrentMonth() {
+        Calendar currentMonth = Calendar.getInstance();
+        return currentMonth.YEAR == selectedMonth.YEAR && currentMonth.MONTH == selectedMonth.MONTH;
+    }
+
+    private boolean isLastMonth() {
+        Calendar currentMonth = Calendar.getInstance();
+        return selectedMonth.YEAR <= currentMonth.YEAR && selectedMonth.MONTH < currentMonth.MONTH;
     }
 
     /**
@@ -194,7 +232,7 @@ public class WorkDayViewModel {
 
     public List<WorkDay> getDaysBySelectedMonth() {
         if (daysBySelectedMonth == null) {
-            daysBySelectedMonth = initializationDaysForMonth();
+            initializationDaysForMonth();
         }
         return daysBySelectedMonth;
     }
@@ -206,4 +244,15 @@ public class WorkDayViewModel {
         return currentDay;
     }
 
+    public Long getIdealWorkedTimeByAllMonth() {
+        return idealWorkedTimeByAllMonth;
+    }
+
+    public Long getIdealWorkedTimeByCurrentDay() {
+        return idealWorkedTimeByCurrentDay;
+    }
+
+    public Long getRealWorkedTime() {
+        return realWorkedTime;
+    }
 }
