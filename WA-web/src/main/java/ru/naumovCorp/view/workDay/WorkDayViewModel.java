@@ -88,6 +88,7 @@ public class WorkDayViewModel {
         for (int i = 1; i <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH); i++) {
             calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), i);
             WorkDay day = new WorkDay(sUtil.getWorker(), calendar.getTime(), false);
+            day.setType(DayType.WORK_DAY);
             if (isHoliday(calendar)) {
                 day.setType(DayType.HOLIDAY);
             }
@@ -161,7 +162,7 @@ public class WorkDayViewModel {
 
     private void calculateDeltaTime() {
         getDaysByMonthType();
-        if (daysByMonthType != null && (isCurrentMonth() || isLastMonth())) {
+        if (daysByMonthType != null) {
             for (WorkDay wd : daysByMonthType) {
                 realWorkedTime = realWorkedTime + wd.getSummaryWorkedTime();
                 idealWorkedTimeByCurrentDay = idealWorkedTimeByCurrentDay + wd.getType().getWorkTimeInMSecond();
