@@ -16,18 +16,19 @@
     <ui:composition>
         <h:form id="current_day_info_form">
             <p:fieldset legend="#{currentDayFrameModel.currentDay != null ? currentDayFrameModel.currentDay.day : 'Не найдено'}">
-                <h:panelGrid columns="4" cellpadding="2">
-                    <h:outputLabel for="current_day_coming_time" value="Работаю с"/>
-                    <h:outputText id="current_day_coming_time" value="#{currentDayFrameModel.comingTime},"/>
-                    <h:outputLabel for="current_day_out_time" value="#{currentDayFrameModel.isWorked() ? 'закончил' : 'могу закочить в'}"/>
-                    <h:outputText id="current_day_out_time" value="#{currentDayFrameModel.outTime}"/>
+                <h:panelGrid id="start_end_time_id" columns="4" cellpadding="10">
+                    <h:graphicImage for="current_day_coming_time" name="img/clock/clock_play.png"/>
+                    <h:outputText id="current_day_coming_time" value="#{currentDayFrameModel.comingTime}" styleClass="window_for_time"/>
+                    <h:graphicImage for="current_day_coming_time" name="img/clock/clock_stop.png"/>
+                    <h:outputText id="current_day_out_time" value="#{currentDayFrameModel.outTime}" styleClass="window_for_time"/>
 
-                    <h:outputLabel for="time_for_end_work_day" value="#{currentDayFrameModel.ifCurrentTimeMoreOutTime() ? 'Переработал' : 'Осталось'}"/>
-                    <h:outputText id="time_for_end_work_day" value="#{currentDayFrameModel.resultWorkedTime}."/>
+                    <h:graphicImage for="time_for_end_work_day"
+                                    name="#{currentDayFrameModel.ifCurrentTimeMoreOutTime() ? 'img/clock/clock_add.png' : 'img/clock/clock_delete.png'}"/>
+                    <h:outputText id="time_for_end_work_day" value="#{currentDayFrameModel.resultWorkedTime}" styleClass="window_for_time"/>
                 </h:panelGrid>
-                <h:panelGrid columns="2" cellpadding="2">
+                <h:panelGrid columns="3" cellpadding="2">
                     <h:outputLabel for="current_day_state" value="Состояние"/>
-                    <h:outputText id ="current_day_state" value="#{currentDayFrameModel.currentDay.state.desc}"/>
+                    <h:outputText id ="current_day_state" value="#{currentDayFrameModel.currentDay.state.desc}" styleClass="window_for_time"/>
                     <p:menuButton value="Действие" rendered="#{currentDayFrameModel.currentDay.state != 'WORKED'}">
                         <p:menuitem value="Начать" actionListener="#{currentDayFrameModel.startWork()}"
                                     update="current_day_info_form, :month_info_form" rendered="#{!currentDayFrameModel.isWorking()}"/>

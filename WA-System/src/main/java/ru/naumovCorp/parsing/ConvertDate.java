@@ -52,7 +52,7 @@ public class ConvertDate {
         if (date == null) {
             return null;
         }
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd EEEEE");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd EE.");
         return simpleDateFormat.format(date);
     }
 

@@ -20,7 +20,7 @@
 <h:body>
     <pe:layout>
 
-        <pe:layoutPane position="north" closable="false" resizable="false">
+        <pe:layoutPane position="north" closable="false" resizable="false" styleClassContent="layout_style">
             <p:menubar>
                 <f:facet name="options">
                     <h:outputText value="#{loginViewModel.worker.toString()}  "/>
@@ -29,69 +29,81 @@
             </p:menubar>
         </pe:layoutPane>
 
-        <pe:layoutPane position="west" closable="true" resizable="false" size="420" minSize="420">
+        <pe:layoutPane position="west" closable="true" resizable="false" size="420" minSize="420" styleClassContent="layout_style">
             <ui:include src="view/workDay/CurrentDayFrame.xhtml"/>
         </pe:layoutPane>
 
-        <pe:layoutPane position="center" resizable="true">
+        <pe:layoutPane position="center" resizable="true" styleClassContent="layout_style">
             <h:form id="month_info_form">
-
                 <p:commandButton id="create_days_for_month" value="+" action="#{workDayViewModel.createDaysForMonth}"
                                  rendered="#{workDayViewModel.daysBySelectedMonth.size() == 0}"
                                  style="float:left; margin: 7px" update="month_info_form"/>
-                <p:commandButton id="next_month" value="+" action="#{workDayViewModel.nextMonth}"
-                                 update="month_info_form" style="float:right; margin: 7px"/>
-                <p:commandButton id="previous_month" value="-" action="#{workDayViewModel.previousMonth}"
-                                 update="month_info_form" style="float:right; margin: 7px"/>
-                <p:spacer height="20"/>
+                <p:spacer height="10"/>
                 <p:dataTable id="month_info_table" value="#{workDayViewModel.daysBySelectedMonth}" var="dayInfo"
                              editable="true" rowStyleClass="#{workDayViewModel.getStyleClassForRow(dayInfo)}"
                              scrollable="true" scrollHeight="800">
                     <f:facet name="header">
+                        <p:commandButton id="previous_month" value="-" action="#{workDayViewModel.previousMonth}"
+                                         update=":month_info_form" style="float: left; margin: 7px"/>
                         <h:outputText value="#{workDayViewModel.dateFormatForFeaderTable(workDayViewModel.selectedMonth.time)}"/>
+                        <p:commandButton id="next_month" value="+" action="#{workDayViewModel.nextMonth}"
+                                         update=":month_info_form" style="float: right; margin: 7px"/>
                     </f:facet>
                     <p:ajax event="rowEdit" listener="#{workDayViewModel.onRowEdit}"/>
-                    <p:column headerText="День">
+                    <p:column id="work_day_id" headerText="День" style="text-align: center; width: 100px;">
                         <h:outputText value="#{workDayViewModel.dateFormatForDayInTable(dayInfo.day)}"/>
                     </p:column>
-                    <p:column headerText="Начало">
+                    <p:column id="start_work_day_id" style="text-align: center; width: 80px;">
+                        <f:facet name="header">
+                            <h:graphicImage name="img/clock/clock_play.png"/>
+                        </f:facet>
                         <p:cellEditor>
                             <f:facet name="output">
-                                <h:outputText value="#{dayInfo.state == 'NO_WORK' ? '--:--' : workDayViewModel.getTime(dayInfo.comingTime.time)}"/>
+                                <h:outputText value="#{dayInfo.state == 'NO_WORK' ? '' : workDayViewModel.getTime(dayInfo.comingTime.time)}"/>
                             </f:facet>
                             <f:facet name="input">
-                                <p:calendar id="coming_time" value="#{dayInfo.comingTime.time}" pattern="MM/dd/yyyy HH:mm"/>
+                                <pe:timePicker value="#{dayInfo.comingTime.time}" mode="popup"/>
                             </f:facet>
                         </p:cellEditor>
                     </p:column>
-                    <p:column headerText="Конец">
+                    <p:column id="end_work_day_id" style="text-align: center; width: 80px;">
+                        <f:facet name="header">
+                            <h:graphicImage name="img/clock/clock_stop.png"/>
+                        </f:facet>
                         <p:cellEditor>
                             <f:facet name="output">
-                                <h:outputText value="#{dayInfo.state != 'WORKED' ? '--:--' : workDayViewModel.getTime(dayInfo.outTime.time)}"/>
+                                <h:outputText value="#{dayInfo.state != 'WORKED' ? '' : workDayViewModel.getTime(dayInfo.outTime.time)}"/>
                             </f:facet>
                             <f:facet name="input">
-                                <p:calendar id="out_time" value="#{dayInfo.outTime.time}" pattern="MM/dd/yyyy HH:mm"/>
+                                <pe:timePicker value="#{dayInfo.outTime.time}" mode="popup"/>
                             </f:facet>
                         </p:cellEditor>
                     </p:column>
-                    <p:column headerText="Итог">
-                        <h:outputText value="#{workDayViewModel.getTime(dayInfo.summaryWorkedTime)}"/>
+                    <p:column id="summary_work_day_id" style="text-align: center; width: 80px;">
+                        <f:facet name="header">
+                            <h:graphicImage name="img/clock/clock_link.png"/>
+                        </f:facet>
+                        <h:outputText value="#{dayInfo.state != 'WORKED' ? '' : workDayViewModel.getTime(dayInfo.summaryWorkedTime)}"/>
                     </p:column>
-                    <p:column headerText="Бонусы">
-                        <h:outputText value="#{workDayViewModel.getTime(dayInfo.deltaTime)}" style="#{workDayViewModel.getStyleForDeltaTime(dayInfo)}"/>
+                    <p:column id="delta_work_day_id" style="text-align: center; width: 80px;">
+                        <f:facet name="header">
+                            <h:graphicImage name="img/clock/clock_add.png"/>
+                        </f:facet>
+                        <h:outputText value="#{dayInfo.state != 'WORKED' ? '' : workDayViewModel.getTime(dayInfo.deltaTime)}"
+                                      style="#{workDayViewModel.getStyleForDeltaTime(dayInfo)}"/>
                     </p:column>
-                    <p:column headerText="Состояние">
+                    <p:column id="state_work_day_id" headerText="Состояние" style="text-align: center; width: 200px;">
                         <p:cellEditor>
                             <f:facet name="output"><h:outputText value="#{dayInfo.state.desc}"/></f:facet>
                             <f:facet name="input">
-                                <p:selectOneMenu value="#{dayInfo.state}">
+                                <p:selectOneMenu value="#{dayInfo.state}" style="width: 120px;">
                                     <f:selectItems value="#{workDayViewModel.states}" var="state"
                                                    itemValue="#{state}" itemLabel="#{state.desc}"/>
                                 </p:selectOneMenu>
                             </f:facet>
                         </p:cellEditor>
                     </p:column>
-                    <p:column style="width:32px">
+                    <p:column style="width:30px">
                         <p:rowEditor/>
                     </p:column>
                     <f:facet name="footer">
@@ -103,37 +115,8 @@
             </h:form>
         </pe:layoutPane>
 
-        <pe:layoutPane position="east" closable="true" resizable="true" size="500" minSize="500">
-            <h:form>
-                <p:dataTable value="#{workerViewModel.workers}" var="worker" editable="true">
-                    <p:ajax event="rowEdit" listener="#{workerViewModel.onRowEdit}"/>
-                    <p:column headerText="Фамилия">
-                        <p:cellEditor>
-                            <f:facet name="output"><h:outputText value="#{worker.family}"/></f:facet>
-                            <f:facet name="input"><p:inputText value="#{worker.family}"/></f:facet>
-                        </p:cellEditor>
-                    </p:column>
-                    <p:column headerText="Имя">
-                        <p:cellEditor>
-                            <f:facet name="output"><h:outputText value="#{worker.firstName}"/></f:facet>
-                            <f:facet name="input"><p:inputText value="#{worker.firstName}"/></f:facet>
-                        </p:cellEditor>
-                    </p:column>
-                    <p:column headerText="Отчество">
-                        <p:cellEditor>
-                            <f:facet name="output"><h:outputText value="#{worker.surname}"/></f:facet>
-                            <f:facet name="input"><p:inputText value="#{worker.surname}"/></f:facet>
-                        </p:cellEditor>
-                    </p:column>
-                    <p:column style="width:32px">
-                        <p:rowEditor/>
-                    </p:column>
-                </p:dataTable>
-            </h:form>
-        </pe:layoutPane>
-
-        <pe:layoutPane position="south" closable="false" resizable="false" styleContent="text-align: center">
-            <p:graphicImage name="img/iconNC.jpg"/>
+        <pe:layoutPane position="south"  closable="false" resizable="false" styleContent="text-align: center" styleClassContent="layout_style">
+            <p:graphicImage name="img/iconNC.png"/>
         </pe:layoutPane>
 
     </pe:layout>

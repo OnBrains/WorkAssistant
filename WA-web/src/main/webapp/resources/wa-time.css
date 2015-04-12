@@ -1,3 +1,18 @@
+body {
+    background-color: #e5e5e5;
+}
+
+/*a {*/
+    /*font: normal 13px Roboto,arial,sans-serif !important;*/
+    /*font-family: Roboto,arial,sans-serif !important;*/
+    /*font-size: 13px;*/
+/*}*/
+
+.ui-widget {
+    font-family: Roboto,arial,sans-serif !important;
+    font-size: 13px;
+}
+
 /*Страница авторизации*/
 
 .login_panel {
@@ -9,11 +24,33 @@
 /*Таблица с информацией по рабочим дням*/
 
 .color_for_holiday {
-    background-color: darkgray;
+    background-color: #eaeaea;
     background-image:none;
 }
 
 .color_for_current_day {
-    background-color: #1584de;
+    background-color: #4da9f1;
     background-image:none;
+}
+
+.ui-datatable td {
+    border-style: none !important;
+}
+
+.ui-datatable-header {
+    height: 35px;
+}
+
+.layout_style {
+    border: none;
+    background-color: #e5e5e5;
+}
+
+/*Стили для работы с текущим днем*/
+
+.window_for_time {
+    border: 2px solid #eaeaea;
+    padding: 5px;
+    width: 100px;
+    height: 100px;
 }

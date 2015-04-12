@@ -72,13 +72,13 @@ public class CurrentDayFrameModel implements Serializable {
     /**
      * Возвращает отформатированное время прихода, для текущего дня
      *
-     * @return - если день не найден, то "-"
+     * @return - если день не найден, то "__:__"
      */
     public String getComingTime() {
         if (getCurrentDay() != null && isWorking()) {
             return ConvertDate.getTime(currentDay.getComingTime().getTime());
         } else {
-            return "-";
+            return "__:__";
         }
     }
 
@@ -90,7 +90,7 @@ public class CurrentDayFrameModel implements Serializable {
                 return getPossibleOutTime();
             }
         } else {
-            return "-";
+            return "__:__";
         }
     }
 
@@ -107,7 +107,7 @@ public class CurrentDayFrameModel implements Serializable {
      * Вычисляет возможное время ухода, в зависимости от времени прихода.
      * Актуально для случая, когда рабочий день не закончин.
      *
-     * @return - время прихода + 8.5 часов, если день не найден, то "-"
+     * @return - время прихода + время в зависимости от типа дня, если день не найден, то "__:__"
      */
     private String getPossibleOutTime() {
         if (getCurrentDay() != null) {
@@ -115,7 +115,7 @@ public class CurrentDayFrameModel implements Serializable {
             possibleOutComeTime.setTimeInMillis(getPossibleOutTimeInMSecond());
             return ConvertDate.getTime(possibleOutComeTime.getTime());
         } else {
-            return "-";
+            return "__:__";
         }
     }
 
@@ -140,14 +140,14 @@ public class CurrentDayFrameModel implements Serializable {
                 return getTimeForEndWorkDay();
             }
         } else {
-            return "-";
+            return "__:__";
         }
     }
 
     /**
      * Вычисляет оставщееся время до окончания рабочего дня или переработанное время
      *
-     * @return - оставшееся/переработанное время, если день не найден, то "-"
+     * @return - оставшееся/переработанное время, если день не найден, то "__:__"
      */
     private String getTimeForEndWorkDay() {
         if (getCurrentDay() != null) {
@@ -161,7 +161,7 @@ public class CurrentDayFrameModel implements Serializable {
             }
             return ConvertDate.formattedTimeFromMSec(diffTimeInMSecond);
         } else {
-            return "-";
+            return "__:__";
         }
     }
 
