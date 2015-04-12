@@ -1,5 +1,6 @@
 package ru.naumovCorp.parsing;
 
+import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -60,8 +61,18 @@ public class ConvertDate {
         if (date == null) {
             return null;
         }
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMMMM yyyy");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMMMM yyyy", dateFormatSymbols);
         return simpleDateFormat.format(date);
     }
+
+    private static DateFormatSymbols dateFormatSymbols = new DateFormatSymbols(){
+
+        @Override
+        public String[] getMonths() {
+            return new String[]{"Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                    "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"};
+        }
+
+    };
 
 }
