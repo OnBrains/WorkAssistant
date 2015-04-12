@@ -2,12 +2,6 @@ body {
     background-color: #e5e5e5;
 }
 
-/*a {*/
-    /*font: normal 13px Roboto,arial,sans-serif !important;*/
-    /*font-family: Roboto,arial,sans-serif !important;*/
-    /*font-size: 13px;*/
-/*}*/
-
 .ui-widget {
     font-family: Roboto,arial,sans-serif !important;
     font-size: 13px;
@@ -41,6 +35,8 @@ body {
     height: 35px;
 }
 
+/*Стили для layout*/
+
 .layout_style {
     border: none;
     background-color: #e5e5e5;
@@ -51,6 +47,4 @@ body {
 .window_for_time {
     border: 2px solid #eaeaea;
     padding: 5px;
-    width: 100px;
-    height: 100px;
 }
