@@ -128,8 +128,20 @@ public class WorkDayViewModel {
     //TODO: прикрутить логику редактирования
     public void onRowEdit(RowEditEvent event) {
         WorkDay day = (WorkDay) event.getObject();
-        day.getDay();
-        wdDAO.update((WorkDay) event.getObject());
+        day.setComingTime(updateYear(day, day.getComingTime()));
+        day.setOutTime(updateYear(day, day.getOutTime()));
+        wdDAO.update(day);
+    }
+
+    /**
+     * В Primefaces если изменять только время, без года, то проставляется 1970 год.
+     * Если ортредактированно время прихода/ухода, то надо проставить год обратно.
+     */
+    private Calendar updateYear(WorkDay workDay, Calendar calendar) {
+        Calendar currentDay = Calendar.getInstance();
+        currentDay.setTime(workDay.getDay());
+        calendar.set(currentDay.get(currentDay.YEAR), currentDay.get(currentDay.MONTH), currentDay.get(currentDay.DATE));
+        return calendar;
     }
 
     private void cleanSummeryTimes() {
