@@ -14,7 +14,7 @@ import static ru.naumovCorp.entity.workDay.WorkDayState.NO_WORK;
  */
 
 @Entity
-@Table(name = "WORK_DAY", uniqueConstraints = {@UniqueConstraint(columnNames = {"DAY"})})
+@Table(name = "WORK_DAY", uniqueConstraints = {@UniqueConstraint(columnNames = {"WORKER_ID", "DAY"})})
 @NamedQueries
     ({
         @NamedQuery(name = WorkDay.GET_TIME_INFO_BY_MONTH,
@@ -47,19 +47,19 @@ public class WorkDay implements Serializable {
     private Date day;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "DAY_TYPE", length = 16)
+    @Column(name = "DAY_TYPE", length = 16, nullable = false)
     private DayType type;
 
-    @Column(name = "COMING_TIME")
+    @Column(name = "COMING_TIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar comingTime;
 
-    @Column(name = "OUT_TIME")
+    @Column(name = "OUT_TIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar outTime;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "STATE", length = 16)
+    @Column(name = "STATE", length = 16, nullable = false)
     private WorkDayState state = NO_WORK;
 
     @Transient
