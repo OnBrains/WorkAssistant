@@ -50,9 +50,6 @@ public class WorkDay implements Serializable {
     @Column(name = "DAY_TYPE", length = 16)
     private DayType type;
 
-    @Column(name = "IS_HOLIDAY", nullable = false)
-    private boolean isHoliday;
-
     @Column(name = "COMING_TIME")
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar comingTime;
@@ -77,10 +74,9 @@ public class WorkDay implements Serializable {
     protected WorkDay() {
     }
 
-    public WorkDay(Worker worker, Date day, boolean isHoliday) {
+    public WorkDay(Worker worker, Date day) {
         this.worker = worker;
         this.day = day;
-        this.isHoliday = isHoliday;
         //TODO: надо ли сетить состояние тут?
         this.state = WorkDayState.NO_WORK;
     }
@@ -115,14 +111,6 @@ public class WorkDay implements Serializable {
 
     public void setType(DayType type) {
         this.type = type;
-    }
-
-    public boolean isHoliday() {
-        return isHoliday;
-    }
-
-    public void setHoliday(boolean isHoliday) {
-        this.isHoliday = isHoliday;
     }
 
     public Calendar getComingTime() {

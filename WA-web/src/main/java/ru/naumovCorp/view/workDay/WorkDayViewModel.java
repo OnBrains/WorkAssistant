@@ -87,7 +87,7 @@ public class WorkDayViewModel {
         Calendar calendar = setZeroTime(selectedMonth);
         for (int i = 1; i <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH); i++) {
             calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), i);
-            WorkDay day = new WorkDay(sUtil.getWorker(), calendar.getTime(), false);
+            WorkDay day = new WorkDay(sUtil.getWorker(), calendar.getTime());
             day.setType(DayType.WORK_DAY);
             if (isHoliday(calendar)) {
                 day.setType(DayType.HOLIDAY);
