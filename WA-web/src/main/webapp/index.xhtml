@@ -31,6 +31,23 @@
 
         <pe:layoutPane position="west" closable="true" resizable="false" size="420" minSize="420" styleClassContent="layout_style">
             <ui:include src="view/workDay/CurrentDayFrame.xhtml"/>
+            <p:fieldset id="selected_month_statistic" legend="Статистика по выбранному месяцу" style="margin-top: 20px">
+                <p:panelGrid columns="1">
+                    <h:outputText value="Требуемое время за месяц: #{workDayViewModel.getTime(workDayViewModel.idealWorkedTimeByAllMonth)}"/>
+                    <h:outputText value="Отработать до текущего дня: #{workDayViewModel.getTime(workDayViewModel.idealWorkedTimeByCurrentDay)}"/>
+                    <h:outputText value="Отработано на текущий день: #{workDayViewModel.getTime(workDayViewModel.realWorkedTime)}"/>
+                </p:panelGrid>
+            </p:fieldset>
+            <p:fieldset legend="Красивая статистика">
+                <div style="display: table; width: 100%;">
+                    <span style="#{workDayViewModel.getStyleForWorkedTime()}"/>
+                    <span style="#{workDayViewModel.getStyleForDeltaTime()}"/>
+                    <span style="#{workDayViewModel.getStyleForRemainingTime()}"/>
+                </div>
+                Отработал #{workDayViewModel.getStyleForWorkedTime()} <br/>
+                Дельта #{workDayViewModel.getStyleForDeltaTime()} <br/>
+                Осталось #{workDayViewModel.getStyleForRemainingTime()}
+            </p:fieldset>
         </pe:layoutPane>
 
         <pe:layoutPane position="center" resizable="true" styleClassContent="layout_style">
@@ -44,10 +61,10 @@
                              scrollable="true" scrollHeight="800">
                     <f:facet name="header">
                         <p:commandButton id="previous_month" value="-" action="#{workDayViewModel.previousMonth}"
-                                         update=":month_info_form" style="float: left; margin: 7px"/>
+                                         update=":month_info_form,:selected_month_statistic" style="float: left; margin: 7px"/>
                         <h:outputText value="#{workDayViewModel.dateFormatForFeaderTable(workDayViewModel.selectedMonth.time)}"/>
                         <p:commandButton id="next_month" value="+" action="#{workDayViewModel.nextMonth}"
-                                         update=":month_info_form" style="float: right; margin: 7px"/>
+                                         update=":month_info_form,:selected_month_statistic" style="float: right; margin: 7px"/>
                     </f:facet>
                     <p:ajax event="rowEdit" listener="#{workDayViewModel.onRowEdit}"/>
                     <p:column id="work_day_id" headerText="День" style="text-align: center; width: 100px;">
@@ -106,11 +123,6 @@
                     <p:column style="width:30px">
                         <p:rowEditor/>
                     </p:column>
-                    <f:facet name="footer">
-                        <h:outputText value="Требуемое время за месяц: #{workDayViewModel.getTime(workDayViewModel.idealWorkedTimeByAllMonth)}"/>
-                        <h:outputText value="Отработать до текущего дня: #{workDayViewModel.getTime(workDayViewModel.idealWorkedTimeByCurrentDay)}"/>
-                        <h:outputText value="Отработано на текущий день: #{workDayViewModel.getTime(workDayViewModel.realWorkedTime)}"/>
-                    </f:facet>
                 </p:dataTable>
             </h:form>
         </pe:layoutPane>
