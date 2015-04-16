@@ -38,7 +38,7 @@
                     <h:outputText value="Отработано на текущий день: #{workDayViewModel.getTime(workDayViewModel.realWorkedTime)}"/>
                 </p:panelGrid>
             </p:fieldset>
-            <p:fieldset legend="Красивая статистика">
+            <p:fieldset legend="Красивая статистика" id="statistics_id">
                 <div style="display: table; width: 100%;">
                     <span style="#{workDayViewModel.getStyleForWorkedTime()}"/>
                     <span style="#{workDayViewModel.getStyleForDeltaTime()}"/>
@@ -61,10 +61,10 @@
                              scrollable="true" scrollHeight="800">
                     <f:facet name="header">
                         <p:commandButton id="previous_month" value="-" action="#{workDayViewModel.previousMonth}"
-                                         update=":month_info_form,:selected_month_statistic" style="float: left; margin: 7px"/>
+                                         update=":month_info_form,:selected_month_statistic,:statistics_id" style="float: left; margin: 7px"/>
                         <h:outputText value="#{workDayViewModel.dateFormatForFeaderTable(workDayViewModel.selectedMonth.time)}"/>
                         <p:commandButton id="next_month" value="+" action="#{workDayViewModel.nextMonth}"
-                                         update=":month_info_form,:selected_month_statistic" style="float: right; margin: 7px"/>
+                                         update=":month_info_form,:selected_month_statistic,:statistics_id" style="float: right; margin: 7px"/>
                     </f:facet>
                     <p:ajax event="rowEdit" listener="#{workDayViewModel.onRowEdit}"/>
                     <p:column id="work_day_id" headerText="День" style="text-align: center; width: 100px;">

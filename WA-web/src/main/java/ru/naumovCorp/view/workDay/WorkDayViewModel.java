@@ -46,6 +46,9 @@ public class WorkDayViewModel {
     @PostConstruct
     private void postConstruct() {
         initializationDaysForMonth();
+        calculateDeltaTime();
+        calculateWorkedTime();
+        calculateRemainingTime();
     }
 
     /**
@@ -73,7 +76,7 @@ public class WorkDayViewModel {
             selectedMonth = Calendar.getInstance();
         }
         daysBySelectedMonth = wdDAO.getDayInfoByMonth(selectedMonth.getTime(), sUtil.getWorker());
-        calculateDeltaTime();
+        calculateTimeForSelectedMonth();
     }
 
     /**
@@ -117,12 +120,7 @@ public class WorkDayViewModel {
      * @return true если выходной
      */
     private boolean isHoliday(Calendar calendar) {
-        if (calendar.get(Calendar.DAY_OF_WEEK) != 1
-                && calendar.get(Calendar.DAY_OF_WEEK) != 7) {
-            return false;
-        } else {
-            return true;
-        }
+        return calendar.get(Calendar.DAY_OF_WEEK) != 1 && calendar.get(Calendar.DAY_OF_WEEK) != 7;
     }
 
     /**
@@ -177,7 +175,7 @@ public class WorkDayViewModel {
         }
     }
 
-    private void calculateDeltaTime() {
+    private void calculateTimeForSelectedMonth() {
         getDaysByMonthType();
         if (daysByMonthType != null) {
             for (WorkDay wd : daysByMonthType) {
@@ -210,52 +208,53 @@ public class WorkDayViewModel {
      ******************************************************************************************************************
      */
 
-    public boolean isWorkedMore() {
+    private long workedTime;
+    private long deltaTime;
+    private long remainingTime;
+
+
+    public boolean isRealWorkedTimeMoreIdeal() {
         return realWorkedTime > idealWorkedTimeByCurrentDay;
     }
 
-    public String getStyleForWorkedTime() {
-        Float percentage;
-        if (realWorkedTime > idealWorkedTimeByAllMonth) {
-            percentage = getPercentage(realWorkedTime, idealWorkedTimeByCurrentDay);
+    private void calculateDeltaTime() {
+        deltaTime = isRealWorkedTimeMoreIdeal() ? realWorkedTime - idealWorkedTimeByCurrentDay
+                                                : idealWorkedTimeByCurrentDay - realWorkedTime;
+    }
+
+    private void calculateWorkedTime() {
+        workedTime = isRealWorkedTimeMoreIdeal() ? idealWorkedTimeByCurrentDay
+                                                 : idealWorkedTimeByCurrentDay - deltaTime;
+    }
+
+    private void calculateRemainingTime() {
+        if (realWorkedTime < idealWorkedTimeByAllMonth) {
+            remainingTime = isRealWorkedTimeMoreIdeal() ? idealWorkedTimeByAllMonth - realWorkedTime
+                                                        : idealWorkedTimeByAllMonth - realWorkedTime - deltaTime;
         } else {
-            percentage = isWorkedMore() ? getPercentage(idealWorkedTimeByAllMonth, idealWorkedTimeByCurrentDay)
-                    : getPercentage(idealWorkedTimeByAllMonth, realWorkedTime);
+            remainingTime = 0;
         }
-        return "background-color: coral;padding: 2px;width: " + percentage + "%;display: table-cell;";
+    }
+
+    private long getSummaryTime() {
+        return workedTime + deltaTime + remainingTime;
+    }
+
+    private float getPercentage(Long fullTime, Long partTime) {
+        return (float) partTime * 100 / fullTime;
+    }
+
+    public String getStyleForWorkedTime() {
+        return "background-color: blue;padding: 2px;width: " + getPercentage(getSummaryTime(), workedTime) + "%;display: table-cell;";
     }
 
     public String getStyleForDeltaTime() {
-        Float percentage;
-        String color;
-        if (realWorkedTime > idealWorkedTimeByAllMonth) {
-            percentage = 100 - getPercentage(realWorkedTime, idealWorkedTimeByCurrentDay);
-            color = "aquamarine";
-        } else {
-            if (isWorkedMore()) {
-                percentage = getPercentage(idealWorkedTimeByAllMonth, realWorkedTime) - getPercentage(idealWorkedTimeByAllMonth, idealWorkedTimeByCurrentDay);
-                color = "aquamarine";
-            } else {
-                percentage = getPercentage(idealWorkedTimeByAllMonth, idealWorkedTimeByCurrentDay) - getPercentage(idealWorkedTimeByAllMonth, realWorkedTime);
-                color = "red";
-            }
-        }
-        return "background-color: " + color +";padding: 2px;width: " + percentage + "%;display: table-cell;";
+        String color = isRealWorkedTimeMoreIdeal() ? "green" : "red";
+        return "background-color: " + color + ";padding: 2px;width: " + getPercentage(getSummaryTime(), deltaTime) + "%;display: table-cell;";
     }
 
     public String getStyleForRemainingTime() {
-        Float percentage;
-        if (realWorkedTime > idealWorkedTimeByAllMonth) {
-            percentage = 100 - getPercentage(realWorkedTime, idealWorkedTimeByCurrentDay);
-        } else {
-            percentage = isWorkedMore() ? 100 - getPercentage(idealWorkedTimeByAllMonth, realWorkedTime)
-                    : 100 - getPercentage(idealWorkedTimeByAllMonth, idealWorkedTimeByCurrentDay);
-        }
-        return "background-color: blue;padding: 2px;width: " + percentage + "%;display: table-cell;";
-    }
-
-    private Float getPercentage(Long fullTime, Long partTime) {
-        return Float.valueOf(partTime * 100 / fullTime);
+        return "background-color: brown;padding: 2px;width: " + getPercentage(getSummaryTime(), remainingTime) + "%;display: table-cell;";
     }
 
     /**
@@ -332,5 +331,17 @@ public class WorkDayViewModel {
 
     public Long getRealWorkedTime() {
         return realWorkedTime;
+    }
+
+    public long getWorkedTime() {
+        return workedTime;
+    }
+
+    public long getDeltaTime() {
+        return deltaTime;
+    }
+
+    public long getRemainingTime() {
+        return remainingTime;
     }
 }
