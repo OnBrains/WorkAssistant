@@ -53,9 +53,17 @@
         <pe:layoutPane position="center" resizable="true" styleClassContent="layout_style">
             <h:form id="month_info_form">
                 <p:outputPanel style="background-color: white; border-radius: 4px 4px 0 0; height: 20px;">
-                    <div class="circle" style="background-color: aquamarine"></div>
-                    <div class="circle" style="background-color: #4da9f1"></div>
-                    <div class="circle" style="background-color: chocolate"></div>
+                    <ul style="display: table; width: 100%; padding: 0;">
+                        <li style="display: table-cell; text-align: center; padding-top: 3px;">
+                            <div class="circle" style="background-color: #2324ff"></div> Отработано
+                        </li>
+                        <li style="display: table-cell; text-align: center; padding-top: 3px;">
+                            <div class="circle" style="background-color: #4cf15d"></div> Переработки
+                        </li>
+                        <li style="display: table-cell; text-align: center; padding-top: 3px;">
+                            <div class="circle" style="background-color: chocolate"></div> Осталось
+                        </li>
+                    </ul>
                 </p:outputPanel>
 
                 <div style="display: table; width: 100%;">
