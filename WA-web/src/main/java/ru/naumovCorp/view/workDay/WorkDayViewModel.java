@@ -245,16 +245,19 @@ public class WorkDayViewModel {
     }
 
     public String getStyleForWorkedTime() {
-        return "background-color: blue;padding: 4px;width: " + getPercentage(getSummaryTime(), workedTime) + "%;display: table-cell;";
+        String display = workedTime == 0 ? "none" : "table-cell";
+        return "background-color: #4da9f1;padding: 4px; width: " + getPercentage(getSummaryTime(), workedTime) + "%; display: " + display + ";";
     }
 
     public String getStyleForDeltaTime() {
         String color = isRealWorkedTimeMoreIdeal() ? "green" : "red";
-        return "background-color: " + color + ";padding: 4px;width: " + getPercentage(getSummaryTime(), deltaTime) + "%;display: table-cell;";
+        String display = deltaTime == 0 ? "none" : "table-cell";
+        return "background-color: " + color + "; padding: 4px;width: " + getPercentage(getSummaryTime(), deltaTime) + "%; display: " + display + ";";
     }
 
     public String getStyleForRemainingTime() {
-        return "background-color: brown;padding: 4px;width: " + getPercentage(getSummaryTime(), remainingTime) + "%;display: table-cell;";
+        String display = remainingTime == 0 ? "none" : "table-cell";
+        return "background-color: chocolate; padding: 4px;width: " + getPercentage(getSummaryTime(), remainingTime) + "%; display: " + display + ";";
     }
 
     /**

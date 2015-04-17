@@ -49,6 +49,8 @@ body {
     padding: 5px;
 }
 
+/*Стили для статистики по месяцу*/
+
 .circle {
     width: 10px;
     height: 10px;
@@ -56,4 +58,21 @@ body {
     -webkit-border-radius: 50px;
     border-radius: 50px;
     display: inline-block;
+}
+
+.panel_for_statistic {
+    background-color: white;
+    border-radius: 4px 4px 0px 0px;
+    height: 40px;
+}
+
+#list_with_legend {
+    width: 100%;
+    padding: 0px;
+}
+
+#list_with_legend li {
+    display: table-cell;
+    text-align: center;
+    padding-top: 13px;
 }
