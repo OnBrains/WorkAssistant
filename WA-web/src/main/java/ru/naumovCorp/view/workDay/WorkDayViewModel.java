@@ -46,9 +46,6 @@ public class WorkDayViewModel {
     @PostConstruct
     private void postConstruct() {
         initializationDaysForMonth();
-        calculateDeltaTime();
-        calculateWorkedTime();
-        calculateRemainingTime();
     }
 
     /**
@@ -190,6 +187,9 @@ public class WorkDayViewModel {
                 }
             }
         }
+        calculateDeltaTime();
+        calculateWorkedTime();
+        calculateRemainingTime();
     }
 
     private boolean isCurrentMonth() {
@@ -245,16 +245,16 @@ public class WorkDayViewModel {
     }
 
     public String getStyleForWorkedTime() {
-        return "background-color: blue;padding: 2px;width: " + getPercentage(getSummaryTime(), workedTime) + "%;display: table-cell;";
+        return "background-color: blue;padding: 4px;width: " + getPercentage(getSummaryTime(), workedTime) + "%;display: table-cell;";
     }
 
     public String getStyleForDeltaTime() {
         String color = isRealWorkedTimeMoreIdeal() ? "green" : "red";
-        return "background-color: " + color + ";padding: 2px;width: " + getPercentage(getSummaryTime(), deltaTime) + "%;display: table-cell;";
+        return "background-color: " + color + ";padding: 4px;width: " + getPercentage(getSummaryTime(), deltaTime) + "%;display: table-cell;";
     }
 
     public String getStyleForRemainingTime() {
-        return "background-color: brown;padding: 2px;width: " + getPercentage(getSummaryTime(), remainingTime) + "%;display: table-cell;";
+        return "background-color: brown;padding: 4px;width: " + getPercentage(getSummaryTime(), remainingTime) + "%;display: table-cell;";
     }
 
     /**

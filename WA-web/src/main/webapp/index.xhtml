@@ -52,6 +52,17 @@
 
         <pe:layoutPane position="center" resizable="true" styleClassContent="layout_style">
             <h:form id="month_info_form">
+                <p:outputPanel style="background-color: white; border-radius: 4px 4px 0 0; height: 20px;">
+                    <div class="circle" style="background-color: aquamarine"></div>
+                    <div class="circle" style="background-color: #4da9f1"></div>
+                    <div class="circle" style="background-color: chocolate"></div>
+                </p:outputPanel>
+
+                <div style="display: table; width: 100%;">
+                    <span style="#{workDayViewModel.getStyleForWorkedTime()}"/>
+                    <span style="#{workDayViewModel.getStyleForDeltaTime()}"/>
+                    <span style="#{workDayViewModel.getStyleForRemainingTime()}"/>
+                </div>
                 <p:commandButton id="create_days_for_month" value="+" action="#{workDayViewModel.createDaysForMonth}"
                                  rendered="#{workDayViewModel.daysBySelectedMonth.size() == 0}"
                                  style="float:left; margin: 7px" update="month_info_form"/>
