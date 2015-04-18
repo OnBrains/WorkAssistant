@@ -8,12 +8,12 @@ import java.io.Serializable;
  */
 
 @Entity
-@Table(name = "WORK_DAY_EVENT_TYPE", uniqueConstraints = {@UniqueConstraint(columnNames = "")})
-public class WorkDayEventType implements Serializable {
+@Table(name = "EVENT_TYPE")
+public class EventType implements Serializable {
 
     @Id
-    @GeneratedValue(generator = "WorkDayEventId")
-    @SequenceGenerator(name = "WorkDayEventId", sequenceName = "GEN_WORK_DAY_EVENT_ID", allocationSize = 1)
+    @GeneratedValue(generator = "EventTypeId")
+    @SequenceGenerator(name = "EventTypeId", sequenceName = "GEN_EVENT_TYPE_ID", allocationSize = 1)
     @Column(name = "ID")
     private Long id;
 
@@ -26,7 +26,7 @@ public class WorkDayEventType implements Serializable {
     @Column(name = "TIME", nullable = true)
     private Long time = 0L;
 
-    protected WorkDayEventType() {
+    protected EventType() {
     }
 
     public Long getId() {
