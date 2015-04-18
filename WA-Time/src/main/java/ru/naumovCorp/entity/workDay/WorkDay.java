@@ -2,9 +2,12 @@ package ru.naumovCorp.entity.workDay;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
+import ru.naumovCorp.entity.workDayEvent.Event;
 import ru.naumovCorp.entity.worker.Worker;
 
 import static ru.naumovCorp.entity.workDay.WorkDayState.NO_WORK;
@@ -24,7 +27,6 @@ import static ru.naumovCorp.entity.workDay.WorkDayState.NO_WORK;
         @NamedQuery(name = WorkDay.GET_DAYS_PRIOR_CURRENT_DAY,
                 query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day, 'yyyyMM') = to_char(:month, 'yyyyMM') and wt.day <= :month order by wt.day")
     })
-
 public class WorkDay implements Serializable {
 
     public static final String GET_TIME_INFO_BY_MONTH = "WorkTimeDAO.getDayInfoByMonth";
@@ -61,6 +63,9 @@ public class WorkDay implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "STATE", length = 16, nullable = false)
     private WorkDayState state = NO_WORK;
+
+    @ManyToMany(mappedBy = "workDays", fetch = FetchType.LAZY)
+    private List<Event> events = new ArrayList<>();
 
     @Transient
     private Long summaryWorkedTime;
@@ -166,6 +171,14 @@ public class WorkDay implements Serializable {
 
     public void setState(WorkDayState state) {
         this.state = state;
+    }
+
+    public List<Event> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<Event> events) {
+        this.events = events;
     }
 
     @Override
