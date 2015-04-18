@@ -37,7 +37,7 @@
                                     rendered="#{currentDayFrameModel.currentDay.state == 'WORKING'}"/>
                     </p:menuButton>
                 </h:panelGrid>
-                <p:poll interval="60" update="time_for_end_work_day" stop="#{currentDayFrameModel.currentDay.state == 'WORKING'}"/>
+                <p:poll interval="60" update="time_for_end_work_day" stop="#{currentDayFrameModel.currentDay.state != 'WORKING'}"/>
             </p:fieldset>
         </h:form>
     </ui:composition>
