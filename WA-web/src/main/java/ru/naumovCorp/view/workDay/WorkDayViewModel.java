@@ -139,7 +139,7 @@ public class WorkDayViewModel {
         calendar.set(currentDay.get(currentDay.YEAR), currentDay.get(currentDay.MONTH), currentDay.get(currentDay.DATE));
         return calendar;
     }
-
+    
     private List<WorkDay> getDaysPriorCurrentDay() {
         List<WorkDay> daysPriorCurrentDay = new ArrayList<>();
         for (WorkDay wd : daysBySelectedMonth) {
@@ -153,16 +153,6 @@ public class WorkDayViewModel {
         return daysPriorCurrentDay;
     }
 
-    private List<WorkDay> getDaysByMonthType() {
-        if (isCurrentMonth()) {
-            return getDaysPriorCurrentDay();
-        }
-        if (isLastMonth()) {
-            return getDaysBySelectedMonth();
-        }
-        return null;
-    }
-
     private boolean isCurrentMonth() {
         Calendar currentMonth = Calendar.getInstance();
         return currentMonth.YEAR == selectedMonth.YEAR && currentMonth.MONTH == selectedMonth.MONTH;
@@ -171,6 +161,16 @@ public class WorkDayViewModel {
     private boolean isLastMonth() {
         Calendar currentMonth = Calendar.getInstance();
         return selectedMonth.YEAR <= currentMonth.YEAR && selectedMonth.MONTH < currentMonth.MONTH;
+    }
+
+    private List<WorkDay> getDaysByMonthType() {
+        if (isCurrentMonth()) {
+            return getDaysPriorCurrentDay();
+        }
+        if (isLastMonth()) {
+            return getDaysBySelectedMonth();
+        }
+        return null;
     }
 
     // =================================================================================================================
