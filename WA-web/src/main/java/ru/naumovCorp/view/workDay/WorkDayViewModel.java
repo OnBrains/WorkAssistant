@@ -2,10 +2,8 @@ package ru.naumovCorp.view.workDay;
 
 
 import org.primefaces.event.RowEditEvent;
-import ru.naumovCorp.dao.DAOHelper;
 import ru.naumovCorp.entity.workDay.DayType;
 import ru.naumovCorp.entity.workDay.WorkDayState;
-import ru.naumovCorp.entity.worker.Worker;
 import ru.naumovCorp.dao.workDay.WorkDayDAOInterface;
 import ru.naumovCorp.entity.workDay.WorkDay;
 import ru.naumovCorp.parsing.ConvertDate;
@@ -15,7 +13,6 @@ import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.inject.Inject;
-import javax.persistence.PostPersist;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -38,14 +35,12 @@ public class WorkDayViewModel {
     private List<WorkDay> daysBySelectedMonth;
     private WorkDay currentDay;
 
-    private List<WorkDay> daysByMonthType;
-    private Long idealWorkedTimeByAllMonth;
-    private Long idealWorkedTimeByCurrentDay;
-    private Long realWorkedTime;
+    @Inject
+    private MonthStatistic statistic;
 
     @PostConstruct
     private void postConstruct() {
-        initializationDaysForMonth();
+        statistic.calculateStatistic(getDaysBySelectedMonth(), getDaysByMonthType());
     }
 
     /**
@@ -54,6 +49,7 @@ public class WorkDayViewModel {
     public void nextMonth() {
         selectedMonth.add(Calendar.MONTH, 1);
         initializationDaysForMonth();
+        statistic.calculateStatistic(getDaysBySelectedMonth(), getDaysByMonthType());
     }
 
     /**
@@ -62,18 +58,17 @@ public class WorkDayViewModel {
     public void previousMonth() {
         selectedMonth.add(Calendar.MONTH, -1);
         initializationDaysForMonth();
+        statistic.calculateStatistic(getDaysBySelectedMonth(), getDaysByMonthType());
     }
 
     /**
      * Получаем все дни, из БД, по выбранному месяцу(selectedMonth)
      */
     private void initializationDaysForMonth() {
-        cleanSummeryTimes();
         if (selectedMonth == null) {
             selectedMonth = Calendar.getInstance();
         }
         daysBySelectedMonth = wdDAO.getDayInfoByMonth(selectedMonth.getTime(), sUtil.getWorker());
-        calculateTimeForSelectedMonth();
     }
 
     /**
@@ -102,6 +97,7 @@ public class WorkDayViewModel {
             wdDAO.create(day);
         }
         initializationDaysForMonth();
+        statistic.calculateStatistic(getDaysBySelectedMonth(), getDaysByMonthType());
     }
 
     private Calendar setZeroTime(Calendar calendar) {
@@ -117,7 +113,7 @@ public class WorkDayViewModel {
      * @return true если выходной
      */
     private boolean isHoliday(Calendar calendar) {
-        return calendar.get(Calendar.DAY_OF_WEEK) != 1 && calendar.get(Calendar.DAY_OF_WEEK) != 7;
+        return calendar.get(Calendar.DAY_OF_WEEK) == 1 || calendar.get(Calendar.DAY_OF_WEEK) == 7;
     }
 
     /**
@@ -144,15 +140,9 @@ public class WorkDayViewModel {
         return calendar;
     }
 
-    private void cleanSummeryTimes() {
-        idealWorkedTimeByAllMonth = 0L;
-        idealWorkedTimeByCurrentDay = 0L;
-        realWorkedTime = 0L;
-    }
-
     private List<WorkDay> getDaysPriorCurrentDay() {
         List<WorkDay> daysPriorCurrentDay = new ArrayList<>();
-        for (WorkDay wd: daysBySelectedMonth) {
+        for (WorkDay wd : daysBySelectedMonth) {
             if (wd.getDay().getTime() < getCurrentDay().getDay().getTime()) {
                 daysPriorCurrentDay.add(wd);
             }
@@ -163,33 +153,14 @@ public class WorkDayViewModel {
         return daysPriorCurrentDay;
     }
 
-    private void getDaysByMonthType() {
+    private List<WorkDay> getDaysByMonthType() {
         if (isCurrentMonth()) {
-            daysByMonthType = getDaysPriorCurrentDay();
+            return getDaysPriorCurrentDay();
         }
         if (isLastMonth()) {
-            daysByMonthType = getDaysBySelectedMonth();
+            return getDaysBySelectedMonth();
         }
-    }
-
-    private void calculateTimeForSelectedMonth() {
-        getDaysByMonthType();
-        if (daysByMonthType != null) {
-            for (WorkDay wd : daysByMonthType) {
-                realWorkedTime = realWorkedTime + wd.getSummaryWorkedTime();
-                idealWorkedTimeByCurrentDay = idealWorkedTimeByCurrentDay + wd.getType().getWorkTimeInMSecond();
-            }
-            if (daysByMonthType.equals(daysBySelectedMonth)) {
-                idealWorkedTimeByAllMonth = idealWorkedTimeByCurrentDay;
-            } else {
-                for (WorkDay wd: daysBySelectedMonth) {
-                    idealWorkedTimeByAllMonth = idealWorkedTimeByAllMonth + wd.getType().getWorkTimeInMSecond();
-                }
-            }
-        }
-        calculateDeltaTime();
-        calculateWorkedTime();
-        calculateRemainingTime();
+        return null;
     }
 
     private boolean isCurrentMonth() {
@@ -202,69 +173,33 @@ public class WorkDayViewModel {
         return selectedMonth.YEAR <= currentMonth.YEAR && selectedMonth.MONTH < currentMonth.MONTH;
     }
 
-    /**
-     ******************************************************************************************************************
-     * проценты
-     ******************************************************************************************************************
-     */
-
-    private long workedTime;
-    private long deltaTime;
-    private long remainingTime;
-
-
-    public boolean isRealWorkedTimeMoreIdeal() {
-        return realWorkedTime > idealWorkedTimeByCurrentDay;
-    }
-
-    private void calculateDeltaTime() {
-        deltaTime = isRealWorkedTimeMoreIdeal() ? realWorkedTime - idealWorkedTimeByCurrentDay
-                                                : idealWorkedTimeByCurrentDay - realWorkedTime;
-    }
-
-    private void calculateWorkedTime() {
-        workedTime = isRealWorkedTimeMoreIdeal() ? idealWorkedTimeByCurrentDay
-                                                 : idealWorkedTimeByCurrentDay - deltaTime;
-    }
-
-    private void calculateRemainingTime() {
-        if (realWorkedTime < idealWorkedTimeByAllMonth) {
-            remainingTime = isRealWorkedTimeMoreIdeal() ? idealWorkedTimeByAllMonth - realWorkedTime
-                                                        : idealWorkedTimeByAllMonth - realWorkedTime - deltaTime;
-        } else {
-            remainingTime = 0;
-        }
-    }
-
-    private long getSummaryTime() {
-        return workedTime + deltaTime + remainingTime;
-    }
+    // =================================================================================================================
+    // Методы для получения стилей блока статистики
+    // =================================================================================================================
 
     private float getPercentage(Long fullTime, Long partTime) {
         return (float) partTime * 100 / fullTime;
     }
 
     public String getStyleForWorkedTime() {
-        String display = workedTime == 0 ? "none" : "table-cell";
-        return "background-color: #4da9f1;padding: 4px; width: " + getPercentage(getSummaryTime(), workedTime) + "%; display: " + display + ";";
+        String display = statistic.getWorkedTime() == 0 ? "none" : "table-cell";
+        return "background-color: #4da9f1;padding: 4px; width: " + getPercentage(statistic.getSummaryTime(), statistic.getWorkedTime()) + "%; display: " + display + ";";
     }
 
     public String getStyleForDeltaTime() {
-        String color = isRealWorkedTimeMoreIdeal() ? "green" : "red";
-        String display = deltaTime == 0 ? "none" : "table-cell";
-        return "background-color: " + color + "; padding: 4px;width: " + getPercentage(getSummaryTime(), deltaTime) + "%; display: " + display + ";";
+        String color = statistic.isRealWorkedTimeMoreIdeal() ? "green" : "red";
+        String display = statistic.getDeltaTime() == 0 ? "none" : "table-cell";
+        return "background-color: " + color + "; padding: 4px;width: " + getPercentage(statistic.getSummaryTime(), statistic.getDeltaTime()) + "%; display: " + display + ";";
     }
 
     public String getStyleForRemainingTime() {
-        String display = remainingTime == 0 ? "none" : "table-cell";
-        return "background-color: chocolate; padding: 4px;width: " + getPercentage(getSummaryTime(), remainingTime) + "%; display: " + display + ";";
+        String display = statistic.getRemainingTime() == 0 ? "none" : "table-cell";
+        return "background-color: chocolate; padding: 4px;width: " + getPercentage(statistic.getSummaryTime(), statistic.getRemainingTime()) + "%; display: " + display + ";";
     }
 
-    /**
-     ******************************************************************************************************************
-     * проценты
-     ******************************************************************************************************************
-     */
+    // =================================================================================================================
+    // Методы для работы отображения времени в UI + стили
+    // =================================================================================================================
 
     /**
      * @param date - дата в полном формате
@@ -289,22 +224,17 @@ public class WorkDayViewModel {
     public String getStyleClassForRow(WorkDay dayInfo) {
         if (dayInfo.getType().equals(DayType.HOLIDAY) && !dayInfo.equals(getCurrentDay())) {
             return "color_for_holiday";
-        } if (dayInfo.equals(getCurrentDay())) {
+        }
+        if (dayInfo.equals(getCurrentDay())) {
             return "color_for_current_day";
         } else {
             return "";
         }
     }
 
-    public String getStyleForDeltaTime(WorkDay dayInfo) {
-        return dayInfo.isWorkedFullDay() ? "color: green;" : "color: red;";
-    }
-
-    /**
-     * ****************************************************************************************************************
-     * Simple getters and setters
-     * ****************************************************************************************************************
-     */
+    // =================================================================================================================
+    // Simple getters and setters
+    // =================================================================================================================
 
     public Calendar getSelectedMonth() {
         return selectedMonth;
@@ -324,27 +254,8 @@ public class WorkDayViewModel {
         return currentDay;
     }
 
-    public Long getIdealWorkedTimeByAllMonth() {
-        return idealWorkedTimeByAllMonth;
+    public MonthStatistic getStatistic() {
+        return statistic;
     }
 
-    public Long getIdealWorkedTimeByCurrentDay() {
-        return idealWorkedTimeByCurrentDay;
-    }
-
-    public Long getRealWorkedTime() {
-        return realWorkedTime;
-    }
-
-    public long getWorkedTime() {
-        return workedTime;
-    }
-
-    public long getDeltaTime() {
-        return deltaTime;
-    }
-
-    public long getRemainingTime() {
-        return remainingTime;
-    }
 }
