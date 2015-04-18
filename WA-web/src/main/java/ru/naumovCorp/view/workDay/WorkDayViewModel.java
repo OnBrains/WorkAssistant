@@ -35,6 +35,7 @@ public class WorkDayViewModel {
     private Calendar selectedMonth;
     private List<WorkDay> daysBySelectedMonth;
     private WorkDay currentDay;
+    private List<WorkDay> selectedDays;
 
     @Inject
     private MonthStatistic statistic;
@@ -77,6 +78,18 @@ public class WorkDayViewModel {
      */
     public WorkDayState[] getStates() {
         return WorkDayState.values();
+    }
+
+    public DayType[] getDayTypes() {
+        return DayType.values();
+    }
+
+    public void changeDaysType(DayType newType) {
+        for (WorkDay wd: selectedDays) {
+            wd.setType(newType);
+            wdDAO.update(wd);
+        }
+        statistic.calculateStatistic(getDaysBySelectedMonth(), getDaysByMonthType());
     }
 
     // TODO: вынести создание дней в DAO и сделать метод транзакционным?
@@ -254,6 +267,14 @@ public class WorkDayViewModel {
             currentDay = wdDAO.getCurrentDayInfo(new Date(), sUtil.getWorker());
         }
         return currentDay;
+    }
+
+    public List<WorkDay> getSelectedDays() {
+        return selectedDays;
+    }
+
+    public void setSelectedDays(List<WorkDay> selectedDays) {
+        this.selectedDays = selectedDays;
     }
 
     public MonthStatistic getStatistic() {

@@ -6,7 +6,8 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:p="http://primefaces.org/ui"
-      xmlns:pe="http://primefaces.org/ui/extensions">
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:c="http://java.sun.com/jsp/jstl/core">
 
 <h:head>
     <h:outputStylesheet name="wa-time.css" />
@@ -21,12 +22,15 @@
     <pe:layout>
 
         <pe:layoutPane position="north" closable="false" resizable="false" styleClassContent="layout_style">
-            <p:menubar>
+            <p:megaMenu>
+                <p:submenu label="Справочники" id="test">
+
+                </p:submenu>
                 <f:facet name="options">
                     <h:outputText value="#{loginViewModel.worker.toString()}  "/>
                     <p:commandButton value="Выйти" action="#{loginViewModel.logout}" icon="ui-icon-extlink" />
                 </f:facet>
-            </p:menubar>
+            </p:megaMenu>
         </pe:layoutPane>
 
         <pe:layoutPane position="west" closable="true" resizable="false" size="420" minSize="420" styleClassContent="layout_style">
@@ -59,23 +63,41 @@
                     <span style="#{workDayViewModel.getStyleForRemainingTime()}"/>
                 </div>
             </h:form>
+            <h:form id="month_action">
+                <p:outputPanel style="height: 43px;">
+                    <p:commandButton id="create_days_for_month" value="+" actionL="#{workDayViewModel.createDaysForMonth}"
+                                     rendered="#{workDayViewModel.daysBySelectedMonth.size() == 0}"
+                                     style="float:left; margin: 10px;" update=":month_info_form, :month_statistic"/>
+                    <p:commandButton value="Событие" style="float:right; margin: 10px;"/>
+                </p:outputPanel>
+            </h:form>
             <h:form id="month_info_form">
-                <p:commandButton id="create_days_for_month" value="+" action="#{workDayViewModel.createDaysForMonth}"
-                                 rendered="#{workDayViewModel.daysBySelectedMonth.size() == 0}"
-                                 style="float:left; margin: 7px" update="month_info_form, :month_statistic"/>
-                <p:spacer height="10"/>
+                <p:contextMenu for="month_info_table">
+                    <p:submenu label="Отметить">
+                        <c:forEach var="dayType" items="#{workDayViewModel.dayTypes}">
+                            <p:menuitem value="#{dayType.desc}" actionListener="#{workDayViewModel.changeDaysType(dayType)}"
+                                        update=":month_info_form, :month_statistic"/>
+                        </c:forEach>
+                    </p:submenu>
+                </p:contextMenu>
+
                 <p:dataTable id="month_info_table" value="#{workDayViewModel.daysBySelectedMonth}" var="dayInfo"
                              editable="true" rowStyleClass="#{workDayViewModel.getStyleClassForRow(dayInfo)}"
-                             scrollable="true" scrollHeight="800">
+                             scrollable="true" scrollHeight="700" selectionMode="multiple" selection="#{workDayViewModel.selectedDays}"
+                             rowSelectMode="new" rowKey="#{dayInfo.id}">
                     <f:facet name="header">
                         <p:commandButton id="previous_month" value="#{workDayViewModel.namePreviousMonth}" action="#{workDayViewModel.previousMonth}"
-                                         update=":month_info_form, :month_statistic" style="float: left; margin: 5px;"/>
+                                         update=":month_info_form, :month_statistic, :month_action" style="float: left; margin: 5px;"/>
                         <h:outputText value="#{workDayViewModel.dateFormatForFeaderTable(workDayViewModel.selectedMonth.time)}"
                                       style="vertical-align: -webkit-baseline-middle;"/>
                         <p:commandButton id="next_month" value="#{workDayViewModel.nameNextMonth}" action="#{workDayViewModel.nextMonth}"
-                                         update=":month_info_form, :month_statistic" style="float: right; margin: 5px;"/>
+                                         update=":month_info_form, :month_statistic, :month_action" style="float: right; margin: 5px;"/>
                     </f:facet>
                     <p:ajax event="rowEdit" listener="#{workDayViewModel.onRowEdit}" update=":month_statistic"/>
+                    <p:column id="work_day_type_id" headerText="Тип дня" style="text-align: center; width: 100px;">
+                        <h:graphicImage name="#{dayInfo.type.icon}" rendered="#{dayInfo.type != 'WORK_DAY' and dayInfo.type != 'HOLIDAY'}"
+                                        title="#{dayInfo.type.desc}"/>
+                    </p:column>
                     <p:column id="work_day_id" headerText="День" style="text-align: center; width: 100px;">
                         <h:outputText value="#{workDayViewModel.dateFormatForDayInTable(dayInfo.day)}"/>
                     </p:column>
