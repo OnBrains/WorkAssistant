@@ -1,6 +1,7 @@
 package ru.naumovCorp.view.workDay;
 
 
+import org.primefaces.context.RequestContext;
 import org.primefaces.event.RowEditEvent;
 import ru.naumovCorp.entity.workDay.DayType;
 import ru.naumovCorp.entity.workDay.WorkDayState;
@@ -127,6 +128,7 @@ public class WorkDayViewModel {
         day.setComingTime(updateYear(day, day.getComingTime()));
         day.setOutTime(updateYear(day, day.getOutTime()));
         wdDAO.update(day);
+        statistic.calculateStatistic(getDaysBySelectedMonth(), getDaysByMonthType());
     }
 
     /**
@@ -139,7 +141,7 @@ public class WorkDayViewModel {
         calendar.set(currentDay.get(currentDay.YEAR), currentDay.get(currentDay.MONTH), currentDay.get(currentDay.DATE));
         return calendar;
     }
-    
+
     private List<WorkDay> getDaysPriorCurrentDay() {
         List<WorkDay> daysPriorCurrentDay = new ArrayList<>();
         for (WorkDay wd : daysBySelectedMonth) {
@@ -256,6 +258,20 @@ public class WorkDayViewModel {
 
     public MonthStatistic getStatistic() {
         return statistic;
+    }
+
+    public String getNameNextMonth() {
+        Calendar nextMonth = Calendar.getInstance();
+        nextMonth.setTime(selectedMonth.getTime());
+        nextMonth.add(Calendar.MONTH, 1);
+        return dateFormatForFeaderTable(nextMonth.getTime());
+    }
+
+    public String getNamePreviousMonth() {
+        Calendar previousMonth = Calendar.getInstance();
+        previousMonth.setTime(selectedMonth.getTime());
+        previousMonth.add(Calendar.MONTH, -1);
+        return dateFormatForFeaderTable(previousMonth.getTime());
     }
 
 }

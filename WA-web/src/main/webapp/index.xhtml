@@ -68,13 +68,14 @@
                              editable="true" rowStyleClass="#{workDayViewModel.getStyleClassForRow(dayInfo)}"
                              scrollable="true" scrollHeight="800">
                     <f:facet name="header">
-                        <p:commandButton id="previous_month" value="-" action="#{workDayViewModel.previousMonth}"
-                                         update=":month_info_form, :month_statistic" style="float: left; margin: 7px"/>
-                        <h:outputText value="#{workDayViewModel.dateFormatForFeaderTable(workDayViewModel.selectedMonth.time)}"/>
-                        <p:commandButton id="next_month" value="+" action="#{workDayViewModel.nextMonth}"
-                                         update=":month_info_form, :month_statistic" style="float: right; margin: 7px"/>
+                        <p:commandButton id="previous_month" value="#{workDayViewModel.namePreviousMonth}" action="#{workDayViewModel.previousMonth}"
+                                         update=":month_info_form, :month_statistic" style="float: left; margin: 5px;"/>
+                        <h:outputText value="#{workDayViewModel.dateFormatForFeaderTable(workDayViewModel.selectedMonth.time)}"
+                                      style="vertical-align: -webkit-baseline-middle;"/>
+                        <p:commandButton id="next_month" value="#{workDayViewModel.nameNextMonth}" action="#{workDayViewModel.nextMonth}"
+                                         update=":month_info_form, :month_statistic" style="float: right; margin: 5px;"/>
                     </f:facet>
-                    <p:ajax event="rowEdit" listener="#{workDayViewModel.onRowEdit}"/>
+                    <p:ajax event="rowEdit" listener="#{workDayViewModel.onRowEdit}" update=":month_statistic"/>
                     <p:column id="work_day_id" headerText="День" style="text-align: center; width: 100px;">
                         <h:outputText value="#{workDayViewModel.dateFormatForDayInTable(dayInfo.day)}"/>
                     </p:column>

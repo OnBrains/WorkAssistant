@@ -64,6 +64,7 @@ body {
     background-color: white;
     border-radius: 4px 4px 0px 0px;
     height: 40px;
+    border: 1px solid #D5D5D5;
 }
 
 #list_with_legend {
@@ -74,5 +75,4 @@ body {
 #list_with_legend li {
     display: table-cell;
     text-align: center;
-    padding-top: 13px;
 }
