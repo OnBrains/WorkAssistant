@@ -18,7 +18,7 @@ public class Worker implements Serializable {
     @Id
     @GeneratedValue(generator = "WorkerId")
     @SequenceGenerator(name = "WorkerId", sequenceName = "GEN_WORKER_ID", allocationSize = 1)
-    @Column(name = "WORKER_ID")
+    @Column(name = "ID")
     private Long id;
 
     @Column(name = "FAMILY", nullable = false, length = 64)

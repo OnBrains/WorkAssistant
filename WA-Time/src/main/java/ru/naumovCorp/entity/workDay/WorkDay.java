@@ -35,7 +35,7 @@ public class WorkDay implements Serializable {
     @Id
     @GeneratedValue(generator = "WorkTimeId")
     @SequenceGenerator(name = "WorkTimeId", sequenceName = "GEN_WORK_DAY_ID", allocationSize = 1)
-    @Column(name = "WORK_DAY_ID")
+    @Column(name = "ID")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
