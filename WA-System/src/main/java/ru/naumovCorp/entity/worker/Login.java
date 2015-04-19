@@ -20,6 +20,7 @@ public class Login implements Serializable {
 
     public static final String CHECK_LOGIN = "Login.checkLogin";
     public static final String IS_LOGIN_USED = "Login.isLoginUsed";
+    public static final Long pref  = 8399978L;
 
     @Id
     @Column(name = "WORKER_ID", nullable = false)
@@ -29,10 +30,10 @@ public class Login implements Serializable {
     @PrimaryKeyJoinColumn
     private Worker worker;
 
-    @Column(name = "LOGIN", nullable = false)
+    @Column(name = "LOGIN", nullable = false, length = 32)
     private String login;
 
-    @Column(name = "PASSWORD", nullable = false)
+    @Column(name = "PASSWORD", nullable = false, length = 512)
     private String password;
 
     protected Login() {
