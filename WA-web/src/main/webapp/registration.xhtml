@@ -37,7 +37,9 @@
                 <p:outputLabel value="Имя пользователя" styleClass="text_style"/>
                 <p:separator/>
                 <p:inputText id="login" value="#{registrationViewModel.login}" required="true"
-                             style="width: 360px; height: 20px;"/>
+                             style="width: 360px; height: 20px;">
+                    <f:validateRegex pattern="^[a-zA-Z._-]+$"/>
+                </p:inputText>
             </p:outputPanel>
 
             <p:outputPanel style="padding-top: 15px;">
@@ -73,11 +75,13 @@
                 <p:outputLabel value="Обратная связь" styleClass="text_style"/>
                 <p:separator/>
                 <p:outputLabel value="Мобильный телефон" styleClass="text_style"/>
-                <p:inputText id="mobile_phone" value="#{registrationViewModel.newWorker.modilePhone}"
-                             style="width: 360px; margin-top: 5px; margin-bottom: 5px; height: 20px;"/>
+                <p:inputMask id="mobile_phone" value="#{registrationViewModel.newWorker.modilePhone}"
+                             style="width: 360px; margin-top: 5px; margin-bottom: 5px; height: 20px;"
+                             mask="8(999)999-99-99"/>
                 <p:outputLabel value="Адрес эл. почты" required="true" styleClass="text_style"/>
                 <p:inputText id="email" value="#{registrationViewModel.newWorker.email}" required="true"
                              style="width: 360px; margin-top: 5px; height: 20px;"/>
+                <p:watermark for="email" value="*@argustelecom.ru"/>
             </p:outputPanel>
 
             <p:outputPanel style="padding-top: 20px; text-align: center;">
