@@ -25,10 +25,10 @@
                 <p:separator/>
                 <h:panelGrid columns="4">
                     <p:inputText id="name" value="#{registrationViewModel.newWorker.firstName}" required="true"
-                                 style="height: 20px;"/>
+                                 style="height: 20px;" maxlength="32"/>
                     <p:watermark for="name" value="Имя"/>
                     <p:inputText id="family" value="#{registrationViewModel.newWorker.family}" required="true"
-                                 style="height: 20px;"/>
+                                 style="height: 20px;" maxlength="64"/>
                     <p:watermark for="family" value="Фамилия"/>
                 </h:panelGrid>
             </p:outputPanel>
@@ -37,7 +37,7 @@
                 <p:outputLabel value="Имя пользователя" styleClass="text_style"/>
                 <p:separator/>
                 <p:inputText id="login" value="#{registrationViewModel.login}" required="true"
-                             style="width: 360px; height: 20px;">
+                             style="width: 360px; height: 20px;" maxlength="32">
                     <f:validateRegex pattern="^[a-zA-Z._-]+$"/>
                 </p:inputText>
             </p:outputPanel>
@@ -46,10 +46,10 @@
                 <p:outputLabel value="Пароль" styleClass="text_style"/>
                 <p:separator/>
                 <p:password id="password" value="#{registrationViewModel.password}" required="true"
-                            feedback="true" style="width: 360px; height: 20px;"/>
+                            feedback="true" maxlength="64" style="width: 360px; height: 20px;"/>
                 <p:outputPanel style="padding-top: 15px;">
                     <p:outputLabel value="Подтверждение пароля" styleClass="text_style"/>
-                    <p:password id="personal_info" required="true"
+                    <p:password id="personal_info" required="true" maxlength="64"
                                 style="width: 360px; margin-top: 5px; height: 20px;"/>
                 </p:outputPanel>
             </p:outputPanel>
@@ -80,7 +80,7 @@
                              mask="8(999)999-99-99"/>
                 <p:outputLabel value="Адрес эл. почты" required="true" styleClass="text_style"/>
                 <p:inputText id="email" value="#{registrationViewModel.newWorker.email}" required="true"
-                             style="width: 360px; margin-top: 5px; height: 20px;"/>
+                             maxlength="64" style="width: 360px; margin-top: 5px; height: 20px;"/>
                 <p:watermark for="email" value="*@argustelecom.ru"/>
             </p:outputPanel>
 
