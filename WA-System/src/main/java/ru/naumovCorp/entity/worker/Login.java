@@ -13,10 +13,13 @@ import java.io.Serializable;
 @Table(name = "LOGIN", uniqueConstraints = {@UniqueConstraint(columnNames = {"LOGIN"})})
 @NamedQueries
         ({@NamedQuery(name = Login.CHECK_LOGIN,
-                        query = "select l.worker from Login l where l.login = :login and l.password = :password")})
+                        query = "select l.worker from Login l where l.login = :login and l.password = :password"),
+          @NamedQuery(name = Login.IS_LOGIN_USED,
+                        query = "select 1 from Login l where l.login = :login")})
 public class Login implements Serializable {
 
     public static final String CHECK_LOGIN = "Login.checkLogin";
+    public static final String IS_LOGIN_USED = "Login.isLoginUsed";
 
     @Id
     @Column(name = "WORKER_ID", nullable = false)
@@ -33,6 +36,12 @@ public class Login implements Serializable {
     private String password;
 
     protected Login() {
+    }
+
+    public Login(String login, String password, Long workerId) {
+        this.login = login;
+        this.password = password;
+        this.workerId = workerId;
     }
 
     public Long getWorkerId() {

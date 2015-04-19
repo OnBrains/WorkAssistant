@@ -6,6 +6,8 @@ import ru.naumovCorp.entity.worker.Login;
 import ru.naumovCorp.entity.worker.Worker;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -15,10 +17,26 @@ import javax.persistence.NoResultException;
  */
 
 @Stateless
+@TransactionManagement(TransactionManagementType.BEAN)
 public class LoginDAO implements LoginDAOInterface {
 
     @Inject
     private DAOHelper dh;
+
+    @Override
+    public void create(Login login) {
+        dh.persist(login);
+    }
+
+    @Override
+    public void update(Login login) {
+        dh.merge(login);
+    }
+
+    @Override
+    public void remove(Login login) {
+        dh.remove(login);
+    }
 
     @Override
     public Worker checkLogin(String login, String password) {
@@ -33,4 +51,15 @@ public class LoginDAO implements LoginDAOInterface {
         }
     }
 
+    @Override
+    public boolean isLoginUsed(String login) {
+        EntityManager em = dh.getEntityManager();
+        try {
+            int isUsed = (int) em.createNamedQuery(Login.IS_LOGIN_USED)
+                    .setParameter("login", login).getSingleResult();
+            return isUsed == 1;
+        } catch (NoResultException ex) {
+            return false;
+        }
+    }
 }

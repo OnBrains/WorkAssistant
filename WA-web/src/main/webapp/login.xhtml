@@ -31,6 +31,10 @@
                 <p:commandButton action="#{loginViewModel.checkLogin}" value="Вход" update="login_form" ajax="true"/>
 
             </h:panelGrid>
+            <p:separator/>
+            <p:outputPanel style="text-align: center;">
+                <p:link outcome="registration" value="Присоединиться к WorkAssistant"/>
+            </p:outputPanel>
         </p:panel>
     </h:form>
 </h:body>

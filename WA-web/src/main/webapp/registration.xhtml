@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+
+<h:head>
+    <h:outputStylesheet name="wa-time.css"/>
+    <title>Регистрация</title>
+    <script type="text/javascript" src="javascript/ru.js"/>
+</h:head>
+
+<h:body>
+
+    <h:form id="registration_form">
+        <p:growl id="msg" showDetail="true" life="3000"/>
+        <p:panel header="Регистрация в WorkAssistant" styleClass="registration_panel">
+
+            <p:outputPanel style="padding-top: 15px;">
+                <p:outputLabel value="Как вас зовут" styleClass="text_style"/>
+                <p:separator/>
+                <h:panelGrid columns="4">
+                    <p:inputText id="name" value="#{registrationViewModel.newWorker.firstName}" required="true"
+                                 style="height: 20px;"/>
+                    <p:watermark for="name" value="Имя"/>
+                    <p:inputText id="family" value="#{registrationViewModel.newWorker.family}" required="true"
+                                 style="height: 20px;"/>
+                    <p:watermark for="family" value="Фамилия"/>
+                </h:panelGrid>
+            </p:outputPanel>
+
+            <p:outputPanel style="padding-top: 15px;">
+                <p:outputLabel value="Имя пользователя" styleClass="text_style"/>
+                <p:separator/>
+                <p:inputText id="login" value="#{registrationViewModel.login}" required="true"
+                             style="width: 360px; height: 20px;"/>
+            </p:outputPanel>
+
+            <p:outputPanel style="padding-top: 15px;">
+                <p:outputLabel value="Пароль" styleClass="text_style"/>
+                <p:separator/>
+                <p:password id="password" value="#{registrationViewModel.password}" required="true"
+                            feedback="true" style="width: 360px; height: 20px;"/>
+                <p:outputPanel style="padding-top: 15px;">
+                    <p:outputLabel value="Подтверждение пароля" styleClass="text_style"/>
+                    <p:password id="personal_info" required="true"
+                                style="width: 360px; margin-top: 5px; height: 20px;"/>
+                </p:outputPanel>
+            </p:outputPanel>
+
+            <p:outputPanel style="padding-top: 15px;">
+                <p:outputLabel value="Личная информация" styleClass="text_style"/>
+                <p:separator/>
+                <h:panelGrid columns="2">
+                    <p:outputLabel for="birthday" value="Дата рождения" style="width: 80px;" styleClass="text_style"/>
+                    <p:outputLabel for="sex" value="Пол" styleClass="text_style"/>
+                    <p:calendar id="birthday" value="#{registrationViewModel.newWorker.birthday}" navigator="true"
+                                local="ru" yearRange="1960:2020" pattern="yyyy-MM-dd" showOn="button"
+                                required="true"/>
+                    <p:selectOneMenu id="sex" value="#{registrationViewModel.newWorker.sex}" required="true"
+                                     style="width: 150px;">
+                        <f:selectItems value="#{registrationViewModel.workerSexs}" var="sex"
+                                       itemValue="#{sex}" itemLabel="#{sex.desc}"/>
+                    </p:selectOneMenu>
+                </h:panelGrid>
+            </p:outputPanel>
+
+            <p:outputPanel style="padding-top: 15px;">
+                <p:outputLabel value="Обратная связь" styleClass="text_style"/>
+                <p:separator/>
+                <p:outputLabel value="Мобильный телефон" styleClass="text_style"/>
+                <p:inputText id="mobile_phone" value="#{registrationViewModel.newWorker.modilePhone}"
+                             style="width: 360px; margin-top: 5px; margin-bottom: 5px; height: 20px;"/>
+                <p:outputLabel value="Адрес эл. почты" required="true" styleClass="text_style"/>
+                <p:inputText id="email" value="#{registrationViewModel.newWorker.email}" required="true"
+                             style="width: 360px; margin-top: 5px; height: 20px;"/>
+            </p:outputPanel>
+
+            <p:outputPanel style="padding-top: 20px; text-align: center;">
+                <p:commandButton value="Зарегестрироваться" action="#{registrationViewModel.createWorker()}"
+                                 update="registration_form" ajax="true"/>
+            </p:outputPanel>
+
+        </p:panel>
+    </h:form>
+</h:body>
+</html>
