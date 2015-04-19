@@ -1,5 +1,6 @@
 package ru.naumovCorp.view;
 
+import ru.naumovCorp.entity.worker.Login;
 import ru.naumovCorp.entity.worker.Worker;
 import ru.naumovCorp.service.SessionUtil;
 import ru.naumovCorp.dao.worker.LoginDAOInterface;
@@ -73,7 +74,8 @@ public class LoginViewModel implements Serializable {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        String hashPassword = Login.pref+password;
+        this.password = String.valueOf(hashPassword.hashCode());
     }
 
 }

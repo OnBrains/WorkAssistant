@@ -76,7 +76,8 @@ public class RegistrationViewModel implements Serializable {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        String hashPassword = Login.pref+password;
+        this.password = String.valueOf(hashPassword.hashCode());
     }
 
     public Worker getNewWorker() {
