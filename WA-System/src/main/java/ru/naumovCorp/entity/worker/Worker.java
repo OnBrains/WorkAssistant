@@ -10,7 +10,7 @@ import javax.persistence.*;
  */
 
 @Entity
-@Table(name = "WORKER", uniqueConstraints = {@UniqueConstraint(columnNames = {"FAMILY", "FIRST_NAME", "SURNAME"})})
+@Table(name = "WORKER")
 @NamedQuery(name = Worker.GET_ALL_WORKER, query = "select w from Worker w")
 public class Worker implements Serializable {
 
@@ -28,7 +28,7 @@ public class Worker implements Serializable {
     @Column(name = "FIRST_NAME", nullable = false, length = 32)
     private String firstName;
 
-    @Column(name = "SURNAME", nullable = true, length = 32)
+    @Column(name = "SURNAME", nullable = false, length = 32)
     private String surname;
 
     @Column(name = "BIRTHDAY", nullable = false)
