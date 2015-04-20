@@ -33,7 +33,7 @@
             </p:megaMenu>
         </pe:layoutPane>
 
-        <pe:layoutPane position="west" closable="true" resizable="false" size="420" minSize="420" styleClassContent="layout_style">
+        <pe:layoutPane position="west" closable="true" resizable="false" size="320" minSize="320" styleClassContent="layout_style">
             <ui:include src="view/workDay/CurrentDayFrame.xhtml"/>
         </pe:layoutPane>
 
@@ -65,7 +65,7 @@
             </h:form>
             <h:form id="month_action">
                 <p:outputPanel style="height: 43px;">
-                    <p:commandButton id="create_days_for_month" value="+" actionL="#{workDayViewModel.createDaysForMonth}"
+                    <p:commandButton id="create_days_for_month" value="+" action="#{workDayViewModel.createDaysForMonth}"
                                      rendered="#{workDayViewModel.daysBySelectedMonth.size() == 0}"
                                      style="float:left; margin: 10px;" update=":month_info_form, :month_statistic"/>
                     <p:commandButton value="Событие" style="float:right; margin: 10px;"/>
@@ -94,14 +94,14 @@
                                          update=":month_info_form, :month_statistic, :month_action" style="float: right; margin: 5px;"/>
                     </f:facet>
                     <p:ajax event="rowEdit" listener="#{workDayViewModel.onRowEdit}" update=":month_statistic"/>
-                    <p:column id="work_day_type_id" headerText="Тип дня" style="text-align: center; width: 100px;">
+                    <p:column id="work_day_type_id" headerText="Тип дня" style="text-align: center; width: 10%;">
                         <h:graphicImage name="#{dayInfo.type.icon}" rendered="#{dayInfo.type != 'WORK_DAY' and dayInfo.type != 'HOLIDAY'}"
                                         title="#{dayInfo.type.desc}"/>
                     </p:column>
-                    <p:column id="work_day_id" headerText="День" style="text-align: center; width: 100px;">
+                    <p:column id="work_day_id" headerText="День" style="text-align: center; width: 20%;">
                         <h:outputText value="#{workDayViewModel.dateFormatForDayInTable(dayInfo.day)}"/>
                     </p:column>
-                    <p:column id="start_work_day_id" style="text-align: center; width: 80px;">
+                    <p:column id="start_work_day_id" style="text-align: center; width: 10%;">
                         <f:facet name="header">
                             <h:graphicImage name="img/clock/clock_play.png"/>
                         </f:facet>
@@ -114,7 +114,7 @@
                             </f:facet>
                         </p:cellEditor>
                     </p:column>
-                    <p:column id="end_work_day_id" style="text-align: center; width: 80px;">
+                    <p:column id="end_work_day_id" style="text-align: center; width: 10%">
                         <f:facet name="header">
                             <h:graphicImage name="img/clock/clock_stop.png"/>
                         </f:facet>
@@ -127,31 +127,31 @@
                             </f:facet>
                         </p:cellEditor>
                     </p:column>
-                    <p:column id="summary_work_day_id" style="text-align: center; width: 80px;">
+                    <p:column id="summary_work_day_id" style="text-align: center; width: 10%;">
                         <f:facet name="header">
                             <h:graphicImage name="img/clock/clock_link.png"/>
                         </f:facet>
                         <h:outputText value="#{dayInfo.state != 'WORKED' ? '' : workDayViewModel.getTime(dayInfo.summaryWorkedTime)}"/>
                     </p:column>
-                    <p:column id="delta_work_day_id" style="text-align: center; width: 80px;">
+                    <p:column id="delta_work_day_id" style="text-align: center; width: 10%;">
                         <f:facet name="header">
                             <h:graphicImage name="img/clock/clock_add.png"/>
                         </f:facet>
                         <h:outputText value="#{dayInfo.state != 'WORKED' ? '' : workDayViewModel.getTime(dayInfo.deltaTime)}"
                                       style="#{dayInfo.isWorkedFullDay() ? 'color: green;' : 'color: red;'}"/>
                     </p:column>
-                    <p:column id="state_work_day_id" headerText="Состояние" style="text-align: center; width: 200px;">
+                    <p:column id="state_work_day_id" headerText="Состояние" style="text-align: center; width: 25%;">
                         <p:cellEditor>
                             <f:facet name="output"><h:outputText value="#{dayInfo.state.desc}"/></f:facet>
                             <f:facet name="input">
-                                <p:selectOneMenu value="#{dayInfo.state}" style="width: 120px;">
+                                <p:selectOneMenu value="#{dayInfo.state}" style="width: 50%;">
                                     <f:selectItems value="#{workDayViewModel.states}" var="state"
                                                    itemValue="#{state}" itemLabel="#{state.desc}"/>
                                 </p:selectOneMenu>
                             </f:facet>
                         </p:cellEditor>
                     </p:column>
-                    <p:column style="width:30px">
+                    <p:column style="width: 5%ж">
                         <p:rowEditor/>
                     </p:column>
                 </p:dataTable>
