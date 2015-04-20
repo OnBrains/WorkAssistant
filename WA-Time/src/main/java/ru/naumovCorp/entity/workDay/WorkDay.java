@@ -32,7 +32,7 @@ public class WorkDay implements Serializable {
     public static final String GET_TIME_INFO_BY_MONTH = "WorkTimeDAO.getDayInfoByMonth";
     public static final String GET_CURRENT_DAY = "WorkTimeDAO.getCurrentDay";
     public static final String GET_DAYS_PRIOR_CURRENT_DAY = "WorkTimeDAO.getDaysPriorCurrentDay";
-    public static final Long mSecondsInWorkDay = 30600000L;
+    public static final String GET_EVENTS = "WorkDay.getEvents";
 
     @Id
     @GeneratedValue(generator = "WorkTimeId")

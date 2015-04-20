@@ -1,11 +1,13 @@
 package ru.naumovCorp.entity.workDayEvent;
 
 import ru.naumovCorp.entity.workDay.WorkDay;
+import ru.naumovCorp.entity.worker.Worker;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,10 +24,13 @@ public class Event implements Serializable {
     @Column(name = "ID")
     private Long id;
 
+    @Column(name = "DAY", nullable = false)
+    private Date day;
+
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "WORK_DAY_EVENT", joinColumns = {@JoinColumn(name = "EVENT_ID")},
-                                        inverseJoinColumns = {@JoinColumn(name = "WORK_DAY_ID")})
-    private List<WorkDay> workDays = new ArrayList<>();
+    @JoinTable(name = "WORKER_EVENT", joinColumns = {@JoinColumn(name = "EVENT_ID")},
+                                        inverseJoinColumns = {@JoinColumn(name = "WORKER_ID")})
+    private List<Worker> workDays = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TYPE_ID", nullable = false)
@@ -36,6 +41,9 @@ public class Event implements Serializable {
 
     @Column(name = "DESCRIPTION", nullable = true, length = 512)
     private String description;
+
+    @Column(name = "FULL_DAY", nullable = false)
+    private Boolean isFullDay = false;
 
     @Column(name = "START_TIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -56,11 +64,19 @@ public class Event implements Serializable {
         this.id = id;
     }
 
-    public List<WorkDay> getWorkDays() {
+    public Date getDay() {
+        return day;
+    }
+
+    public void setDay(Date day) {
+        this.day = day;
+    }
+
+    public List<Worker> getWorkDays() {
         return workDays;
     }
 
-    public void setWorkDays(List<WorkDay> workDays) {
+    public void setWorkDays(List<Worker> workDays) {
         this.workDays = workDays;
     }
 
@@ -86,6 +102,14 @@ public class Event implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Boolean getIsFullDay() {
+        return isFullDay;
+    }
+
+    public void setIsFullDay(Boolean isFullDay) {
+        this.isFullDay = isFullDay;
     }
 
     public Calendar getStartTime() {
