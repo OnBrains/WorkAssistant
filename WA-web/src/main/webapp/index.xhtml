@@ -68,7 +68,7 @@
                     <p:commandButton id="create_days_for_month" value="+" action="#{workDayViewModel.createDaysForMonth}"
                                      rendered="#{workDayViewModel.daysBySelectedMonth.size() == 0}"
                                      style="float:left; margin: 10px;" update=":month_info_form, :month_statistic"/>
-                    <p:commandButton value="Событие" style="float:right; margin: 10px;"/>
+                    <p:commandButton value="Событие" style="float:right; margin: 10px;" title="Данная функция еще не реализована"/>
                 </p:outputPanel>
             </h:form>
             <h:form id="month_info_form">
@@ -103,7 +103,7 @@
                     </p:column>
                     <p:column id="start_work_day_id" style="text-align: center; width: 10%;">
                         <f:facet name="header">
-                            <h:graphicImage name="img/clock/clock_play.png"/>
+                            <h:graphicImage name="img/clock/clock_play.png" title="Начало рабочего дня"/>
                         </f:facet>
                         <p:cellEditor>
                             <f:facet name="output">
@@ -116,7 +116,7 @@
                     </p:column>
                     <p:column id="end_work_day_id" style="text-align: center; width: 10%">
                         <f:facet name="header">
-                            <h:graphicImage name="img/clock/clock_stop.png"/>
+                            <h:graphicImage name="img/clock/clock_stop.png" title="Окончание рабочего дня"/>
                         </f:facet>
                         <p:cellEditor>
                             <f:facet name="output">
@@ -129,13 +129,13 @@
                     </p:column>
                     <p:column id="summary_work_day_id" style="text-align: center; width: 10%;">
                         <f:facet name="header">
-                            <h:graphicImage name="img/clock/clock_link.png"/>
+                            <h:graphicImage name="img/clock/clock_link.png" title="Отработанное время"/>
                         </f:facet>
                         <h:outputText value="#{dayInfo.state != 'WORKED' ? '' : workDayViewModel.getTime(dayInfo.summaryWorkedTime)}"/>
                     </p:column>
                     <p:column id="delta_work_day_id" style="text-align: center; width: 10%;">
                         <f:facet name="header">
-                            <h:graphicImage name="img/clock/clock_add.png"/>
+                            <h:graphicImage name="img/clock/clock_add.png" title="Переработано/Недоработано"/>
                         </f:facet>
                         <h:outputText value="#{dayInfo.state != 'WORKED' ? '' : workDayViewModel.getTime(dayInfo.deltaTime)}"
                                       style="#{dayInfo.isWorkedFullDay() ? 'color: green;' : 'color: red;'}"/>
