@@ -72,6 +72,7 @@
                 </p:outputPanel>
             </h:form>
             <h:form id="month_info_form">
+                <p:messages for="month_info_table" id="messages" showDetail="true" autoUpdate="false" closable="true" />
                 <p:contextMenu for="month_info_table">
                     <p:submenu label="Отметить">
                         <c:forEach var="dayType" items="#{workDayViewModel.dayTypes}">
@@ -93,7 +94,7 @@
                         <p:commandButton id="next_month" value="#{workDayViewModel.nameNextMonth}" action="#{workDayViewModel.nextMonth}"
                                          update=":month_info_form, :month_statistic, :month_action" style="float: right; margin: 5px;"/>
                     </f:facet>
-                    <p:ajax event="rowEdit" listener="#{workDayViewModel.onRowEdit}" update=":month_statistic"/>
+                    <p:ajax event="rowEdit" listener="#{workDayViewModel.onRowEdit}" update=":month_statistic, messages"/>
                     <p:column id="work_day_type_id" headerText="Тип дня" style="text-align: center; width: 10%;">
                         <h:graphicImage name="#{dayInfo.type.icon}" rendered="#{dayInfo.type != 'WORK_DAY' and dayInfo.type != 'HOLIDAY'}"
                                         title="#{dayInfo.type.desc}"/>
@@ -123,7 +124,7 @@
                                 <h:outputText value="#{dayInfo.state != 'WORKED' ? '' : workDayViewModel.getTime(dayInfo.outTime.time)}"/>
                             </f:facet>
                             <f:facet name="input">
-                                <pe:timePicker value="#{dayInfo.outTime.time}" mode="popup"/>
+                                <pe:timePicker value="#{dayInfo.outTime.time}" mode="popup" minHour="#{workDayViewModel.getMinHourForOutTime(dayInfo)}"/>
                             </f:facet>
                         </p:cellEditor>
                     </p:column>

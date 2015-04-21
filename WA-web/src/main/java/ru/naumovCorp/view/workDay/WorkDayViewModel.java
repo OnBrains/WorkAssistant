@@ -11,8 +11,10 @@ import ru.naumovCorp.parsing.ConvertDate;
 import ru.naumovCorp.service.SessionUtil;
 
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -85,7 +87,7 @@ public class WorkDayViewModel {
     }
 
     public void changeDaysType(DayType newType) {
-        for (WorkDay wd: selectedDays) {
+        for (WorkDay wd : selectedDays) {
             wd.setType(newType);
             wdDAO.update(wd);
         }
@@ -130,6 +132,10 @@ public class WorkDayViewModel {
         return calendar.get(Calendar.DAY_OF_WEEK) == 1 || calendar.get(Calendar.DAY_OF_WEEK) == 7;
     }
 
+    private boolean isComingTimeMoreOutTime(WorkDay workDay) {
+        return workDay.getComingTime().getTimeInMillis() > workDay.getOutTime().getTimeInMillis();
+    }
+
     /**
      * Изменяем запись в таблице
      *
@@ -138,10 +144,14 @@ public class WorkDayViewModel {
     //TODO: прикрутить логику редактирования
     public void onRowEdit(RowEditEvent event) {
         WorkDay day = (WorkDay) event.getObject();
-        day.setComingTime(updateYear(day, day.getComingTime()));
-        day.setOutTime(updateYear(day, day.getOutTime()));
-        wdDAO.update(day);
-        statistic.calculateStatistic(getDaysBySelectedMonth(), getDaysByMonthType());
+        if (!isComingTimeMoreOutTime(day)) {
+            day.setComingTime(updateYear(day, day.getComingTime()));
+            day.setOutTime(updateYear(day, day.getOutTime()));
+            wdDAO.update(day);
+            statistic.calculateStatistic(getDaysBySelectedMonth(), getDaysByMonthType());
+        } else {
+            FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_WARN, "Нельзя сохранить изменения", "Время начала рабочего дня больше времени окончания"));
+        }
     }
 
     /**
@@ -215,6 +225,13 @@ public class WorkDayViewModel {
     // =================================================================================================================
     // Методы для работы отображения времени в UI + стили
     // =================================================================================================================
+
+    public int getMinHourForOutTime(WorkDay workDay) {
+        Calendar calendar = Calendar.getInstance();
+        int i = workDay.getComingTime().get(Calendar.HOUR);
+        System.out.println(i);
+        return workDay.getComingTime().get(Calendar.HOUR);
+    }
 
     /**
      * @param date - дата в полном формате
