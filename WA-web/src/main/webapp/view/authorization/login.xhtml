@@ -1,21 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
+<ui:composition template="/view/View.xhtml"
+      xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:p="http://primefaces.org/ui"
       xmlns:pe="http://primefaces.org/ui/extensions">
 
-<h:head>
+<ui:define name="header">
     <h:outputStylesheet name="wa-time.css" />
     <title>Авторизация</title>
-</h:head>
+</ui:define>
 
-<h:body>
+<ui:define name="body">
     <h:form id="login_form">
-        <p:growl id="msg" showDetail="true" life="3000" />
         <p:panel header="Вход в систему" styleClass="login_panel">
             <h:panelGrid id="login_panel" columns="3">
 
@@ -37,5 +34,6 @@
             </p:outputPanel>
         </p:panel>
     </h:form>
-</h:body>
-</html>
+</ui:define>
+
+</ui:composition>
