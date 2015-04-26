@@ -1,24 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:p="http://primefaces.org/ui"
-      xmlns:pe="http://primefaces.org/ui/extensions"
-      xmlns:c="http://java.sun.com/jsp/jstl/core">
+<ui:composition template="/view/View.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:c="http://java.sun.com/jsp/jstl/core">
 
-<h:head>
+<ui:define name="header">
     <h:outputStylesheet name="wa-time.css" />
     <title>Влияй на свое будующее</title>
-</h:head>
+</ui:define>
 
-<!--<ui:define name="head">-->
-    <!--<h:outputStylesheet name="wa-time.css" />-->
-<!--</ui:define>-->
+<ui:define name="body">
 
-<h:body>
     <pe:layout>
 
         <pe:layoutPane position="north" closable="false" resizable="false" styleClassContent="layout_style">
@@ -34,7 +29,7 @@
         </pe:layoutPane>
 
         <pe:layoutPane position="west" closable="true" resizable="false" size="320" minSize="320" styleClassContent="layout_style">
-            <ui:include src="view/workDay/CurrentDayFrame.xhtml"/>
+            <ui:include src="/view/workDay/CurrentDayFrame.xhtml"/>
         </pe:layoutPane>
 
         <pe:layoutPane position="center" resizable="true" styleClassContent="layout_style">
@@ -72,8 +67,6 @@
                 </p:outputPanel>
             </h:form>
             <h:form id="month_info_form">
-                <!--<p:messages for="month_info_table" id="messages" showDetail="true" autoUpdate="false" closable="true" />-->
-                <p:growl id="arg_msg_warn" for="arg_msg_for_warn" showDetail="true" life="3000" sticky="true"/>
                 <p:contextMenu for="month_info_table">
                     <p:submenu label="Отметить">
                         <c:forEach var="dayType" items="#{workDayViewModel.dayTypes}">
@@ -165,5 +158,7 @@
         </pe:layoutPane>
 
     </pe:layout>
-</h:body>
-</html>
+
+</ui:define>
+
+</ui:composition>

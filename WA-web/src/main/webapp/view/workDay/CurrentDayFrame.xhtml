@@ -1,7 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
+<ui:component xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets"
@@ -11,9 +8,7 @@
 <ui:define name="head">
     <h:outputStylesheet name="wa-time.css" />
 </ui:define>
-<!--<h:graphicImage for="current_day_coming_time" name="img/clock/clock_play.png"/>-->
-<h:body>
-    <ui:composition>
+
         <h:form id="current_day_info_form">
             <p:fieldset legend="#{currentDayFrameModel.currentDay != null ? currentDayFrameModel.currentDay.day : 'Не найдено'}">
                 <h:panelGrid id="start_end_time" columns="4" cellpadding="10">
@@ -40,7 +35,5 @@
                 <p:poll interval="60" update="time_for_end_work_day, img_for_end_work_day" stop="#{currentDayFrameModel.currentDay.state != 'WORKING'}"/>
             </p:fieldset>
         </h:form>
-    </ui:composition>
-</h:body>
 
-</html>
+</ui:component>

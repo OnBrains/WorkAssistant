@@ -4,19 +4,26 @@
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd">
     <navigation-rule>
-        <from-view-id>/login.xhtml</from-view-id>
+        <from-view-id>/view/authorization/login.xhtml</from-view-id>
         <navigation-case>
             <from-outcome>home</from-outcome>
-            <to-view-id>/index.xhtml</to-view-id>
+            <to-view-id>/view/workDay/TimeJournalView.xhtml</to-view-id>
             <redirect/>
         </navigation-case>
     </navigation-rule>
     <navigation-rule>
-        <from-view-id>/registration.xhtml</from-view-id>
+        <from-view-id>/view/authorization/registration.xhtml</from-view-id>
         <navigation-case>
             <from-outcome>home</from-outcome>
-            <to-view-id>/index.xhtml</to-view-id>
+            <to-view-id>/view/workDay/TimeJournalView.xhtml</to-view-id>
             <redirect/>
+        </navigation-case>
+    </navigation-rule>
+    <navigation-rule>
+        <from-view-id>/view/workDay/TimeJournalView.xhtml</from-view-id>
+        <navigation-case>
+            <from-outcome>login</from-outcome>
+            <to-view-id>/view/authorization/login.xhtml</to-view-id>
         </navigation-case>
     </navigation-rule>
 </faces-config>
