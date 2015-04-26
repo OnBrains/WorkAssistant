@@ -2,6 +2,7 @@ package ru.naumovCorp.view;
 
 import ru.naumovCorp.entity.worker.Login;
 import ru.naumovCorp.entity.worker.Worker;
+import ru.naumovCorp.inf.Notification;
 import ru.naumovCorp.service.SessionUtil;
 import ru.naumovCorp.dao.worker.LoginDAOInterface;
 
@@ -36,11 +37,12 @@ public class LoginViewModel implements Serializable {
             session.setAttribute("worker", worker);
             return "home";
         } else {
-            FacesContext.getCurrentInstance().addMessage(
-                    null,
-                    new FacesMessage(FacesMessage.SEVERITY_WARN,
-                            "Ошибка при авторизации",
-                            "Повторите попытку входа"));
+//            FacesContext.getCurrentInstance().addMessage(
+//                    null,
+//                    new FacesMessage(FacesMessage.SEVERITY_WARN,
+//                            "Ошибка при авторизации",
+//                            "Повторите попытку входа"));
+            Notification.info("Ошибка при авторизации", "Повторите попытку входа");
             return "login";
         }
     }

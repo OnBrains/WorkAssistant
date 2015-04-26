@@ -1,12 +1,12 @@
 package ru.naumovCorp.view.workDay;
 
-
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.RowEditEvent;
 import ru.naumovCorp.entity.workDay.DayType;
 import ru.naumovCorp.entity.workDay.WorkDayState;
 import ru.naumovCorp.dao.workDay.WorkDayDAOInterface;
 import ru.naumovCorp.entity.workDay.WorkDay;
+import ru.naumovCorp.inf.Notification;
 import ru.naumovCorp.parsing.ConvertDate;
 import ru.naumovCorp.service.SessionUtil;
 
@@ -150,7 +150,7 @@ public class WorkDayViewModel {
             wdDAO.update(day);
             statistic.calculateStatistic(getDaysBySelectedMonth(), getDaysByMonthType());
         } else {
-            FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_WARN, "Нельзя сохранить изменения", "Время начала рабочего дня больше времени окончания"));
+            Notification.info("Нельзя сохранить изменения", "Время начала рабочего дня больше времени окончания");
         }
     }
 
