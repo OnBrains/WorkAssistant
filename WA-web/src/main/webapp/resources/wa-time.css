@@ -1,5 +1,6 @@
 body {
-    background-color: #e5e5e5;
+    /*background-color: #e5e5e5;*/
+    background-color: white;
 }
 
 /*Стиль для ссылок*/
@@ -62,7 +63,8 @@ a:hover {
 
 .layout_style {
     border: none;
-    background-color: #e5e5e5;
+    /*background-color: #e5e5e5;*/
+    background-color: white;
 }
 
 /*Стили для работы с текущим днем*/
