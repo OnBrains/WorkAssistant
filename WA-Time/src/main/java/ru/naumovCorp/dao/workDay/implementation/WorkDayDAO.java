@@ -41,6 +41,12 @@ public class WorkDayDAO implements WorkDayDAOInterface {
     }
 
     @Override
+    public WorkDay find(Long workDayId) {
+        EntityManager em = dh.getEntityManager();
+        return em.find(WorkDay.class, workDayId);
+    }
+
+    @Override
     public WorkDay getCurrentDayInfo(Date day, Worker currentWorker) {
         EntityManager em = dh.getEntityManager();
         WorkDay currentDay;
