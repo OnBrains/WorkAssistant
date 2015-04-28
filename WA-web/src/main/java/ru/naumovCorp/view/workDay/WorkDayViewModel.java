@@ -144,14 +144,24 @@ public class WorkDayViewModel {
     //TODO: прикрутить логику редактирования
     public void onRowEdit(RowEditEvent event) {
         WorkDay day = (WorkDay) event.getObject();
-        if (!isComingTimeMoreOutTime(day)) {
-            day.setComingTime(updateYear(day, day.getComingTime()));
-            day.setOutTime(updateYear(day, day.getOutTime()));
-            wdDAO.update(day);
-            statistic.calculateStatistic(getDaysBySelectedMonth(), getDaysByMonthType());
-        } else {
+        WorkDay oldDayState = wdDAO.find(day.getId());
+        if (isComingTimeMoreOutTime(day) && day.getState().equals(WorkDayState.WORKED)) {
+            WorkDay editDay = null;
+            for (WorkDay wd: daysBySelectedMonth) {
+                if (wd.equals(oldDayState)) {
+                    editDay = wd;
+                }
+            }
             Notification.info("Нельзя сохранить изменения", "Время начала рабочего дня больше времени окончания");
+            editDay.setComingTime(oldDayState.getComingTime());
+            editDay.setOutTime(oldDayState.getOutTime());
+            editDay.setState(oldDayState.getState());
+            return;
         }
+        day.setComingTime(updateYear(day, day.getComingTime()));
+        day.setOutTime(updateYear(day, day.getOutTime()));
+        wdDAO.update(day);
+        statistic.calculateStatistic(getDaysBySelectedMonth(), getDaysByMonthType());
     }
 
     /**
@@ -228,8 +238,6 @@ public class WorkDayViewModel {
 
     public int getMinHourForOutTime(WorkDay workDay) {
         Calendar calendar = Calendar.getInstance();
-        int i = workDay.getComingTime().get(Calendar.HOUR);
-        System.out.println(i);
         return workDay.getComingTime().get(Calendar.HOUR);
     }
 
