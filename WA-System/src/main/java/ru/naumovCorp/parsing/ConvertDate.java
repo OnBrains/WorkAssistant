@@ -65,6 +65,14 @@ public class ConvertDate {
         return simpleDateFormat.format(date);
     }
 
+    public static String dayFormat(Date date) {
+        if (date == null) {
+            return null;
+        }
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd");
+        return simpleDateFormat.format(date);
+    }
+
     private static DateFormatSymbols dateFormatSymbols = new DateFormatSymbols(){
 
         @Override
