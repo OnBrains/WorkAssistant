@@ -132,6 +132,19 @@ public class CurrentDayFrameModel implements Serializable {
         }
     }
 
+    public String getCurrentWorkedTime() {
+        if (isWorking()) {
+            if (isWorked()) {
+                return ConvertDate.formattedTimeFromMSec(currentDay.getSummaryWorkedTime());
+            } else {
+                Calendar currentTime = Calendar.getInstance();
+                return ConvertDate.formattedTimeFromMSec(currentTime.getTimeInMillis() - currentDay.getComingTime().getTimeInMillis());
+            }
+        } else {
+            return "__:__";
+        }
+    }
+
     public String getResultWorkedTime() {
         if (isWorking()) {
             if (isWorked()) {
@@ -177,6 +190,11 @@ public class CurrentDayFrameModel implements Serializable {
         } else {
             return false;
         }
+    }
+
+    public String getLegendValue() {
+        return getCurrentDay() != null ? ConvertDate.dayFormat(currentDay.getDay()) +
+                " - " + currentDay.getState().getDesc() : "Не найдено";
     }
 
 }
