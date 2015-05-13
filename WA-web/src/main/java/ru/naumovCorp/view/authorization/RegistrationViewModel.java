@@ -33,6 +33,7 @@ public class RegistrationViewModel implements Serializable {
 
     private String login;
     private String password;
+    private String repeatPassword;
 
     private Worker newWorker = new Worker();
 
@@ -47,6 +48,13 @@ public class RegistrationViewModel implements Serializable {
                     new FacesMessage(FacesMessage.SEVERITY_WARN,
                             "Ошибка при регистрации",
                             "Имя пользователя: '" + login + "' занято."));
+            return "";
+        } else if (!password.equals(repeatPassword)) {
+            FacesContext.getCurrentInstance().addMessage(
+                    null,
+                    new FacesMessage(FacesMessage.SEVERITY_WARN,
+                            "Ошибка при регистрации",
+                            "Неправильное подтверждение пароля"));
             return "";
         } else {
             wDAO.create(newWorker);
@@ -78,6 +86,15 @@ public class RegistrationViewModel implements Serializable {
     public void setPassword(String password) {
         String hashPassword = Login.pref+password;
         this.password = String.valueOf(hashPassword.hashCode());
+    }
+
+    public String getRepeatPassword() {
+        return repeatPassword;
+    }
+
+    public void setRepeatPassword(String repeatPassword) {
+        String hashPassword = Login.pref+repeatPassword;
+        this.repeatPassword = String.valueOf(hashPassword.hashCode());
     }
 
     public Worker getNewWorker() {

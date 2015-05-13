@@ -49,7 +49,7 @@
                             feedback="true" maxlength="64" style="width: 360px; height: 20px;"/>
                 <p:outputPanel style="padding-top: 15px;">
                     <p:outputLabel value="Подтверждение пароля" styleClass="text_style"/>
-                    <p:password id="personal_info" required="true" maxlength="64"
+                    <p:password id="personal_info" value="#{registrationViewModel.repeatPassword}" required="true" maxlength="64"
                                 style="width: 360px; margin-top: 5px; height: 20px;"/>
                 </p:outputPanel>
             </p:outputPanel>
