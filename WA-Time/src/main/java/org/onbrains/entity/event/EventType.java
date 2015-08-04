@@ -1,9 +1,8 @@
-package org.onbrains.entity.workDayEvent;
+package org.onbrains.entity.event;
 
 import org.onbrains.entity.SuperClass;
 
 import javax.persistence.*;
-import java.io.Serializable;
 
 /**
  * @author Naumov Oleg on 18.04.2015 13:41.
@@ -22,6 +21,8 @@ import java.io.Serializable;
 @Entity
 @Table(name = "EVENT_TYPE", uniqueConstraints = {@UniqueConstraint(columnNames = {"TITLE"})})
 public class EventType extends SuperClass {
+
+    public static final Long WORK_EVENT_TYPE_ID = 2275L;
 
     @Column(name = "TITLE", nullable = false, length = 64)
     private String title;

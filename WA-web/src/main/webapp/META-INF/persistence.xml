@@ -9,8 +9,8 @@
         <class>org.onbrains.entity.day.Day</class>
         <class>org.onbrains.entity.workDay.WorkDay</class>
         <class>org.onbrains.entity.worker.Login</class>
-        <class>org.onbrains.entity.workDayEvent.Event</class>
-        <class>org.onbrains.entity.workDayEvent.EventType</class>
+        <class>org.onbrains.entity.event.Event</class>
+        <class>org.onbrains.entity.event.EventType</class>
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect"/>
             <property name="hibernate.show_sql" value="true"/>

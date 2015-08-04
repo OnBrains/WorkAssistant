@@ -1,7 +1,6 @@
-package org.onbrains.entity.workDayEvent;
+package org.onbrains.entity.event;
 
 import org.onbrains.entity.SuperClass;
-import org.onbrains.entity.workDay.WorkDay;
 
 import javax.persistence.*;
 import java.util.*;
@@ -24,11 +23,6 @@ public class Event extends SuperClass {
     @Column(name = "DAY", nullable = false)
     private Date day;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "WORK_DAY_EVENT", joinColumns = {@JoinColumn(name = "EVENT_ID")},
-            inverseJoinColumns = {@JoinColumn(name = "WORK_DAY_ID")})
-    private Set<WorkDay> workDays = new HashSet<>();
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TYPE_ID", nullable = false)
     private EventType type;
@@ -50,9 +44,8 @@ public class Event extends SuperClass {
     protected Event() {
     }
 
-    public Event(Date day, Set<WorkDay> workDays, EventType type, String title, Calendar startTime, Calendar endTime) {
+    public Event(Date day, EventType type, String title, Calendar startTime, Calendar endTime) {
         this.day = day;
-        this.workDays = workDays;
         this.type = type;
         this.title = title;
         this.startTime = startTime;
@@ -68,17 +61,6 @@ public class Event extends SuperClass {
 
     public void setDay(Date day) {
         this.day = day;
-    }
-
-    /**
-     * @return Перечень рабочих дней, к которым привязано данное событие.
-     */
-    public Set<WorkDay> getWorkDays() {
-        return workDays;
-    }
-
-    public void setWorkDays(Set<WorkDay> workDays) {
-        this.workDays = workDays;
     }
 
     /**

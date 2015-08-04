@@ -10,31 +10,31 @@
 </ui:define>
 
         <h:form id="current_day_info_form">
-            <p:fieldset legend="#{currentDayFrameModel.legendValue}">
+            <p:fieldset legend="#{currentDayFrameModelOld.legendValue}">
                 <h:panelGrid id="start_end_time" columns="4" cellpadding="10">
-                    <p:commandLink id="start_day_button" for="current_day_coming_time" action="#{currentDayFrameModel.startWork()}"
-                                   disabled="#{currentDayFrameModel.currentDay.state != 'NO_WORK'}" update="current_day_info_form, :month_info_form"
+                    <p:commandLink id="start_day_button" for="current_day_coming_time" action="#{currentDayFrameModelOld.startWork()}"
+                                   disabled="#{currentDayFrameModelOld.currentDay.state != 'NO_WORK'}" update="current_day_info_form, :month_info_form"
                                    title="Начать рабочий день">
                         <h:graphicImage name="img/clock/clock_play.png" />
                     </p:commandLink>
-                    <h:outputText id="current_day_coming_time" value="#{currentDayFrameModel.comingTime}" styleClass="window_for_time"/>
+                    <h:outputText id="current_day_coming_time" value="#{currentDayFrameModelOld.comingTime}" styleClass="window_for_time"/>
 
-                    <p:commandLink id="end_day_button" for="current_day_out_time" action="#{currentDayFrameModel.endWork()}"
-                                   disabled="#{currentDayFrameModel.currentDay.state != 'WORKING'}" update="current_day_info_form, :month_info_form"
+                    <p:commandLink id="end_day_button" for="current_day_out_time" action="#{currentDayFrameModelOld.endWork()}"
+                                   disabled="#{currentDayFrameModelOld.currentDay.state != 'WORKING'}" update="current_day_info_form, :month_info_form"
                                    title="Закончить рабочий день">
                         <h:graphicImage name="img/clock/clock_stop.png" />
                     </p:commandLink>
-                    <h:outputText id="current_day_out_time" value="#{currentDayFrameModel.outTime}" styleClass="window_for_time"/>
+                    <h:outputText id="current_day_out_time" value="#{currentDayFrameModelOld.outTime}" styleClass="window_for_time"/>
 
                     <h:graphicImage id="img_for_worked_time" for="time_for_end_work_day" title="Отработанное время"
                                     name="img/clock/clock_link.png"/>
-                    <h:outputText id="worked_time" value="#{currentDayFrameModel.currentWorkedTime}" styleClass="window_for_time"/>
+                    <h:outputText id="worked_time" value="#{currentDayFrameModelOld.currentWorkedTime}" styleClass="window_for_time"/>
 
                     <h:graphicImage id="img_for_end_work_day" for="time_for_end_work_day" title="Оставшееся/Переработаное время"
-                                    name="#{currentDayFrameModel.ifCurrentTimeMoreOutTime() ? 'img/clock/clock_add.png' : 'img/clock/clock_delete.png'}"/>
-                    <h:outputText id="time_for_end_work_day" value="#{currentDayFrameModel.resultWorkedTime}" styleClass="window_for_time"/>
+                                    name="#{currentDayFrameModelOld.ifCurrentTimeMoreOutTime() ? 'img/clock/clock_add.png' : 'img/clock/clock_delete.png'}"/>
+                    <h:outputText id="time_for_end_work_day" value="#{currentDayFrameModelOld.resultWorkedTime}" styleClass="window_for_time"/>
                 </h:panelGrid>
-                <p:poll interval="60" update="time_for_end_work_day, img_for_end_work_day, worked_time" stop="#{currentDayFrameModel.currentDay.state != 'WORKING'}"/>
+                <p:poll interval="60" update="time_for_end_work_day, img_for_end_work_day, worked_time" stop="#{currentDayFrameModelOld.currentDay.state != 'WORKING'}"/>
             </p:fieldset>
         </h:form>
 

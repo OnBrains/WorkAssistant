@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.onbrains.entity.SuperClass;
 import org.onbrains.entity.day.Day;
-import org.onbrains.entity.workDayEvent.Event;
+import org.onbrains.entity.event.Event;
 import org.onbrains.entity.worker.Worker;
 
 /**
@@ -97,7 +97,7 @@ public class WorkDay extends SuperClass {
 
     /**
      * Время начала рабочего дня. Берётся минимальное время прихода из всех {@linkplain Event событий},
-     * {@linkplain org.onbrains.entity.workDayEvent.EventType#isWorking() время которых идет в зачет отработанного}.
+     * {@linkplain org.onbrains.entity.event.EventType#isWorking() время которых идет в зачет отработанного}.
      *
      * @return Время начала рабочего дня.
      */
@@ -111,7 +111,7 @@ public class WorkDay extends SuperClass {
 
     /**
      * Время окончания рабочего дня. Берётся максимальное время ухода из всех {@linkplain Event событий},
-     * {@linkplain org.onbrains.entity.workDayEvent.EventType#isWorking() время которых идет в зачет отработанного}
+     * {@linkplain org.onbrains.entity.event.EventType#isWorking() время которых идет в зачет отработанного}
      *
      * @return Время окончания рабочего дня.
      */
