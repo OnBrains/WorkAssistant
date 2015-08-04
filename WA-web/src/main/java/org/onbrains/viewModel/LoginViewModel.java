@@ -1,4 +1,4 @@
-package org.onbrains.view;
+package org.onbrains.viewModel;
 
 import org.onbrains.dao.worker.LoginDAOInterface;
 import org.onbrains.entity.worker.Login;

@@ -1,4 +1,4 @@
-package org.onbrains.view.worker;
+package org.onbrains.viewModel.worker;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;

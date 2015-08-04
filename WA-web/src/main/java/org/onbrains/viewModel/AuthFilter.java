@@ -1,4 +1,4 @@
-package org.onbrains.view;
+package org.onbrains.viewModel;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;

@@ -1,4 +1,4 @@
-package org.onbrains.view.authorization;
+package org.onbrains.viewModel.authorization;
 
 import org.onbrains.dao.worker.LoginDAOInterface;
 import org.onbrains.dao.worker.WorkerDAOInterface;

@@ -1,4 +1,4 @@
-package org.onbrains.view.workDay;
+package org.onbrains.viewModel.workDay;
 
 import org.onbrains.dao.workDay.WorkDayDAOInterface;
 import org.onbrains.entity.workDay.WorkDay;
