@@ -111,7 +111,7 @@ public class WorkDayViewModel {
      *
      * @return Информация о следующем месяце.
      */
-    public String getNameNextMonth() {
+    public String getNameForNextMonth() {
         Calendar nextMonth = Calendar.getInstance();
         nextMonth.setTime(getSelectedMonth().getTime());
         nextMonth.add(Calendar.MONTH, 1);
@@ -123,7 +123,7 @@ public class WorkDayViewModel {
      *
      * @return Информация о предыдущем месяце.
      */
-    public String getNamePreviousMonth() {
+    public String getNameForPreviousMonth() {
         Calendar previousMonth = Calendar.getInstance();
         previousMonth.setTime(getSelectedMonth().getTime());
         previousMonth.add(Calendar.MONTH, -1);
