@@ -3,7 +3,7 @@ package org.onbrains.view.workDay;
 import org.onbrains.dao.workDay.WorkDayDAOInterface;
 import org.onbrains.entity.workDay.WorkDay;
 import org.onbrains.entity.workDay.WorkDayState;
-import org.onbrains.parsing.ConvertDate;
+import org.onbrains.utils.parsing.DateFormatService;
 import org.onbrains.service.SessionUtil;
 
 import javax.faces.bean.ManagedBean;
@@ -76,7 +76,7 @@ public class CurrentDayFrameModel implements Serializable {
      */
     public String getComingTime() {
         if (getCurrentDay() != null && isWorking()) {
-            return ConvertDate.getTime(currentDay.getComingTime().getTime());
+            return DateFormatService.toHHMM(currentDay.getComingTime().getTime());
         } else {
             return "__:__";
         }
@@ -100,7 +100,7 @@ public class CurrentDayFrameModel implements Serializable {
      * @return - реальное время ухода
      */
     private String getRealOutTime() {
-        return ConvertDate.getTime(currentDay.getOutTime().getTime());
+        return DateFormatService.toHHMM(currentDay.getOutTime().getTime());
     }
 
     /**
@@ -113,7 +113,7 @@ public class CurrentDayFrameModel implements Serializable {
         if (getCurrentDay() != null) {
             Calendar possibleOutComeTime = Calendar.getInstance();
             possibleOutComeTime.setTimeInMillis(getPossibleOutTimeInMSecond());
-            return ConvertDate.getTime(possibleOutComeTime.getTime());
+            return DateFormatService.toHHMM(possibleOutComeTime.getTime());
         } else {
             return "__:__";
         }
@@ -125,7 +125,7 @@ public class CurrentDayFrameModel implements Serializable {
     private Long getPossibleOutTimeInMSecond() {
         if (getCurrentDay() != null) {
             Long commingTimeInMSeconds = getCurrentDay().getComingTime().getTimeInMillis();
-            Long possibleOutTimeInMSecond = commingTimeInMSeconds + currentDay.getType().getWorkTimeInMSecond();
+            Long possibleOutTimeInMSecond = commingTimeInMSeconds + currentDay.getDay().getType().getWorkTimeInMSecond();
             return possibleOutTimeInMSecond;
         } else {
             return 0L;
@@ -135,10 +135,10 @@ public class CurrentDayFrameModel implements Serializable {
     public String getCurrentWorkedTime() {
         if (isWorking()) {
             if (isWorked()) {
-                return ConvertDate.formattedTimeFromMSec(currentDay.getSummaryWorkedTime());
+                return DateFormatService.mSecToHHMM(currentDay.getSummaryWorkedTime());
             } else {
                 Calendar currentTime = Calendar.getInstance();
-                return ConvertDate.formattedTimeFromMSec(currentTime.getTimeInMillis() - currentDay.getComingTime().getTimeInMillis());
+                return DateFormatService.mSecToHHMM(currentTime.getTimeInMillis() - currentDay.getComingTime().getTimeInMillis());
             }
         } else {
             return "__:__";
@@ -148,7 +148,7 @@ public class CurrentDayFrameModel implements Serializable {
     public String getResultWorkedTime() {
         if (isWorking()) {
             if (isWorked()) {
-                return ConvertDate.formattedTimeFromMSec(currentDay.getDeltaTime());
+                return DateFormatService.mSecToHHMM(currentDay.getDeltaTime());
             } else {
                 return getTimeForEndWorkDay();
             }
@@ -172,7 +172,7 @@ public class CurrentDayFrameModel implements Serializable {
             } else {
                 diffTimeInMSecond = diffTime.getTimeInMillis() - possibleOutTime;
             }
-            return ConvertDate.formattedTimeFromMSec(diffTimeInMSecond);
+            return DateFormatService.mSecToHHMM(diffTimeInMSecond);
         } else {
             return "__:__";
         }
@@ -193,7 +193,7 @@ public class CurrentDayFrameModel implements Serializable {
     }
 
     public String getLegendValue() {
-        return getCurrentDay() != null ? ConvertDate.dayFormat(currentDay.getDay()) +
+        return getCurrentDay() != null ? DateFormatService.toDDEE(currentDay.getDay().getDay()) +
                 " - " + currentDay.getState().getDesc() : "Не найдено";
     }
 

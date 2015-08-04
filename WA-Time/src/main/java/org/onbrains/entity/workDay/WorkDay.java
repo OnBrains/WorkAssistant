@@ -1,12 +1,12 @@
 package org.onbrains.entity.workDay;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
+import org.onbrains.entity.SuperClass;
+import org.onbrains.entity.day.Day;
 import org.onbrains.entity.workDayEvent.Event;
 import org.onbrains.entity.worker.Worker;
 
@@ -15,46 +15,35 @@ import org.onbrains.entity.worker.Worker;
  */
 
 @Entity
-@Table(name = "WORK_DAY", uniqueConstraints = {@UniqueConstraint(columnNames = {"WORKER_ID", "DAY"})})
+@Table(name = "WORK_DAY", uniqueConstraints = {@UniqueConstraint(columnNames = {"WORKER_ID", "DAY_ID"})})
 @NamedQueries
     ({
-        @NamedQuery(name = WorkDay.GET_TIME_INFO_BY_MONTH,
-                query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day, 'yyyyMM') = to_char(:month, 'yyyyMM') order by wt.day"),
+        @NamedQuery(name = WorkDay.GET_WORK_DAYS_BY_MONTH,
+                query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day.day, 'yyyyMM') = to_char(:month, 'yyyyMM') order by wt.day"),
         @NamedQuery(name = WorkDay.GET_CURRENT_DAY,
-                query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day, 'yyyyMMdd') = to_char(:day, 'yyyyMMdd')"),
+                query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day.day, 'yyyyMMdd') = to_char(:day, 'yyyyMMdd')"),
         @NamedQuery(name = WorkDay.GET_DAYS_PRIOR_CURRENT_DAY,
                 query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day, 'yyyyMM') = to_char(:month, 'yyyyMM') and wt.day <= :month order by wt.day")
     })
-public class WorkDay implements Serializable {
+public class WorkDay extends SuperClass {
 
-    public static final String GET_TIME_INFO_BY_MONTH = "WorkTimeDAO.getDayInfoByMonth";
+    public static final String GET_WORK_DAYS_BY_MONTH = "WorkTimeDAO.getWorkDaysByMonth";
     public static final String GET_CURRENT_DAY = "WorkTimeDAO.getCurrentDay";
     public static final String GET_DAYS_PRIOR_CURRENT_DAY = "WorkTimeDAO.getDaysPriorCurrentDay";
-    public static final String GET_EVENTS = "WorkDay.getEvents";
-
-    @Id
-    @GeneratedValue(generator = "WorkTimeId")
-    @SequenceGenerator(name = "WorkTimeId", sequenceName = "GEN_WORK_DAY_ID", allocationSize = 1)
-    @Column(name = "ID")
-    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "WORKER_ID", nullable = false)
     private Worker worker;
 
-    @Column(name = "DAY", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date day;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "DAY_ID", nullable = false)
+    private Day day;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "DAY_TYPE", length = 16, nullable = false)
-    private DayType type;
-
-    @Column(name = "COMING_TIME", nullable = false)
+    @Column(name = "COMING_TIME")
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar comingTime;
 
-    @Column(name = "OUT_TIME", nullable = false)
+    @Column(name = "OUT_TIME")
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar outTime;
 
@@ -77,21 +66,16 @@ public class WorkDay implements Serializable {
     protected WorkDay() {
     }
 
-    public WorkDay(Worker worker, Date day) {
+    public WorkDay(Worker worker, Day day) {
         this.worker = worker;
         this.day = day;
         //TODO: надо ли сетить состояние тут?
         this.state = WorkDayState.NO_WORK;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
+    /**
+     * @return Работник, к которому относится данный рабочий день.
+     */
     public Worker getWorker() {
         return worker;
     }
@@ -100,22 +84,23 @@ public class WorkDay implements Serializable {
         this.worker = worker;
     }
 
-    public Date getDay() {
+    /**
+     * @return Конкретный день в году
+     */
+    public Day getDay() {
         return day;
     }
 
-    public void setDay(Date day) {
+    public void setDay(Day day) {
         this.day = day;
     }
 
-    public DayType getType() {
-        return type;
-    }
-
-    public void setType(DayType type) {
-        this.type = type;
-    }
-
+    /**
+     * Время начала рабочего дня. Берётся минимальное время прихода из всех {@linkplain Event событий},
+     * {@linkplain org.onbrains.entity.workDayEvent.EventType#isWorking() время которых идет в зачет отработанного}.
+     *
+     * @return Время начала рабочего дня.
+     */
     public Calendar getComingTime() {
         return comingTime;
     }
@@ -124,12 +109,43 @@ public class WorkDay implements Serializable {
         this.comingTime = comingTime;
     }
 
+    /**
+     * Время окончания рабочего дня. Берётся максимальное время ухода из всех {@linkplain Event событий},
+     * {@linkplain org.onbrains.entity.workDayEvent.EventType#isWorking() время которых идет в зачет отработанного}
+     *
+     * @return Время окончания рабочего дня.
+     */
     public Calendar getOutTime() {
         return outTime;
     }
 
     public void setOutTime(Calendar outTime) {
         this.outTime = outTime;
+    }
+
+    /**
+     * Состаяние рабочего дня. Показывает в какой стадии находится рабочий день.
+     * Состояние <strong>На работе</strong> может быть выбрано только для текущего рабочего дня.
+     *
+     * @return Состояние, в котором находится рабочий день.
+     */
+    public WorkDayState getState() {
+        return state;
+    }
+
+    public void setState(WorkDayState state) {
+        this.state = state;
+    }
+
+    /**
+     * @return Перечень событий относящихся к рабочему дню.
+     */
+    public List<Event> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<Event> events) {
+        this.events = events;
     }
 
     /**
@@ -148,7 +164,7 @@ public class WorkDay implements Serializable {
      * @return - true если отработан весь день
      */
     public boolean isWorkedFullDay() {
-        return getSummaryWorkedTime() > type.getWorkTimeInMSecond();
+        return getSummaryWorkedTime() > day.getType().getWorkTimeInMSecond();
     }
 
     /**
@@ -158,42 +174,9 @@ public class WorkDay implements Serializable {
      */
     public Long getDeltaTime() {
         if (getState().equals(WorkDayState.WORKED)) {
-            return isWorkedFullDay() ? getSummaryWorkedTime() - type.getWorkTimeInMSecond() : type.getWorkTimeInMSecond() - getSummaryWorkedTime();
+            return isWorkedFullDay() ? getSummaryWorkedTime() - day.getType().getWorkTimeInMSecond() : day.getType().getWorkTimeInMSecond() - getSummaryWorkedTime();
         }
         return 0L;
-    }
-
-    public WorkDayState getState() {
-        return state;
-    }
-
-    public void setState(WorkDayState state) {
-        this.state = state;
-    }
-
-    public List<Event> getEvents() {
-        return events;
-    }
-
-    public void setEvents(List<Event> events) {
-        this.events = events;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        WorkDay workDay = (WorkDay) o;
-
-        if (id != null ? !id.equals(workDay.id) : workDay.id != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return id != null ? id.hashCode() : 0;
     }
 
 }

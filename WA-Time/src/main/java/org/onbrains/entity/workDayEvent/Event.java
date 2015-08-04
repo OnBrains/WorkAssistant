@@ -1,35 +1,33 @@
 package org.onbrains.entity.workDayEvent;
 
-import org.onbrains.entity.worker.Worker;
+import org.onbrains.entity.SuperClass;
+import org.onbrains.entity.workDay.WorkDay;
 
 import javax.persistence.*;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Naumov Oleg on 18.04.2015 14:59.
+ *         События которые могут происходить в течении рабочего дня. Описание {@linkplain EventType типов событий}.
+ *         Одно событие может быть привязано к рабочим дня нескольких работников.
+ *         Совместные командировки, совещания, миттинги команд и тд.
+ *         <br/>
+ *         Для {@linkplain EventType#isWorking событий}, время которых влияет на отработанное.
+ *         Не могут пересекаться рабочие интервалы. Границы интервала определяются {@linkplain #startTime началом события}
+ *         и {@linkplain #endTime окончанием события}.
  */
-
 @Entity
 @Table(name = "EVENT")
-public class Event implements Serializable {
+public class Event extends SuperClass {
 
-    @Id
-    @GeneratedValue(generator = "EventId")
-    @SequenceGenerator(name = "EventId", sequenceName = "GEN_EVENT_ID", allocationSize = 1)
-    @Column(name = "ID")
-    private Long id;
-
+    @Temporal(TemporalType.DATE)
     @Column(name = "DAY", nullable = false)
     private Date day;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "WORKER_EVENT", joinColumns = {@JoinColumn(name = "EVENT_ID")},
-                                        inverseJoinColumns = {@JoinColumn(name = "WORKER_ID")})
-    private List<Worker> workDays = new ArrayList<>();
+    @JoinTable(name = "WORK_DAY_EVENT", joinColumns = {@JoinColumn(name = "EVENT_ID")},
+            inverseJoinColumns = {@JoinColumn(name = "WORK_DAY_ID")})
+    private Set<WorkDay> workDays = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TYPE_ID", nullable = false)
@@ -40,9 +38,6 @@ public class Event implements Serializable {
 
     @Column(name = "DESCRIPTION", nullable = true, length = 512)
     private String description;
-
-    @Column(name = "FULL_DAY", nullable = false)
-    private Boolean isFullDay = false;
 
     @Column(name = "START_TIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -55,14 +50,18 @@ public class Event implements Serializable {
     protected Event() {
     }
 
-    public Long getId() {
-        return id;
+    public Event(Date day, Set<WorkDay> workDays, EventType type, String title, Calendar startTime, Calendar endTime) {
+        this.day = day;
+        this.workDays = workDays;
+        this.type = type;
+        this.title = title;
+        this.startTime = startTime;
+        this.endTime = endTime;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
+    /**
+     * @return День, в который происходит событие.
+     */
     public Date getDay() {
         return day;
     }
@@ -71,14 +70,20 @@ public class Event implements Serializable {
         this.day = day;
     }
 
-    public List<Worker> getWorkDays() {
+    /**
+     * @return Перечень рабочих дней, к которым привязано данное событие.
+     */
+    public Set<WorkDay> getWorkDays() {
         return workDays;
     }
 
-    public void setWorkDays(List<Worker> workDays) {
+    public void setWorkDays(Set<WorkDay> workDays) {
         this.workDays = workDays;
     }
 
+    /**
+     * @return Тип события.
+     */
     public EventType getType() {
         return type;
     }
@@ -87,6 +92,9 @@ public class Event implements Serializable {
         this.type = type;
     }
 
+    /**
+     * @return Тема события.
+     */
     public String getTitle() {
         return title;
     }
@@ -95,6 +103,9 @@ public class Event implements Serializable {
         this.title = title;
     }
 
+    /**
+     * @return Подробное описание события.
+     */
     public String getDescription() {
         return description;
     }
@@ -103,14 +114,9 @@ public class Event implements Serializable {
         this.description = description;
     }
 
-    public Boolean getIsFullDay() {
-        return isFullDay;
-    }
-
-    public void setIsFullDay(Boolean isFullDay) {
-        this.isFullDay = isFullDay;
-    }
-
+    /**
+     * @return Время начала события.
+     */
     public Calendar getStartTime() {
         return startTime;
     }
@@ -119,6 +125,9 @@ public class Event implements Serializable {
         this.startTime = startTime;
     }
 
+    /**
+     * @return Время окончания события.
+     */
     public Calendar getEndTime() {
         return endTime;
     }

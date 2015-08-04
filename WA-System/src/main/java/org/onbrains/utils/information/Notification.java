@@ -1,4 +1,4 @@
-package org.onbrains.inf;
+package org.onbrains.utils.information;
 
 import org.primefaces.context.RequestContext;
 

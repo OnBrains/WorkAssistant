@@ -6,19 +6,20 @@
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
         <jta-data-source>java:/OracleWA</jta-data-source>
         <class>org.onbrains.entity.worker.Worker</class>
+        <class>org.onbrains.entity.day.Day</class>
         <class>org.onbrains.entity.workDay.WorkDay</class>
         <class>org.onbrains.entity.worker.Login</class>
         <class>org.onbrains.entity.workDayEvent.Event</class>
         <class>org.onbrains.entity.workDayEvent.EventType</class>
         <properties>
-            <property name="hibernate.transaction.manager_lookup_class"
-                      value="org.hibernate.transaction.JBossTransactionManagerLookup"/>
             <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect"/>
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="true"/>
+            <!--<property name="hibernate.hbm2ddl.auto" value="update"/>-->
             <property name="hibernate.connection.autocommit" value="true"/>
             <property name="hibernate.order_updates" value="true"/>
             <property name="hibernate.order_inserts" value="true"/>
         </properties>
     </persistence-unit>
+
 </persistence> 

@@ -39,21 +39,6 @@
             <version>1.0.10</version>
         </dependency>
 
-        <!-- JSF 2 -->
-        <dependency>
-            <groupId>com.sun.faces</groupId>
-            <artifactId>jsf-api</artifactId>
-            <version>2.1.29</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.sun.faces</groupId>
-            <artifactId>jsf-impl</artifactId>
-            <version>2.2.5</version>
-            <scope>provided</scope>
-        </dependency>
-
         <dependency>
             <groupId>ru.naumovCorp</groupId>
             <artifactId>WA-Time</artifactId>

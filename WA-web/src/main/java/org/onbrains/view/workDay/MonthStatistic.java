@@ -34,13 +34,13 @@ public class MonthStatistic {
         if (workDaysByMonthType != null) {
             for (WorkDay wd : workDaysByMonthType) {
                 realWorkedTime = realWorkedTime + wd.getSummaryWorkedTime();
-                idealWorkedTimeByCurrentDay = idealWorkedTimeByCurrentDay + wd.getType().getWorkTimeInMSecond();
+                idealWorkedTimeByCurrentDay = idealWorkedTimeByCurrentDay + wd.getDay().getType().getWorkTimeInMSecond();
             }
             if (workDaysByMonthType.equals(workDays)) {
                 idealWorkedTimeByAllMonth = idealWorkedTimeByCurrentDay;
             } else {
                 for (WorkDay wd: workDays) {
-                    idealWorkedTimeByAllMonth = idealWorkedTimeByAllMonth + wd.getType().getWorkTimeInMSecond();
+                    idealWorkedTimeByAllMonth = idealWorkedTimeByAllMonth + wd.getDay().getType().getWorkTimeInMSecond();
                 }
             }
         }

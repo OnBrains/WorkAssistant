@@ -62,7 +62,7 @@ public class WorkDayDAO implements WorkDayDAOInterface {
     @Override
     public List<WorkDay> getDayInfoByMonth(Date month, Worker currentWorker) {
         EntityManager em = dh.getEntityManager();
-        return em.createNamedQuery(WorkDay.GET_TIME_INFO_BY_MONTH, WorkDay.class)
+        return em.createNamedQuery(WorkDay.GET_WORK_DAYS_BY_MONTH, WorkDay.class)
                 .setParameter("worker", currentWorker).setParameter("month", month).getResultList();
     }
 

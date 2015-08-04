@@ -1,5 +1,7 @@
 package org.onbrains.entity.worker;
 
+import org.onbrains.entity.SuperClass;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -12,15 +14,9 @@ import javax.persistence.*;
 @Entity
 @Table(name = "WORKER")
 @NamedQuery(name = Worker.GET_ALL_WORKER, query = "select w from Worker w")
-public class Worker implements Serializable {
+public class Worker extends SuperClass {
 
     public static final String GET_ALL_WORKER = "WorkerDAO.getWorkers";
-
-    @Id
-    @GeneratedValue(generator = "WorkerId")
-    @SequenceGenerator(name = "WorkerId", sequenceName = "GEN_WORKER_ID", allocationSize = 1)
-    @Column(name = "ID")
-    private Long id;
 
     @Column(name = "FAMILY", nullable = false, length = 64)
     private String family;
@@ -28,10 +24,11 @@ public class Worker implements Serializable {
     @Column(name = "FIRST_NAME", nullable = false, length = 32)
     private String firstName;
 
-    @Column(name = "SURNAME", nullable = false, length = 32)
+    @Column(name = "SURNAME", nullable = true, length = 32)
     private String surname;
 
     @Column(name = "BIRTHDAY", nullable = false)
+    @Temporal(TemporalType.DATE)
     private Date birthday;
 
     @Enumerated(EnumType.STRING)
@@ -54,14 +51,6 @@ public class Worker implements Serializable {
         this.birthday = birthday;
         this.sex = sex;
         this.email = email;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getFamily() {
@@ -123,23 +112,6 @@ public class Worker implements Serializable {
     @Override
     public String toString() {
         return family + " " + firstName;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Worker worker = (Worker) o;
-
-        if (id != null ? !id.equals(worker.id) : worker.id != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return id != null ? id.hashCode() : 0;
     }
 
 }

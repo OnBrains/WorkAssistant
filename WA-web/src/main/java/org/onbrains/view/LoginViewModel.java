@@ -3,7 +3,7 @@ package org.onbrains.view;
 import org.onbrains.dao.worker.LoginDAOInterface;
 import org.onbrains.entity.worker.Login;
 import org.onbrains.entity.worker.Worker;
-import org.onbrains.inf.Notification;
+import org.onbrains.utils.information.Notification;
 import org.onbrains.service.SessionUtil;
 
 import javax.faces.bean.ManagedBean;
