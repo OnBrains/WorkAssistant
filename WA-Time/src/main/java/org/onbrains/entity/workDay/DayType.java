@@ -2,38 +2,53 @@ package org.onbrains.entity.workDay;
 
 /**
  * @author Naumov Oleg on 11.04.2015 13:07.
+ *
+ * Типы дней, пока что видится только три типа:
+ * <ul>
+ *     <li>Рабочий день</li>
+ *     <li>Выходной</li>
+ *     <li>Сокращенный день</li>
+ * </ul>
+ * Для типа дня можно задать {@linkplain #getWorkTimeInMSecond() время}, которое необходимо отработать
+ * и {@linkplain #getPathToIcon() иконку}
  */
-
 public enum DayType {
 
     WORK_DAY       ("Рабочий день", 30600000L, ""),
     HOLIDAY        ("Выходной", 0L, ""),
-    DAY_OFF        ("Отгул", 30600000L, "img/dayType/day_off.png"),
-    SHORT_WORK_DAY ("Сокращенный день", 27000000L, "img/dayType/short_work_day.png"),
-    BUSINESS_TRIP  ("Командировка", 0L, "img/dayType/business_trip.png"),
-    HOSPITAL       ("Больничный", 0L, "img/dayType/hospital.png"),
-    VACATION       ("Отпуск", 0L, "img/dayType/vacation.png");
+    SHORT_WORK_DAY ("Сокращенный день", 27000000L, "img/dayType/short_work_day.png");
 
     private String desc;
     private Long workTimeInMSecond;
-    private String icon;
+    private String pathToIcon;
 
     private DayType(String desc, Long workTimeInMSecond, String icon) {
         this.desc = desc;
         this.workTimeInMSecond = workTimeInMSecond;
-        this.icon = icon;
+        this.pathToIcon = icon;
     }
 
+    /**
+     * Понятное наименование типа рабочего дня, которое можно отобразить в UI.
+     *
+     * @return Наименование типа рабочего дня.
+     */
     public String getDesc() {
         return desc;
     }
 
+    /**
+     * @return Время, которое необходимо отработать в рабочий день данного типа.
+     */
     public Long getWorkTimeInMSecond() {
         return workTimeInMSecond;
     }
 
-    public String getIcon() {
-        return icon;
+    /**
+     * @return Путь до места, в котором лежит иконта для данного типа рабочего дня.
+     */
+    public String getPathToIcon() {
+        return pathToIcon;
     }
 
 }
