@@ -53,6 +53,27 @@ public class Event extends SuperClass {
     }
 
     /**
+     * Services
+     */
+
+    /**
+     * Вычисляет время, которое пойдет в учет отработанного времени за день. На отработанное время влияют только
+     * {@linkplain EventType#isWorking() определенные типы событий}. Если событие не влияет на рабочее время вернется нулевое значение.
+     *
+     * @return Отработанное время в миллисекундах.
+     */
+    public Long getWorkedTime() {
+        if (type.isWorking()) {
+            return endTime.getTimeInMillis() - startTime.getTimeInMillis();
+        }
+        return 0L;
+    }
+
+    /**
+     * Simple getters & setters
+     */
+
+    /**
      * @return День, в который происходит событие.
      */
     public Date getDay() {

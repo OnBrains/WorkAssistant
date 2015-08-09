@@ -17,14 +17,14 @@ import org.onbrains.entity.worker.Worker;
 @Entity
 @Table(name = "WORK_DAY", uniqueConstraints = {@UniqueConstraint(columnNames = {"WORKER_ID", "DAY_ID"})})
 @NamedQueries
-    ({
-        @NamedQuery(name = WorkDay.GET_WORK_DAYS_BY_MONTH,
-                query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day.day, 'yyyyMM') = to_char(:month, 'yyyyMM') order by wt.day"),
-        @NamedQuery(name = WorkDay.GET_CURRENT_DAY,
-                query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day.day, 'yyyyMMdd') = to_char(:day, 'yyyyMMdd')"),
-        @NamedQuery(name = WorkDay.GET_DAYS_PRIOR_CURRENT_DAY,
-                query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day, 'yyyyMM') = to_char(:month, 'yyyyMM') and wt.day <= :month order by wt.day")
-    })
+        ({
+                @NamedQuery(name = WorkDay.GET_WORK_DAYS_BY_MONTH,
+                        query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day.day, 'yyyyMM') = to_char(:month, 'yyyyMM') order by wt.day"),
+                @NamedQuery(name = WorkDay.GET_CURRENT_DAY,
+                        query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day.day, 'yyyyMMdd') = to_char(:day, 'yyyyMMdd')"),
+                @NamedQuery(name = WorkDay.GET_DAYS_PRIOR_CURRENT_DAY,
+                        query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day, 'yyyyMM') = to_char(:month, 'yyyyMM') and wt.day <= :month order by wt.day")
+        })
 public class WorkDay extends SuperClass {
 
     public static final String GET_WORK_DAYS_BY_MONTH = "WorkTimeDAO.getWorkDaysByMonth";
@@ -51,17 +51,10 @@ public class WorkDay extends SuperClass {
     @Column(name = "STATE", length = 16, nullable = false)
     private WorkDayState state = WorkDayState.NO_WORK;
 
-    @ManyToMany(mappedBy = "workDays", fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "WORK_DAY_EVENT", joinColumns = {@JoinColumn(name = "WORK_DAY_ID")},
+            inverseJoinColumns = {@JoinColumn(name = "EVENT_ID")})
     private List<Event> events = new ArrayList<>();
-
-    @Transient
-    private Long summaryWorkedTime;
-
-    @Transient
-    private boolean workedFullDay;
-
-    @Transient
-    private Long deltaTime;
 
     protected WorkDay() {
     }
@@ -149,19 +142,27 @@ public class WorkDay extends SuperClass {
     }
 
     /**
-     * Суммарное отработаное время в мил. секундах.
-     * Равняется время ухода минус время прихода. Если рабочий день не закончен = 0.
+     * Суммарное отработанное время в миллисекундах за все {@linkplain org.onbrains.entity.event.EventType#isWorking() события},
+     * которые влияют на отработанное время.
      *
-     * @return - разница между временем ухода и временем прихода
+     * @return Суммарное отработанное время в миллисекундах.
      */
     public Long getSummaryWorkedTime() {
-        return getState().equals(WorkDayState.WORKED) ? outTime.getTimeInMillis() - comingTime.getTimeInMillis() : 0;
+        Long summaryWorkedTime = 0L;
+        if (!events.isEmpty()) {
+            for (Event event : events) {
+                summaryWorkedTime = summaryWorkedTime + event.getWorkedTime();
+            }
+        }
+        return summaryWorkedTime;
     }
 
     /**
-     * Определяет отработано ли рабочий день полностью
+     * Определяет отработано ли все положенное время, за текущий рабочий день.
+     * Для каждого типа рабочего дня может быть своя {@linkplain org.onbrains.entity.workDay.DayType#getWorkTimeInMSecond() номра времени},
+     * которое положено отработать.
      *
-     * @return - true если отработан весь день
+     * @return <strong>true</strong> если отработанно все положенное время.
      */
     public boolean isWorkedFullDay() {
         return getSummaryWorkedTime() > day.getType().getWorkTimeInMSecond();
@@ -170,13 +171,11 @@ public class WorkDay extends SuperClass {
     /**
      * Вычисляет переработанное или недоработанное время, для завершенного дня.
      *
-     * @return - переработанное/недоработанное время в мил. секундах, если день не закончен вернет 0
+     * @return Переработанное/недоработанное время в миллисекундах, если день не закончен вернет 0.
      */
     public Long getDeltaTime() {
-        if (getState().equals(WorkDayState.WORKED)) {
-            return isWorkedFullDay() ? getSummaryWorkedTime() - day.getType().getWorkTimeInMSecond() : day.getType().getWorkTimeInMSecond() - getSummaryWorkedTime();
-        }
-        return 0L;
+        Long resultWorkedTimeInMSecond = Math.abs(getSummaryWorkedTime() - day.getType().getWorkTimeInMSecond());
+        return getState().equals(WorkDayState.WORKED) ? resultWorkedTimeInMSecond : 0L;
     }
 
 }

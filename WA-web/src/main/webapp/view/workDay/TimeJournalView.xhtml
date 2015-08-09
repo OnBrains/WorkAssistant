@@ -29,7 +29,7 @@
             </pe:layoutPane>
 
             <pe:layoutPane position="west" closable="true" resizable="false" size="290" minSize="290" styleClassContent="layout_style">
-                <!--<ui:include src="/viewModel/workDay/CurrentDayFrame.xhtml"/>-->
+                <ui:include src="/view/workDay/CurrentDayFrame.xhtml"/>
             </pe:layoutPane>
 
             <pe:layoutPane position="center" resizable="true" styleClassContent="layout_style">
@@ -48,7 +48,7 @@
                 </h:form>
                 <h:form id="month_info_form">
                     <p:dataTable id="month_info_table" value="#{workDayViewModel.workDaysBySelectedMonth}" var="dayInfo"
-                                 editable="true" scrollable="true" scrollHeight="700">
+                                 rowStyleClass="#{workDayViewModelOld.getStyleClassForRow(dayInfo)}" editable="true" scrollable="true" scrollHeight="700">
                         <f:facet name="header">
                             <p:commandButton id="previous_month" value="#{workDayViewModel.nameForPreviousMonth}" action="#{workDayViewModel.previousMonth}"
                                              update=":month_info_form, :month_statistic, :month_action" style="float: left; margin: 5px;"/>
@@ -79,11 +79,13 @@
                             <f:facet name="header">
                                 <h:graphicImage name="img/clock/clock_link.png" title="Отработанное время"/>
                             </f:facet>
+                            <h:outputText value="#{dateFormat.mSecToHHMM(dayInfo.getSummaryWorkedTime())}"/>
                         </p:column>
                         <p:column id="delta_work_day_id" style="text-align: center; width: 10%;">
                             <f:facet name="header">
                                 <h:graphicImage name="img/clock/clock_add.png" title="Переработано/Недоработано"/>
                             </f:facet>
+                            <h:outputText value="#{dateFormat.mSecToHHMM(dayInfo.getDeltaTime())}"/>
                         </p:column>
                         <p:column id="state_work_day_id" headerText="Состояние" style="text-align: center; width: 25%;">
                             <h:outputText value="#{dayInfo.state.desc}"/>
