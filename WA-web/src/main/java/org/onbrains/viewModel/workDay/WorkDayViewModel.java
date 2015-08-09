@@ -3,6 +3,7 @@ package org.onbrains.viewModel.workDay;
 import org.onbrains.dao.day.DayDAOInterface;
 import org.onbrains.dao.workDay.WorkDayDAOInterface;
 import org.onbrains.entity.day.Day;
+import org.onbrains.entity.workDay.DayType;
 import org.onbrains.entity.workDay.WorkDay;
 import org.onbrains.utils.parsing.DateFormatService;
 import org.onbrains.service.SessionUtil;
@@ -13,6 +14,7 @@ import javax.faces.bean.ViewScoped;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,6 +33,7 @@ public class WorkDayViewModel {
 
     private Calendar selectedMonth = Calendar.getInstance();
     private List<WorkDay> daysBySelectedMonth = new ArrayList<>();
+    private WorkDay currentWorkDay;
 
     @PostConstruct
     private void postConstruct() {
@@ -129,4 +132,31 @@ public class WorkDayViewModel {
         previousMonth.add(Calendar.MONTH, -1);
         return DateFormatService.toMMMMMYYYY(previousMonth.getTime());
     }
+
+    /**
+     * Style
+     */
+
+    public String getStyleClassForRow(WorkDay dayInfo) {
+        if (dayInfo.getDay().getType().equals(DayType.HOLIDAY) && !dayInfo.equals(getCurrentDay())) {
+            return "color_for_holiday";
+        }
+        if (dayInfo.equals(getCurrentDay())) {
+            return "color_for_current_day";
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * Simple getters & setters
+     */
+
+    private WorkDay getCurrentDay() {
+        if (currentWorkDay == null) {
+            currentWorkDay = wdDAO.getCurrentDayInfo(new Date(), sessionUtil.getWorker());
+        }
+        return currentWorkDay;
+    }
+
 }
