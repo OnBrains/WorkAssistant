@@ -8,6 +8,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.inject.Inject;
+import java.util.List;
 
 /**
  * @author Naumov Oleg on 04.08.2015 22:19.
@@ -39,4 +40,8 @@ public class EventTypeDAO implements EventTypeDAOInterface {
         return dh.getEntityManager().find(EventType.class, eventTypeId);
     }
 
+    @Override
+    public List<EventType> getAllEventType() {
+        return dh.getEntityManager().createNamedQuery(EventType.GET_ALL_EVENT_TYPE, EventType.class).getResultList();
+    }
 }

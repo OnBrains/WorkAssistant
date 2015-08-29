@@ -3,6 +3,7 @@ package org.onbrains.entity.workDay;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.onbrains.entity.SuperClass;
@@ -54,7 +55,11 @@ public class WorkDay extends SuperClass {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "WORK_DAY_EVENT", joinColumns = {@JoinColumn(name = "WORK_DAY_ID")},
             inverseJoinColumns = {@JoinColumn(name = "EVENT_ID")})
+    @OrderBy(value = "startTime DESC")
     private List<Event> events = new ArrayList<>();
+
+    @Transient
+    private Event lastEvent;
 
     protected WorkDay() {
     }
@@ -139,6 +144,10 @@ public class WorkDay extends SuperClass {
 
     public void setEvents(List<Event> events) {
         this.events = events;
+    }
+
+    public Event getLastEvent() {
+        return !events.isEmpty() ? events.get(0) : null;
     }
 
     /**

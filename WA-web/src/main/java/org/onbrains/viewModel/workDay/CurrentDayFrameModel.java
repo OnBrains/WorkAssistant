@@ -2,20 +2,25 @@ package org.onbrains.viewModel.workDay;
 
 import org.onbrains.dao.DAOHelper;
 import org.onbrains.dao.workDay.WorkDayDAOInterface;
+import org.onbrains.dao.workDayEvent.EventTypeDAOInterface;
 import org.onbrains.entity.workDay.WorkDay;
 import org.onbrains.entity.workDay.WorkDayState;
 import org.onbrains.entity.event.Event;
 import org.onbrains.entity.event.EventType;
 import org.onbrains.service.SessionUtil;
+import org.onbrains.utils.information.Notification;
 import org.onbrains.utils.parsing.DateFormatService;
+import org.primefaces.event.RowEditEvent;
 
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Naumov Oleg on 04.08.2015 21:40.
@@ -27,9 +32,12 @@ public class CurrentDayFrameModel implements Serializable {
     @Inject
     private WorkDayDAOInterface wdDAO;
     @Inject
+    private EventTypeDAOInterface etDAO;
+    @Inject
     private DAOHelper hDAO;
 
     private WorkDay currentWorkDay;
+    private EventType selectedEventType;
 
     @PostConstruct
     public void postConstruct() {
@@ -46,14 +54,72 @@ public class CurrentDayFrameModel implements Serializable {
     }
 
     /**
+     * Из за того, что Primefaces проставляет 1970г если использовать компонент для ввода только времени необходимо
+     * формировать корректное значение времени.
+     *
+     * @param time корректное время.
+     * @param day  день года.
+     * @return Корректное время с корректной датой.
+     */
+    private Calendar formationCorrectTime(Calendar time, Date day) {
+        Calendar correctTime = Calendar.getInstance();
+        correctTime.setTime(day);
+        correctTime.set(Calendar.HOUR_OF_DAY, time.get(Calendar.HOUR_OF_DAY));
+        correctTime.set(Calendar.MINUTE, time.get(Calendar.MINUTE));
+        return correctTime;
+    }
+
+    public void onRowEdit(RowEditEvent event) {
+        Event editionEvent = (Event) event.getObject();
+        editionEvent.setStartTime(formationCorrectTime(editionEvent.getStartTime(), editionEvent.getDay()));
+        editionEvent.setEndTime(formationCorrectTime(editionEvent.getEndTime(), editionEvent.getDay()));
+        if (editionEvent.getEndTime().getTimeInMillis() < editionEvent.getStartTime().getTimeInMillis()) {
+            Notification.warn("Невозможно сохранить изменения", "Время окончания события больше времени начала");
+        } else {
+            hDAO.merge(editionEvent);
+        }
+    }
+
+    /**
+     * Создает новое событие и добавляет его к списку событий текущего дня.
+     *
+     * @return Созданное событие.
+     */
+    private Event addNewEvent() {
+        Event workEvent = new Event(currentWorkDay.getDay().getDay(), selectedEventType, selectedEventType.getTitle(), Calendar.getInstance());
+        hDAO.persist(workEvent);
+        currentWorkDay.getEvents().add(workEvent);
+        wdDAO.update(currentWorkDay);
+        return workEvent;
+    }
+
+    /**
+     * {@linkplain #addNewEvent Создает событие} и отмечает начало рабочего дня если это первое событие для текущего дня.
+     */
+    public void startEvent() {
+        addNewEvent();
+        if (currentWorkDay.getEvents().isEmpty()) {
+            startWork();
+        }
+    }
+
+    /**
+     * Проставляет время окончания для последнего события текущего дня.
+     */
+    public void stopEvent() {
+        Event editingEvent = currentWorkDay.getLastEvent();
+        editingEvent.setEndTime(Calendar.getInstance());
+        hDAO.merge(editingEvent);
+    }
+
+    /**
      * Проставляет информацию о начале рабочего дня, в качестве времени прихода на работу
      * проставляется текущее время.
      */
     //FIXME: Перед началом рабочего дня надо проверять, нет ли уже события влияющего на отработанное время, с таким временным интервалом
     public void startWork() {
-        currentWorkDay.setComingTime(Calendar.getInstance());
+        currentWorkDay.setComingTime(currentWorkDay.getLastEvent().getStartTime());
         currentWorkDay.setState(WorkDayState.WORKING);
-        wdDAO.update(currentWorkDay);
     }
 
     /**
@@ -65,13 +131,6 @@ public class CurrentDayFrameModel implements Serializable {
     public void endWork() {
         currentWorkDay.setOutTime(Calendar.getInstance());
         currentWorkDay.setState(WorkDayState.WORKED);
-        Event workEvent = new Event(currentWorkDay.getDay().getDay(), (EventType) hDAO.find(EventType.class, EventType.WORK_EVENT_TYPE_ID),
-                "Работа за " + DateFormatService.toYYYYMMDD(new Date()), currentWorkDay.getComingTime(), currentWorkDay.getOutTime());
-        hDAO.persist(workEvent);
-//        List<Event> events = currentWorkDay.getEvents();
-        currentWorkDay.getEvents().add(workEvent);
-        wdDAO.update(currentWorkDay);
-
     }
 
     /**
@@ -213,6 +272,26 @@ public class CurrentDayFrameModel implements Serializable {
 
     public WorkDay getCurrentWorkDay() {
         return currentWorkDay;
+    }
+
+    public EventType getSelectedEventType() {
+        return selectedEventType;
+    }
+
+    public void setSelectedEventType(EventType selectedEventType) {
+        this.selectedEventType = selectedEventType;
+    }
+
+    public List<EventType> getAllEventType() {
+        return etDAO.getAllEventType();
+    }
+
+    public Date getCurrentTime() {
+        return Calendar.getInstance().getTime();
+    }
+
+    public int getMinHourForEndEvent(Event event) {
+        return event.getStartTime().get(Calendar.HOUR_OF_DAY);
     }
 
 }

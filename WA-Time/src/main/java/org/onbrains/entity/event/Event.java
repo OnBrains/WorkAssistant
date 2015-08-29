@@ -37,19 +37,18 @@ public class Event extends SuperClass {
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar startTime;
 
-    @Column(name = "END_TIME", nullable = false)
+    @Column(name = "END_TIME", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar endTime;
 
     protected Event() {
     }
 
-    public Event(Date day, EventType type, String title, Calendar startTime, Calendar endTime) {
+    public Event(Date day, EventType type, String title, Calendar startTime) {
         this.day = day;
         this.type = type;
         this.title = title;
         this.startTime = startTime;
-        this.endTime = endTime;
     }
 
     /**
@@ -64,7 +63,7 @@ public class Event extends SuperClass {
      */
     public Long getWorkedTime() {
         if (type.isWorking()) {
-            return endTime.getTimeInMillis() - startTime.getTimeInMillis();
+            return startTime.getTimeInMillis() - startTime.getTimeInMillis();
         }
         return 0L;
     }

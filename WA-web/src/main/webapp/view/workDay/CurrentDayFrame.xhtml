@@ -1,43 +1,71 @@
-<ui:component   xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:h="http://java.sun.com/jsf/html"
-                xmlns:f="http://java.sun.com/jsf/core"
-                xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:p="http://primefaces.org/ui"
-                xmlns:pe="http://primefaces.org/ui/extensions"
-                xmlns:c="http://java.sun.com/jsp/jstl/core">
+<ui:component xmlns="http://www.w3.org/1999/xhtml"
+              xmlns:h="http://java.sun.com/jsf/html"
+              xmlns:f="http://java.sun.com/jsf/core"
+              xmlns:ui="http://java.sun.com/jsf/facelets"
+              xmlns:p="http://primefaces.org/ui"
+              xmlns:pe="http://primefaces.org/ui/extensions"
+              xmlns:c="http://java.sun.com/jsp/jstl/core">
 
     <ui:define name="header">
-        <h:outputStylesheet name="wa-time.css" />
+        <h:outputStylesheet name="wa-time.css"/>
         <title>Влияй на свое будущее</title>
     </ui:define>
 
-    <h:form id="current_day_info_form">
+    <h:form id="current_day_form">
         <p:fieldset legend="#{currentDayFrameModel.legendValue}">
-            <h:panelGrid id="start_end_time" columns="4" cellpadding="10">
-                <p:commandLink id="start_day_button" for="current_day_coming_time" action="#{currentDayFrameModel.startWork()}"
-                               disabled="#{currentDayFrameModel.isWorking()}" update="current_day_info_form, :month_info_form"
-                               title="Начать рабочий день">
-                    <h:graphicImage name="img/clock/clock_play.png" />
-                </p:commandLink>
-                <h:outputText id="current_day_coming_time" value="#{currentDayFrameModel.comingTime}" styleClass="window_for_time"/>
+            <p:commandLink id="start_event_button" disabled="#{currentDayFrameModel.currentWorkDay.lastEvent.endTime == null}"
+                           title="Начать событие">
+                <h:graphicImage name="img/clock/clock_play.png"/>
+            </p:commandLink>
+            <p:overlayPanel id="event_types_panel" for="start_event_button" hideEffect="fade" rendered="#{currentDayFrameModel.currentWorkDay.lastEvent.endTime != null}">
+                <h:selectOneMenu id="event_type" value="#{currentDayFrameModel.selectedEventType}" style="width: 150px;"
+                                 converter="org.onbrains.viewModel.ObjectConverter">
+                    <f:selectItem itemLabel="Тип события" itemValue=""/>
+                    <f:selectItems value="#{currentDayFrameModel.allEventType}" var="selectedEventType"
+                                   itemLabel="#{selectedEventType.title}"/>
+                    <p:ajax event="change" listener="#{currentDayFrameModel.startEvent()}"
+                            update="current_day_form, :month_info_form"/>
+                </h:selectOneMenu>
+            </p:overlayPanel>
 
-                <p:commandLink id="end_day_button" for="current_day_out_time" action="#{currentDayFrameModel.endWork()}"
-                               disabled="#{!currentDayFrameModel.isWorking()}" update="current_day_info_form, :month_info_form"
-                               title="Закончить рабочий день">
-                    <h:graphicImage name="img/clock/clock_stop.png" />
-                </p:commandLink>
-                <h:outputText id="current_day_out_time" value="#{currentDayFrameModel.outTime}" styleClass="window_for_time"/>
+            <p:commandLink id="stop_event_button" title="Закончить событие" actionListener="#{currentDayFrameModel.stopEvent()}"
+                           disabled="#{currentDayFrameModel.currentWorkDay.lastEvent.endTime != null}"
+                           update="current_day_form, :month_info_form">
+                <h:graphicImage name="img/clock/clock_pause.png"/>
+            </p:commandLink>
 
-                <h:graphicImage id="img_for_worked_time" for="time_for_end_work_day" title="Отработанное время"
-                                name="img/clock/clock_link.png"/>
-                <h:outputText id="worked_time" value="#{currentDayFrameModel.currentWorkedTime}" styleClass="window_for_time"/>
+            <p:dataTable id="current_day_events_table" value="#{currentDayFrameModel.currentWorkDay.events}" var="dayEvent" editable="true">
 
-                <h:graphicImage id="img_for_end_work_day" for="time_for_end_work_day" title="Оставшееся/Переработаное время"
-                                name="#{currentDayFrameModel.currentTimeMorePossibleOutTime() ? 'img/clock/clock_add.png' : 'img/clock/clock_delete.png'}"/>
-                <h:outputText id="time_for_end_work_day" value="#{currentDayFrameModel.deltaTime}" styleClass="window_for_time"/>
+                <p:ajax event="rowEdit" listener="#{currentDayFrameModel.onRowEdit}"/>
 
-            </h:panelGrid>
-                <p:poll interval="60" update="time_for_end_work_day, img_for_end_work_day, worked_time" stop="#{!currentDayFrameModel.working}"/>
+                <p:column headerText="Тип" style="width: 35%;">
+                    #{dayEvent.type.title}
+                </p:column>
+                <p:column headerText="Начало" style="text-align: center; width: 25%;">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <h:outputText value="#{dateFormat.toHHMM(dayEvent.startTime.time)}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <pe:timePicker value="#{dayEvent.startTime.time}" mode="popup"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+                <p:column headerText="Окончание" style="text-align: center; width: 25%;">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <h:outputText value="#{dateFormat.toHHMM(dayEvent.endTime.time)}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <pe:timePicker value="#{dayEvent.endTime != null ? dayEvent.endTime.time : currentDayFrameModel.currentTime}"
+                                           mode="popup" minHour="#{currentDayFrameModel.getMinHourForEndEvent(dayEvent)}"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+                <p:column style="text-align: center; width: 15%;">
+                    <p:rowEditor/>
+                </p:column>
+            </p:dataTable>
         </p:fieldset>
     </h:form>
 
