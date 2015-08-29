@@ -6,22 +6,21 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:p="http://primefaces.org/ui"
-      xmlns:pe="http://primefaces.org/ui/extensions"
-      xmlns:c="http://java.sun.com/jsp/jstl/core">
+        >
 
 <f:view encoding="UTF-8" contentType="text/html">
 
-<h:head>
-    <ui:insert name="header"/>
-</h:head>
+    <h:head>
+        <ui:insert name="header"/>
+    </h:head>
 
-<h:body>
-    <ui:insert name="body"/>
+    <h:body>
+        <ui:insert name="body"/>
 
-    <p:growl id="msg_warn" for="arg_msg_for_warn" showDetail="true" sticky="true" />
-    <p:growl id="msg_info" for="arg_msg_for_info" showDetail="true" />
-    <p:growl id="msg_error" showDetail="true" autoUpdate="true" sticky="true" redisplay="false" />
-</h:body>
+        <p:growl id="msg_warn" for="arg_msg_for_warn" showDetail="true" sticky="true"/>
+        <p:growl id="msg_info" for="arg_msg_for_info" showDetail="true"/>
+        <p:growl id="msg_error" showDetail="true" autoUpdate="true" sticky="true" redisplay="false"/>
+    </h:body>
 
 </f:view>
 

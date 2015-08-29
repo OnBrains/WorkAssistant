@@ -11,27 +11,27 @@ import javax.inject.Inject;
  */
 public class EventDAO implements EventDAOInterface {
 
-    @Inject
-    private DAOHelper dh;
+	@Inject
+	private DAOHelper dh;
 
-    @Override
-    public void create(Event event) {
-        dh.persist(event);
-    }
+	@Override
+	public void create(Event event) {
+		dh.persist(event);
+	}
 
-    @Override
-    public void update(Event event) {
-        dh.merge(event);
-    }
+	@Override
+	public void update(Event event) {
+		dh.merge(event);
+	}
 
-    @Override
-    public void remove(Event event) {
-        dh.remove(event);
-    }
+	@Override
+	public void remove(Event event) {
+		dh.remove(event);
+	}
 
-    @Override
-    public Event find(Long eventId) {
-        return dh.getEntityManager().find(Event.class, eventId);
-    }
+	@Override
+	public Event find(Long eventId) {
+		return dh.getEntityManager().find(Event.class, eventId);
+	}
 
 }

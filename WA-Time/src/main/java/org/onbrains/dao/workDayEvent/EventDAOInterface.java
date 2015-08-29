@@ -7,9 +7,12 @@ import org.onbrains.entity.event.Event;
  */
 public interface EventDAOInterface {
 
-    public void create(Event event);
-    public void update(Event event);
-    public void remove(Event event);
-    public Event find(Long eventId);
+	public void create(Event event);
+
+	public void update(Event event);
+
+	public void remove(Event event);
+
+	public Event find(Long eventId);
 
 }

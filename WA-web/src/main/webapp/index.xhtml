@@ -10,12 +10,12 @@
       xmlns:c="http://java.sun.com/jsp/jstl/core">
 
 <h:head>
-    <h:outputStylesheet name="wa-time.css" />
+    <h:outputStylesheet name="wa-time.css"/>
     <title>Влияй на свое будущее</title>
 </h:head>
 
 <!--<ui:define name="head">-->
-    <!--<h:outputStylesheet name="wa-time.css" />-->
+<!--<h:outputStylesheet name="wa-time.css" />-->
 <!--</ui:define>-->
 
 <h:body>
@@ -28,25 +28,28 @@
                 </p:submenu>
                 <f:facet name="options">
                     <h:outputText value="#{loginViewModel.worker.toString()}  "/>
-                    <p:commandButton value="Выйти" action="#{loginViewModel.logout}" icon="ui-icon-extlink" />
+                    <p:commandButton value="Выйти" action="#{loginViewModel.logout}" icon="ui-icon-extlink"/>
                 </f:facet>
             </p:megaMenu>
         </pe:layoutPane>
 
-        <pe:layoutPane position="west" closable="true" resizable="false" size="320" minSize="320" styleClassContent="layout_style">
+        <pe:layoutPane position="west" closable="true" resizable="false" size="320" minSize="320"
+                       styleClassContent="layout_style">
             <ui:include src="view/workDay/CurrentDayFrame.CurrentDayFrameOld.xhtml"/>
         </pe:layoutPane>
 
         <pe:layoutPane position="center" resizable="true" styleClassContent="layout_style">
             <h:form id="month_statistic">
                 <p:outputPanel styleClass="panel_for_statistic">
-                    <ul id="list_with_legend" style="display: #{workDayViewModelOld.selectedMonth != null ? 'table' : 'none'};">
+                    <ul id="list_with_legend"
+                        style="display: #{workDayViewModelOld.selectedMonth != null ? 'table' : 'none'};">
                         <li style="#{workDayViewModelOld.statistic.workedTime == 0 ? 'display: none' : ''};">
                             <div class="circle" style="background-color: #4da9f1;"/>
                             #{workDayViewModelOld.getTime(workDayViewModelOld.statistic.workedTime)} Отработано
                         </li>
                         <li style="#{workDayViewModelOld.statistic.deltaTime == 0 ? 'display: none' : ''};">
-                            <div class="circle" style="background-color: #{workDayViewModelOld.statistic.realWorkedTimeMoreIdeal ? 'green' : 'red'};"/>
+                            <div class="circle"
+                                 style="background-color: #{workDayViewModelOld.statistic.realWorkedTimeMoreIdeal ? 'green' : 'red'};"/>
                             #{workDayViewModelOld.getTime(workDayViewModelOld.statistic.deltaTime)}
                             #{workDayViewModelOld.statistic.realWorkedTimeMoreIdeal ? 'Переработок' : 'Недоработок'}
                         </li>
@@ -65,10 +68,12 @@
             </h:form>
             <h:form id="month_action">
                 <p:outputPanel style="height: 43px;">
-                    <p:commandButton id="create_days_for_month" value="+" action="#{workDayViewModelOld.createDaysForMonth}"
+                    <p:commandButton id="create_days_for_month" value="+"
+                                     action="#{workDayViewModelOld.createDaysForMonth}"
                                      rendered="#{workDayViewModelOld.daysBySelectedMonth.size() == 0}"
                                      style="float:left; margin: 10px;" update=":month_info_form, :month_statistic"/>
-                    <p:commandButton value="Событие" style="float:right; margin: 10px;" title="Данная функция еще не реализована"/>
+                    <p:commandButton value="Событие" style="float:right; margin: 10px;"
+                                     title="Данная функция еще не реализована"/>
                 </p:outputPanel>
             </h:form>
             <h:form id="month_info_form">
@@ -77,7 +82,8 @@
                 <p:contextMenu for="month_info_table">
                     <p:submenu label="Отметить">
                         <c:forEach var="dayType" items="#{workDayViewModelOld.dayTypes}">
-                            <p:menuitem value="#{dayType.desc}" actionListener="#{workDayViewModelOld.changeDaysType(dayType)}"
+                            <p:menuitem value="#{dayType.desc}"
+                                        actionListener="#{workDayViewModelOld.changeDaysType(dayType)}"
                                         update=":month_info_form, :month_statistic"/>
                         </c:forEach>
                     </p:submenu>
@@ -85,19 +91,26 @@
 
                 <p:dataTable id="month_info_table" value="#{workDayViewModelOld.daysBySelectedMonth}" var="dayInfo"
                              editable="true" rowStyleClass="#{workDayViewModelOld.getStyleClassForRow(dayInfo)}"
-                             scrollable="true" scrollHeight="700" selectionMode="multiple" selection="#{workDayViewModelOld.selectedDays}"
+                             scrollable="true" scrollHeight="700" selectionMode="multiple"
+                             selection="#{workDayViewModelOld.selectedDays}"
                              rowSelectMode="new" rowKey="#{dayInfo.id}">
                     <f:facet name="header">
-                        <p:commandButton id="previous_month" value="#{workDayViewModelOld.namePreviousMonth}" action="#{workDayViewModelOld.previousMonth}"
-                                         update=":month_info_form, :month_statistic, :month_action" style="float: left; margin: 5px;"/>
-                        <h:outputText value="#{workDayViewModelOld.dateFormatForFeaderTable(workDayViewModelOld.selectedMonth.time)}"
-                                      style="vertical-align: -webkit-baseline-middle;"/>
-                        <p:commandButton id="next_month" value="#{workDayViewModelOld.nameNextMonth}" action="#{workDayViewModelOld.nextMonth}"
-                                         update=":month_info_form, :month_statistic, :month_action" style="float: right; margin: 5px;"/>
+                        <p:commandButton id="previous_month" value="#{workDayViewModelOld.namePreviousMonth}"
+                                         action="#{workDayViewModelOld.previousMonth}"
+                                         update=":month_info_form, :month_statistic, :month_action"
+                                         style="float: left; margin: 5px;"/>
+                        <h:outputText
+                                value="#{workDayViewModelOld.dateFormatForFeaderTable(workDayViewModelOld.selectedMonth.time)}"
+                                style="vertical-align: -webkit-baseline-middle;"/>
+                        <p:commandButton id="next_month" value="#{workDayViewModelOld.nameNextMonth}"
+                                         action="#{workDayViewModelOld.nextMonth}"
+                                         update=":month_info_form, :month_statistic, :month_action"
+                                         style="float: right; margin: 5px;"/>
                     </f:facet>
                     <p:ajax event="rowEdit" listener="#{workDayViewModelOld.onRowEdit}" update=":month_statistic"/>
                     <p:column id="work_day_type_id" headerText="Тип дня" style="text-align: center; width: 10%;">
-                        <h:graphicImage name="#{dayInfo.type.icon}" rendered="#{dayInfo.type != 'WORK_DAY' and dayInfo.type != 'HOLIDAY'}"
+                        <h:graphicImage name="#{dayInfo.type.icon}"
+                                        rendered="#{dayInfo.type != 'WORK_DAY' and dayInfo.type != 'HOLIDAY'}"
                                         title="#{dayInfo.type.desc}"/>
                     </p:column>
                     <p:column id="work_day_id" headerText="День" style="text-align: center; width: 20%;">
@@ -109,7 +122,8 @@
                         </f:facet>
                         <p:cellEditor>
                             <f:facet name="output">
-                                <h:outputText value="#{dayInfo.state == 'NO_WORK' ? '' : workDayViewModelOld.getTime(dayInfo.comingTime.time)}"/>
+                                <h:outputText
+                                        value="#{dayInfo.state == 'NO_WORK' ? '' : workDayViewModelOld.getTime(dayInfo.comingTime.time)}"/>
                             </f:facet>
                             <f:facet name="input">
                                 <pe:timePicker value="#{dayInfo.comingTime.time}" mode="popup"/>
@@ -122,10 +136,12 @@
                         </f:facet>
                         <p:cellEditor>
                             <f:facet name="output">
-                                <h:outputText value="#{dayInfo.state != 'WORKED' ? '' : workDayViewModelOld.getTime(dayInfo.outTime.time)}"/>
+                                <h:outputText
+                                        value="#{dayInfo.state != 'WORKED' ? '' : workDayViewModelOld.getTime(dayInfo.outTime.time)}"/>
                             </f:facet>
                             <f:facet name="input">
-                                <pe:timePicker value="#{dayInfo.outTime.time}" mode="popup" minHour="#{workDayViewModelOld.getMinHourForOutTime(dayInfo)}"/>
+                                <pe:timePicker value="#{dayInfo.outTime.time}" mode="popup"
+                                               minHour="#{workDayViewModelOld.getMinHourForOutTime(dayInfo)}"/>
                             </f:facet>
                         </p:cellEditor>
                     </p:column>
@@ -133,14 +149,16 @@
                         <f:facet name="header">
                             <h:graphicImage name="img/clock/clock_link.png" title="Отработанное время"/>
                         </f:facet>
-                        <h:outputText value="#{dayInfo.state != 'WORKED' ? '' : workDayViewModelOld.getTime(dayInfo.summaryWorkedTime)}"/>
+                        <h:outputText
+                                value="#{dayInfo.state != 'WORKED' ? '' : workDayViewModelOld.getTime(dayInfo.summaryWorkedTime)}"/>
                     </p:column>
                     <p:column id="delta_work_day_id" style="text-align: center; width: 10%;">
                         <f:facet name="header">
                             <h:graphicImage name="img/clock/clock_add.png" title="Переработано/Недоработано"/>
                         </f:facet>
-                        <h:outputText value="#{dayInfo.state != 'WORKED' ? '' : workDayViewModelOld.getTime(dayInfo.deltaTime)}"
-                                      style="#{dayInfo.isWorkedFullDay() ? 'color: green;' : 'color: red;'}"/>
+                        <h:outputText
+                                value="#{dayInfo.state != 'WORKED' ? '' : workDayViewModelOld.getTime(dayInfo.deltaTime)}"
+                                style="#{dayInfo.isWorkedFullDay() ? 'color: green;' : 'color: red;'}"/>
                     </p:column>
                     <p:column id="state_work_day_id" headerText="Состояние" style="text-align: center; width: 25%;">
                         <p:cellEditor>
@@ -160,7 +178,8 @@
             </h:form>
         </pe:layoutPane>
 
-        <pe:layoutPane position="south"  closable="false" resizable="false" styleContent="text-align: center" styleClassContent="layout_style">
+        <pe:layoutPane position="south" closable="false" resizable="false" styleContent="text-align: center"
+                       styleClassContent="layout_style">
             <p:graphicImage name="img/iconNC.png"/>
         </pe:layoutPane>
 

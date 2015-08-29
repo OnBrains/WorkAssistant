@@ -14,7 +14,7 @@ a:hover {
 }
 
 .ui-widget {
-    font-family: Roboto,arial,sans-serif !important;
+    font-family: Roboto, arial, sans-serif !important;
     font-size: 13px;
 }
 
@@ -42,12 +42,12 @@ a:hover {
 
 .color_for_holiday {
     background-color: #eaeaea;
-    background-image:none;
+    background-image: none;
 }
 
 .color_for_current_day {
     background-color: #4da9f1;
-    background-image:none;
+    background-image: none;
 }
 
 .ui-datatable td {

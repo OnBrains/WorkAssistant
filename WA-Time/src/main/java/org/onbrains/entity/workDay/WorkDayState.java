@@ -6,25 +6,24 @@ package org.onbrains.entity.workDay;
 
 public enum WorkDayState {
 
-    NO_WORK  ("Не работал", 1),
-    WORKING  ("На работе", 2),
-//    COMEAWAY ("Отлучился", 3), // пока отлучения не реализованы
-    WORKED   ("Отработал", 4);
+	NO_WORK("Не работал", 1), WORKING("На работе", 2),
+	// COMEAWAY ("Отлучился", 3), // пока отлучения не реализованы
+	WORKED("Отработал", 4);
 
-    private String desc;
-    private int order;
+	private String desc;
+	private int order;
 
-    private WorkDayState(String desc, int order) {
-         this.desc = desc;
-         this.order = order;
-    }
+	private WorkDayState(String desc, int order) {
+		this.desc = desc;
+		this.order = order;
+	}
 
-    public String getDesc() {
-        return desc;
-    }
+	public String getDesc() {
+		return desc;
+	}
 
-    public int getOrder() {
-        return order;
-    }
+	public int getOrder() {
+		return order;
+	}
 
 }

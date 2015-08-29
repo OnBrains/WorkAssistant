@@ -17,31 +17,31 @@ import java.util.List;
 @TransactionManagement(TransactionManagementType.BEAN)
 public class EventTypeDAO implements EventTypeDAOInterface {
 
-    @Inject
-    private DAOHelper dh;
+	@Inject
+	private DAOHelper dh;
 
-    @Override
-    public void create(EventType eventType) {
-        dh.persist(eventType);
-    }
+	@Override
+	public void create(EventType eventType) {
+		dh.persist(eventType);
+	}
 
-    @Override
-    public void update(EventType eventType) {
-        dh.merge(eventType);
-    }
+	@Override
+	public void update(EventType eventType) {
+		dh.merge(eventType);
+	}
 
-    @Override
-    public void remove(EventType eventType) {
-        dh.remove(eventType);
-    }
+	@Override
+	public void remove(EventType eventType) {
+		dh.remove(eventType);
+	}
 
-    @Override
-    public EventType find(Long eventTypeId) {
-        return dh.getEntityManager().find(EventType.class, eventTypeId);
-    }
+	@Override
+	public EventType find(Long eventTypeId) {
+		return dh.getEntityManager().find(EventType.class, eventTypeId);
+	}
 
-    @Override
-    public List<EventType> getAllEventType() {
-        return dh.getEntityManager().createNamedQuery(EventType.GET_ALL_EVENT_TYPE, EventType.class).getResultList();
-    }
+	@Override
+	public List<EventType> getAllEventType() {
+		return dh.getEntityManager().createNamedQuery(EventType.GET_ALL_EVENT_TYPE, EventType.class).getResultList();
+	}
 }

@@ -4,7 +4,7 @@
               xmlns:ui="http://java.sun.com/jsf/facelets"
               xmlns:p="http://primefaces.org/ui"
               xmlns:pe="http://primefaces.org/ui/extensions"
-              xmlns:c="http://java.sun.com/jsp/jstl/core">
+        >
 
     <ui:define name="header">
         <h:outputStylesheet name="wa-time.css"/>
@@ -13,11 +13,13 @@
 
     <h:form id="current_day_form">
         <p:fieldset legend="#{currentDayFrameModel.legendValue}">
-            <p:commandLink id="start_event_button" disabled="#{currentDayFrameModel.currentWorkDay.lastEvent.endTime == null}"
+            <p:commandLink id="start_event_button"
+                           disabled="#{currentDayFrameModel.currentWorkDay.lastEvent.endTime == null}"
                            title="Начать событие">
                 <h:graphicImage name="img/clock/clock_play.png"/>
             </p:commandLink>
-            <p:overlayPanel id="event_types_panel" for="start_event_button" hideEffect="fade" rendered="#{currentDayFrameModel.currentWorkDay.lastEvent.endTime != null}">
+            <p:overlayPanel id="event_types_panel" for="start_event_button" hideEffect="fade"
+                            rendered="#{currentDayFrameModel.currentWorkDay.lastEvent.endTime != null}">
                 <h:selectOneMenu id="event_type" value="#{currentDayFrameModel.selectedEventType}" style="width: 150px;"
                                  converter="org.onbrains.viewModel.ObjectConverter">
                     <f:selectItem itemLabel="Тип события" itemValue=""/>
@@ -28,13 +30,15 @@
                 </h:selectOneMenu>
             </p:overlayPanel>
 
-            <p:commandLink id="stop_event_button" title="Закончить событие" actionListener="#{currentDayFrameModel.stopEvent()}"
+            <p:commandLink id="stop_event_button" title="Закончить событие"
+                           actionListener="#{currentDayFrameModel.stopEvent()}"
                            disabled="#{currentDayFrameModel.currentWorkDay.lastEvent.endTime != null}"
                            update="current_day_form, :month_info_form">
                 <h:graphicImage name="img/clock/clock_pause.png"/>
             </p:commandLink>
 
-            <p:dataTable id="current_day_events_table" value="#{currentDayFrameModel.currentWorkDay.events}" var="dayEvent" editable="true">
+            <p:dataTable id="current_day_events_table" value="#{currentDayFrameModel.currentWorkDay.events}"
+                         var="dayEvent" editable="true">
 
                 <p:ajax event="rowEdit" listener="#{currentDayFrameModel.onRowEdit}"/>
 
@@ -57,8 +61,9 @@
                             <h:outputText value="#{dateFormat.toHHMM(dayEvent.endTime.time)}"/>
                         </f:facet>
                         <f:facet name="input">
-                            <pe:timePicker value="#{dayEvent.endTime != null ? dayEvent.endTime.time : currentDayFrameModel.currentTime}"
-                                           mode="popup" minHour="#{currentDayFrameModel.getMinHourForEndEvent(dayEvent)}"/>
+                            <pe:timePicker
+                                    value="#{dayEvent.endTime != null ? dayEvent.endTime.time : currentDayFrameModel.currentTime}"
+                                    mode="popup" minHour="#{currentDayFrameModel.getMinHourForEndEvent(dayEvent)}"/>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>

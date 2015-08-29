@@ -12,12 +12,19 @@ import java.util.List;
 
 public interface WorkDayDAOInterface {
 
-    public void create(WorkDay workDay);
-    public void update(WorkDay workDay);
-    public void remove(WorkDay workDay);
-    public WorkDay find(Long workDayId);
-    public WorkDay getCurrentDayInfo(Date day, Worker currentWorker);
-    public List<WorkDay> getDayInfoByMonth(Date month, Worker currentWorker);
-    public List<WorkDay> getDaysPriorCurrentDay(Date month, Worker currentWorker);
+	public void create(WorkDay workDay);
+
+	public void update(WorkDay workDay);
+
+	public void remove(WorkDay workDay);
+
+	public WorkDay find(Long workDayId);
+
+	// FIXME: переименовать в getWorkDay
+	public WorkDay getCurrentDayInfo(Date day, Worker currentWorker);
+
+	public List<WorkDay> getDayInfoByMonth(Date month, Worker currentWorker);
+
+	public List<WorkDay> getDaysPriorCurrentDay(Date month, Worker currentWorker);
 
 }

@@ -9,10 +9,14 @@ import java.util.List;
  */
 public interface EventTypeDAOInterface {
 
-    public void create(EventType eventType);
-    public void update(EventType eventType);
-    public void remove(EventType eventType);
-    public EventType find(Long eventTypeId);
-    public List<EventType> getAllEventType();
+	public void create(EventType eventType);
+
+	public void update(EventType eventType);
+
+	public void remove(EventType eventType);
+
+	public EventType find(Long eventTypeId);
+
+	public List<EventType> getAllEventType();
 
 }

@@ -19,40 +19,41 @@ import java.util.regex.Pattern;
 @FacesConverter("org.onbrains.viewModel.ObjectConverter")
 public class AbstractPersistentEntityConverter implements Converter {
 
-    private static final Pattern SERIALIZED_FORMAT = Pattern.compile("(.*)\\-([0-9]+)");
+	private static final Pattern SERIALIZED_FORMAT = Pattern.compile("(.*)\\-([0-9]+)");
 
-    @Override
-    public Object getAsObject(FacesContext context, UIComponent component, String value) {
-        if (value == null || "".equals(value)) {
-            return null;
-        }
+	@Override
+	public Object getAsObject(FacesContext context, UIComponent component, String value) {
+		if (value == null || "".equals(value)) {
+			return null;
+		}
 
-        Matcher matcher = SERIALIZED_FORMAT.matcher(value);
-        if (!matcher.matches()) {
-            throw new ConverterException(new FacesMessage("'" + value + "' неверное значение, необходимо выбрать значение из предложеных"));
-        }
+		Matcher matcher = SERIALIZED_FORMAT.matcher(value);
+		if (!matcher.matches()) {
+			throw new ConverterException(
+					new FacesMessage("'" + value + "' неверное значение, необходимо выбрать значение из предложеных"));
+		}
 
-        Class<?> entityClass = null;
-        Long primaryKey = null;
-        try {
-            entityClass = getClass(matcher.group(1));
-            primaryKey = getId(matcher.group(2));
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return DAOHelper.getEntityManager().find(entityClass, primaryKey);
-    }
+		Class<?> entityClass = null;
+		Long primaryKey = null;
+		try {
+			entityClass = getClass(matcher.group(1));
+			primaryKey = getId(matcher.group(2));
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return DAOHelper.getEntityManager().find(entityClass, primaryKey);
+	}
 
-    @Override
-    public String getAsString(FacesContext context, UIComponent component, Object value) {
-        return value.toString();
-    }
+	@Override
+	public String getAsString(FacesContext context, UIComponent component, Object value) {
+		return value.toString();
+	}
 
-    private Class<?> getClass(String classPath) throws ClassNotFoundException {
-        return Class.forName(classPath);
-    }
+	private Class<?> getClass(String classPath) throws ClassNotFoundException {
+		return Class.forName(classPath);
+	}
 
-    private Long getId(String idValue) {
-        return Long.parseLong(idValue);
-    }
+	private Long getId(String idValue) {
+		return Long.parseLong(idValue);
+	}
 }

@@ -11,26 +11,26 @@ import javax.faces.context.FacesContext;
 
 public class Notification {
 
-    public static void info(String summary, String detail) {
-        FacesContext.getCurrentInstance().addMessage("msg_for_info",
-                new FacesMessage(FacesMessage.SEVERITY_INFO, summary, detail == null ? "" : detail));
-        if (RequestContext.getCurrentInstance().isAjaxRequest()) {
-            RequestContext.getCurrentInstance().update("msg_info");
-        }
-    }
+	public static void info(String summary, String detail) {
+		FacesContext.getCurrentInstance().addMessage("msg_for_info",
+				new FacesMessage(FacesMessage.SEVERITY_INFO, summary, detail == null ? "" : detail));
+		if (RequestContext.getCurrentInstance().isAjaxRequest()) {
+			RequestContext.getCurrentInstance().update("msg_info");
+		}
+	}
 
-    public static void warn(String summary, String detail) {
-        FacesContext.getCurrentInstance().addMessage("msg_for_warn",
-                new FacesMessage(FacesMessage.SEVERITY_WARN, summary, detail == null ? "" : detail));
-        if (!RequestContext.getCurrentInstance().isAjaxRequest()) {
-            return;
-        }
-        RequestContext.getCurrentInstance().update("msg_warn");
-    }
+	public static void warn(String summary, String detail) {
+		FacesContext.getCurrentInstance().addMessage("msg_for_warn",
+				new FacesMessage(FacesMessage.SEVERITY_WARN, summary, detail == null ? "" : detail));
+		if (!RequestContext.getCurrentInstance().isAjaxRequest()) {
+			return;
+		}
+		RequestContext.getCurrentInstance().update("msg_warn");
+	}
 
-    public static void error(String summary, String detail) {
-        FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, detail == null ? "" : detail));
-    }
+	public static void error(String summary, String detail) {
+		FacesContext.getCurrentInstance().addMessage(null,
+				new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, detail == null ? "" : detail));
+	}
 
 }
