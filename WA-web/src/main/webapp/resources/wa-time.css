@@ -72,6 +72,14 @@ a:hover {
     padding: 5px;
 }
 
+.with_delete_button button {
+    opacity: 0;
+}
+
+.with_delete_button:hover button {
+    opacity: 1;
+}
+
 /*Стили для статистики по месяцу*/
 
 .circle {

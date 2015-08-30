@@ -14,14 +14,14 @@
     <h:form id="current_day_form">
         <p:fieldset legend="#{currentDayFrameModel.legendValue}">
             <p:commandLink id="start_event_button"
-                           disabled="#{currentDayFrameModel.currentWorkDay.lastEvent.endTime == null}"
+                           disabled="#{!currentDayFrameModel.canStartEvent()}"
                            title="Начать событие">
                 <h:graphicImage name="img/clock/clock_play.png"/>
             </p:commandLink>
             <p:overlayPanel id="event_types_panel" for="start_event_button" hideEffect="fade"
-                            rendered="#{currentDayFrameModel.currentWorkDay.lastEvent.endTime != null}">
+                            rendered="#{currentDayFrameModel.canStartEvent()}">
                 <h:selectOneMenu id="event_type" value="#{currentDayFrameModel.selectedEventType}" style="width: 150px;"
-                                 converter="org.onbrains.viewModel.ObjectConverter">
+                                 converter="#{abstractPersistentEntityConverter}">
                     <f:selectItem itemLabel="Тип события" itemValue=""/>
                     <f:selectItems value="#{currentDayFrameModel.allEventType}" var="selectedEventType"
                                    itemLabel="#{selectedEventType.title}"/>
@@ -32,7 +32,7 @@
 
             <p:commandLink id="stop_event_button" title="Закончить событие"
                            actionListener="#{currentDayFrameModel.stopEvent()}"
-                           disabled="#{currentDayFrameModel.currentWorkDay.lastEvent.endTime != null}"
+                           disabled="#{!currentDayFrameModel.canStopEvent()}"
                            update="current_day_form, :month_info_form">
                 <h:graphicImage name="img/clock/clock_pause.png"/>
             </p:commandLink>
@@ -42,10 +42,10 @@
 
                 <p:ajax event="rowEdit" listener="#{currentDayFrameModel.onRowEdit}"/>
 
-                <p:column headerText="Тип" style="width: 35%;">
+                <p:column headerText="Тип" style="width: 36%;">
                     #{dayEvent.type.title}
                 </p:column>
-                <p:column headerText="Начало" style="text-align: center; width: 25%;">
+                <p:column headerText="Начало" style="text-align: center; width: 20%;">
                     <p:cellEditor>
                         <f:facet name="output">
                             <h:outputText value="#{dateFormat.toHHMM(dayEvent.startTime.time)}"/>
@@ -55,7 +55,7 @@
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
-                <p:column headerText="Окончание" style="text-align: center; width: 25%;">
+                <p:column headerText="Окончание" style="text-align: center; width: 20%;">
                     <p:cellEditor>
                         <f:facet name="output">
                             <h:outputText value="#{dateFormat.toHHMM(dayEvent.endTime.time)}"/>
@@ -67,8 +67,12 @@
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
-                <p:column style="text-align: center; width: 15%;">
+                <p:column style="text-align: center; width: 12%;">
                     <p:rowEditor/>
+                </p:column>
+                <p:column style="text-align: center; width: 12%;" styleClass="with_delete_button">
+                    <p:commandButton icon="ui-icon-trash" action="#{currentDayFrameModel.removeEvent(dayEvent)}"
+                                     update="current_day_form, :month_info_form"/>
                 </p:column>
             </p:dataTable>
         </p:fieldset>
