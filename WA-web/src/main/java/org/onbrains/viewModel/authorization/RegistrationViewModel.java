@@ -12,7 +12,10 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpSession;
+import javax.transaction.Transactional;
 import java.io.Serializable;
 
 /**
@@ -21,8 +24,11 @@ import java.io.Serializable;
 
 @ManagedBean
 @RequestScoped
+@Transactional
 public class RegistrationViewModel implements Serializable {
 
+	@PersistenceContext(unitName = "WA")
+	private EntityManager em;
 	@Inject
 	LoginDAOInterface lDAO;
 	@Inject
@@ -48,8 +54,8 @@ public class RegistrationViewModel implements Serializable {
 					"Ошибка при регистрации", "Неправильное подтверждение пароля"));
 			return "";
 		} else {
-			wDAO.create(newWorker);
-			lDAO.create(new Login(login, password, newWorker.getId()));
+			em.persist(newWorker);
+			em.persist(new Login(login, password, newWorker.getId()));
 			login();
 			return "home";
 		}

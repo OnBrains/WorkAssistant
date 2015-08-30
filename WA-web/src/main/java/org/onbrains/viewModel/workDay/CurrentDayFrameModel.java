@@ -1,6 +1,5 @@
 package org.onbrains.viewModel.workDay;
 
-import org.onbrains.dao.DAOHelper;
 import org.onbrains.dao.workDay.WorkDayDAOInterface;
 import org.onbrains.dao.workDayEvent.EventTypeDAOInterface;
 import org.onbrains.entity.event.Event;
@@ -13,9 +12,12 @@ import org.onbrains.utils.parsing.DateFormatService;
 import org.primefaces.event.RowEditEvent;
 
 import javax.annotation.PostConstruct;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
+import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
+import javax.inject.Named;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
@@ -24,16 +26,17 @@ import java.util.List;
 /**
  * @author Naumov Oleg on 04.08.2015 21:40.
  */
-@ManagedBean
-@ViewScoped
+@Named
+@SessionScoped
+@Transactional
 public class CurrentDayFrameModel implements Serializable {
 
+	@PersistenceContext
+	private EntityManager em;
 	@Inject
 	private WorkDayDAOInterface wdDAO;
 	@Inject
 	private EventTypeDAOInterface etDAO;
-	@Inject
-	private DAOHelper hDAO;
 
 	private WorkDay currentWorkDay;
 	private EventType selectedEventType;
@@ -77,7 +80,7 @@ public class CurrentDayFrameModel implements Serializable {
 		if (editionEvent.getEndTime().getTimeInMillis() < editionEvent.getStartTime().getTimeInMillis()) {
 			Notification.warn("Невозможно сохранить изменения", "Время окончания события больше времени начала");
 		} else {
-			hDAO.merge(editionEvent);
+			em.merge(editionEvent);
 		}
 	}
 
@@ -89,10 +92,26 @@ public class CurrentDayFrameModel implements Serializable {
 	private Event addNewEvent() {
 		Event workEvent = new Event(currentWorkDay.getDay().getDay(), selectedEventType, selectedEventType.getTitle(),
 				Calendar.getInstance());
-		hDAO.persist(workEvent);
+		em.persist(workEvent);
 		currentWorkDay.getEvents().add(workEvent);
-		wdDAO.update(currentWorkDay);
+		em.merge(currentWorkDay);
 		return workEvent;
+	}
+
+	/**
+	 * @return <strong>true</strong> - если можно начать новое событие для текущего дня.
+	 */
+	public boolean canStartEvent() {
+		return currentWorkDay.getEvents().isEmpty() || currentWorkDay.getLastEvent().getEndTime() != null;
+	}
+
+	/**
+	 * Проверяет можно ли закончить {@linkplain WorkDay#lastEvent последнее событие}.
+	 *
+	 * @return <strong>true</strong> - если можно.
+	 */
+	public boolean canStopEvent() {
+		return !currentWorkDay.getEvents().isEmpty() && currentWorkDay.getLastEvent().getEndTime() == null;
 	}
 
 	/**
@@ -100,10 +119,13 @@ public class CurrentDayFrameModel implements Serializable {
 	 * дня.
 	 */
 	public void startEvent() {
+		// em.joinTransaction();
+		// em.getTransaction().begin();
 		addNewEvent();
 		if (currentWorkDay.getEvents().isEmpty()) {
 			startWork();
 		}
+		// em.getTransaction().commit();
 	}
 
 	/**
@@ -112,7 +134,15 @@ public class CurrentDayFrameModel implements Serializable {
 	public void stopEvent() {
 		Event editingEvent = currentWorkDay.getLastEvent();
 		editingEvent.setEndTime(Calendar.getInstance());
-		hDAO.merge(editingEvent);
+		em.merge(editingEvent);
+	}
+
+	// FIXME: разобраться почему не работает каскадное изменение. Должно происходить удаление события из БД при удалении
+	// его из коллекции.
+	public void removeEvent(Event removingEvent) {
+		currentWorkDay.getEvents().remove(removingEvent);
+		em.merge(currentWorkDay);
+		em.remove(em.merge(removingEvent));
 	}
 
 	/**

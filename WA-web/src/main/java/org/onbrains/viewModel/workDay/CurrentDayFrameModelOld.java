@@ -9,6 +9,9 @@ import org.onbrains.utils.parsing.DateFormatService;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
@@ -18,8 +21,11 @@ import java.util.Date;
  */
 @ManagedBean
 @ViewScoped
+@Transactional
 public class CurrentDayFrameModelOld implements Serializable {
 
+    @PersistenceContext(unitName = "WA")
+    private EntityManager em;
 	@Inject
 	private WorkDayDAOInterface wdDAO;
 	@Inject
@@ -40,7 +46,7 @@ public class CurrentDayFrameModelOld implements Serializable {
 	public void startWork() {
 		currentDay.setComingTime(Calendar.getInstance());
 		currentDay.setState(WorkDayState.WORKING);
-		wdDAO.update(currentDay);
+		em.merge(currentDay);
 	}
 
 	/**
@@ -49,7 +55,7 @@ public class CurrentDayFrameModelOld implements Serializable {
 	public void endWork() {
 		currentDay.setOutTime(Calendar.getInstance());
 		currentDay.setState(WorkDayState.WORKED);
-		wdDAO.update(currentDay);
+		em.merge(currentDay);
 	}
 
 	public boolean isWorking() {

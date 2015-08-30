@@ -9,9 +9,13 @@ import org.onbrains.service.SessionUtil;
 import org.onbrains.utils.parsing.DateFormatService;
 
 import javax.annotation.PostConstruct;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
+import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
+import javax.inject.Named;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -20,10 +24,13 @@ import java.util.List;
 /**
  * @author Naumov Oleg on 30.07.2015 21:43.
  */
-@ManagedBean
-@ViewScoped
-public class WorkDayViewModel {
+@Named
+@SessionScoped
+@Transactional
+public class WorkDayViewModel implements Serializable {
 
+    @PersistenceContext(unitName = "WA")
+    private EntityManager em;
 	@Inject
 	private WorkDayDAOInterface wdDAO;
 	@Inject
@@ -73,7 +80,7 @@ public class WorkDayViewModel {
 		List<Day> daysBySelectedMonth = new ArrayList<>();
 		daysBySelectedMonth = dDAO.getDaysByMonth(getSelectedMonth().getTime());
 		for (Day day : daysBySelectedMonth) {
-			wdDAO.create(new WorkDay(sessionUtil.getWorker(), day));
+			em.persist(new WorkDay(sessionUtil.getWorker(), day));
 		}
 	}
 

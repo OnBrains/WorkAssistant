@@ -10,13 +10,5 @@ import java.util.List;
  */
 public interface DayDAOInterface {
 
-	public void create(Day day);
-
-	public void update(Day day);
-
-	public void remove(Day day);
-
-	public Day find(Long dayId);
-
 	public List<Day> getDaysByMonth(Date month);
 }

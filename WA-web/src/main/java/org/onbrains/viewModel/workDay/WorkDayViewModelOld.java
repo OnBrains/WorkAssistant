@@ -13,6 +13,9 @@ import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -24,8 +27,11 @@ import java.util.List;
 
 @ManagedBean
 @ViewScoped
+@Transactional
 public class WorkDayViewModelOld {
 
+    @PersistenceContext(unitName = "WA")
+    private EntityManager em;
 	@Inject
 	private WorkDayDAOInterface wdDAO;
 	@Inject
@@ -86,7 +92,7 @@ public class WorkDayViewModelOld {
 	public void changeDaysType(DayType newType) {
 		for (WorkDay wd : selectedDays) {
 			wd.getDay().setType(newType);
-			wdDAO.update(wd);
+			em.merge(wd);
 		}
 		statistic.calculateStatistic(getDaysBySelectedMonth(), getDaysByMonthType());
 	}
@@ -142,7 +148,7 @@ public class WorkDayViewModelOld {
 	// TODO: прикрутить логику редактирования
 	public void onRowEdit(RowEditEvent event) {
 		WorkDay day = (WorkDay) event.getObject();
-		WorkDay oldDayState = wdDAO.find(day.getId());
+		WorkDay oldDayState = em.find(WorkDay.class, day.getId());
 		if (isComingTimeMoreOutTime(day) && day.getState().equals(WorkDayState.WORKED)) {
 			WorkDay editDay = null;
 			for (WorkDay wd : daysBySelectedMonth) {
@@ -158,7 +164,7 @@ public class WorkDayViewModelOld {
 		}
 		day.setComingTime(updateYear(day, day.getComingTime()));
 		day.setOutTime(updateYear(day, day.getOutTime()));
-		wdDAO.update(day);
+		em.merge(day);
 		statistic.calculateStatistic(getDaysBySelectedMonth(), getDaysByMonthType());
 	}
 

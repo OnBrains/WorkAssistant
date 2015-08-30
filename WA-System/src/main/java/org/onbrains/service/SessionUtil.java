@@ -6,13 +6,14 @@ import javax.ejb.Stateless;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.Serializable;
 
 /**
  * @author Naumov Oleg on 04.04.2015 19:39.
  */
 
 @Stateless
-public class SessionUtil {
+public class SessionUtil implements Serializable {
 
 	public static HttpSession getSession() {
 		return (HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(false);

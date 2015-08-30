@@ -9,9 +9,6 @@ import java.util.List;
  */
 public interface WorkerDAOInterface {
 
-    public void create(Worker worker);
-    public void update(Worker worker);
-    public void remove(Worker worker);
     public List<Worker> getWorkers();
 
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -63,7 +64,7 @@ public class WorkDay extends SuperClass {
 	@Column(name = "STATE", length = 16, nullable = false)
 	private WorkDayState state = WorkDayState.NO_WORK;
 
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinTable(name = "WORK_DAY_EVENT", joinColumns = { @JoinColumn(name = "WORK_DAY_ID") }, inverseJoinColumns = {
 			@JoinColumn(name = "EVENT_ID") })
 	@OrderBy(value = "startTime DESC")
@@ -157,6 +158,7 @@ public class WorkDay extends SuperClass {
 		this.events = events;
 	}
 
+    //FIXME: выбирать только события, которые влияют на рабочее время.
 	public Event getLastEvent() {
 		return !events.isEmpty() ? events.get(0) : null;
 	}

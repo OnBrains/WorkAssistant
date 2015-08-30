@@ -1,37 +1,22 @@
 package org.onbrains.dao.workDayEvent.implementation;
 
-import org.onbrains.dao.DAOHelper;
 import org.onbrains.dao.workDayEvent.EventDAOInterface;
-import org.onbrains.entity.event.Event;
 
-import javax.inject.Inject;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.io.Serializable;
 
 /**
  * @author Naumov Oleg on 04.08.2015 22:27.
  */
-public class EventDAO implements EventDAOInterface {
 
-	@Inject
-	private DAOHelper dh;
+@Stateless
+public class EventDAO implements EventDAOInterface, Serializable {
 
-	@Override
-	public void create(Event event) {
-		dh.persist(event);
-	}
+    private static final long serialVersionUID = -1L;
 
-	@Override
-	public void update(Event event) {
-		dh.merge(event);
-	}
-
-	@Override
-	public void remove(Event event) {
-		dh.remove(event);
-	}
-
-	@Override
-	public Event find(Long eventId) {
-		return dh.getEntityManager().find(Event.class, eventId);
-	}
+	@PersistenceContext(unitName = "WA")
+	private EntityManager em;
 
 }

@@ -2,7 +2,7 @@
 <persistence version="2.0"
              xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
-    <persistence-unit name="WA" transaction-type="RESOURCE_LOCAL">
+    <persistence-unit name="WA" transaction-type="JTA">
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
         <jta-data-source>java:/OracleWA</jta-data-source>
         <class>org.onbrains.entity.worker.Worker</class>
@@ -13,6 +13,12 @@
         <class>org.onbrains.entity.event.EventType</class>
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect"/>
+            <!--<property name="hibernate.session_factory_name" value="java:jboss/SessionFactory"/>-->
+            <!--<property name="jboss.entity.manager.factory.jndi.name" value="java:/bookingEntityManagerFactory"/>-->
+            <property name="hibernate.enable_lazy_load_no_trans" value="true"/>
+            <property name="current_session_context_class" value="thread"/>
+            <property name="hibernate.cache.use_second_level_cache" value="true"/>
+            <property name="hibernate.cache.use_query_cache" value="true"/>
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="true"/>
             <!--<property name="hibernate.hbm2ddl.auto" value="update"/>-->

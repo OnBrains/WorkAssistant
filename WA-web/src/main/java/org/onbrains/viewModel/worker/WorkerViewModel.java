@@ -1,14 +1,17 @@
 package org.onbrains.viewModel.worker;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
-import javax.inject.Inject;
-import java.io.Serializable;
-import java.util.List;
-
 import org.onbrains.dao.worker.WorkerDAOInterface;
 import org.onbrains.entity.worker.Worker;
 import org.primefaces.event.RowEditEvent;
+
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ViewScoped;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Naumov Oleg on 21.03.2015 20:34.
@@ -16,8 +19,11 @@ import org.primefaces.event.RowEditEvent;
 
 @ManagedBean
 @ViewScoped
+@Transactional
 public class WorkerViewModel implements Serializable {
 
+    @PersistenceContext
+    private EntityManager em;
     @Inject
     private WorkerDAOInterface wDAO;
 
@@ -32,7 +38,7 @@ public class WorkerViewModel implements Serializable {
 
     public void onRowEdit(RowEditEvent event) {
         Worker worker = (Worker) event.getObject();
-        wDAO.update(worker);
+        em.merge(worker);
     }
 
 }
