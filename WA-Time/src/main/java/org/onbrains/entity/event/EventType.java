@@ -28,7 +28,7 @@ import org.onbrains.entity.SuperClass;
 @NamedQueries({ @NamedQuery(name = EventType.GET_ALL_EVENT_TYPE, query = "select et from EventType et") })
 public class EventType extends SuperClass {
 
-	public static final String GET_ALL_EVENT_TYPE = "EventType.getAllEventType";
+	public static final String GET_ALL_EVENT_TYPE = "EventType.getAllEventTypes";
 
 	public static final Long WORK_EVENT_TYPE_ID = 2275L;
 

@@ -9,6 +9,6 @@ import java.util.List;
  */
 public interface EventTypeDAOInterface {
 
-	public List<EventType> getAllEventType();
+	public List<EventType> getAllEventTypes();
 
 }

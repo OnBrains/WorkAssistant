@@ -4,8 +4,7 @@
                 xmlns:f="http://java.sun.com/jsf/core"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 xmlns:p="http://primefaces.org/ui"
-                xmlns:pe="http://primefaces.org/ui/extensions"
-        >
+                xmlns:pe="http://primefaces.org/ui/extensions">
 
     <ui:define name="header">
         <h:outputStylesheet name="wa-time.css"/>
@@ -16,19 +15,19 @@
 
         <pe:layout>
 
-            <pe:layoutPane position="north" closable="false" resizable="false" styleClassContent="layout_style">
-                <p:megaMenu>
-                    <p:submenu label="Справочники" id="test">
-
+            <pe:layoutPane position="north" closable="false" resizable="true" styleClassContent="layout_style">
+                <p:menubar>
+                    <p:submenu label="Справочники" id="directories_submenu">
+                        <p:menuitem value="Типы событий" url="/view/event/EventTypesDirectory.xhtml"/>
                     </p:submenu>
                     <f:facet name="options">
-                        <h:outputText value="#{loginViewModel.worker.toString()}  "/>
+                        <h:outputText value="#{loginViewModel.worker.toString()}"/>
                         <p:commandButton value="Выйти" action="#{loginViewModel.logout}" icon="ui-icon-extlink"/>
                     </f:facet>
-                </p:megaMenu>
+                </p:menubar>
             </pe:layoutPane>
 
-            <pe:layoutPane position="west" closable="true" resizable="false" size="400" minSize="400"
+            <pe:layoutPane position="west" closable="true" resizable="false" size="450" minSize="450"
                            styleClassContent="layout_style">
                 <ui:include src="/view/workDay/CurrentDayFrame.xhtml"/>
             </pe:layoutPane>

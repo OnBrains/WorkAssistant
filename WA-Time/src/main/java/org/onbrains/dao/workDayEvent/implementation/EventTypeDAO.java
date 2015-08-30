@@ -21,7 +21,7 @@ public class EventTypeDAO implements EventTypeDAOInterface, Serializable {
 	private EntityManager em;
 
 	@Override
-	public List<EventType> getAllEventType() {
+	public List<EventType> getAllEventTypes() {
 		return em.createNamedQuery(EventType.GET_ALL_EVENT_TYPE, EventType.class).getResultList();
 	}
 

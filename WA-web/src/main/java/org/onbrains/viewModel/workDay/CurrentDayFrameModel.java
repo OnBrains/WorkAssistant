@@ -317,7 +317,7 @@ public class CurrentDayFrameModel implements Serializable {
 	}
 
 	public List<EventType> getAllEventType() {
-		return etDAO.getAllEventType();
+		return etDAO.getAllEventTypes();
 	}
 
 	public Date getCurrentTime() {

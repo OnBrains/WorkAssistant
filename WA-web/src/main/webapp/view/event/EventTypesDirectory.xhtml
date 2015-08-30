@@ -1,0 +1,90 @@
+<ui:composition template="/view/View.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core">
+
+    <ui:define name="header">
+        <h:outputStylesheet name="wa-time.css"/>
+        <title>Влияй на свое будущее</title>
+    </ui:define>
+
+    <ui:define name="body">
+        <h:form>
+            <p:dataTable id="event_types_directory_table" value="#{eventTypesViewModel.allEventTypes}" var="eventType"
+                         editable="true">
+
+                <p:ajax event="rowEdit" listener="#{eventTypesViewModel.onRowEdit}"/>
+
+                <f:facet name="header">
+                    <p:commandButton id="event_type_creation_button" value="Создать"
+                                     style="float: right; margin: 5px;"/>
+                </f:facet>
+
+                <p:column headerText="Наименование" style="width: 20%;">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <h:outputText value="#{eventType.title}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{eventType.title}" style="width: 90%;" required="true" maxlength="64"
+                                         requiredMessage="Не заполнена информация о наименовании типа"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+                <p:column headerText="Влияет на рабочее время" style="width: 10%; text-align: center">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:selectBooleanCheckbox value="#{eventType.working}" disabled="true"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:selectBooleanCheckbox value="#{eventType.working}" required="true"
+                                                     requiredMessage="Не заполнена информация о влиянии события на рабочее время"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+                <p:column headerText="Можно не отрабатывать" style="width: 10%; text-align: center">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <h:outputText value="#{dateFormat.mSecToHHMM(eventType.notWorkingTime)}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <h:panelGrid columns="2" style="margin-bottom: 10px">
+                                <h:selectOneMenu id="possible_hours" value="#{eventTypesViewModel.selectedNoWorkHour}"
+                                                 required="true"
+                                                 requiredMessage="Не заполена информация о кол-ве часов">
+                                    <f:selectItem itemLabel="Часов" itemValue=""/>
+                                    <f:selectItems value="#{eventTypesViewModel.possibleHours}" var="hour"
+                                                   itemLabel="#{hour}"/>
+                                </h:selectOneMenu>
+                                <h:selectOneMenu id="possible_minutes"
+                                                 value="#{eventTypesViewModel.selectedNoWorkMinute}" required="false"
+                                                 requiredMessage="Не заполена информация о кол-ве минут">
+                                    <f:selectItem itemLabel="Минут" itemValue=""/>
+                                    <f:selectItems value="#{eventTypesViewModel.possibleMinutes}" var="minute"
+                                                   itemLabel="#{minute}"/>
+                                </h:selectOneMenu>
+                            </h:panelGrid>
+                        </f:facet>
+                    </p:cellEditor>
+                    <!--#{eventTypesViewModel.selectedNoWorkHour}-->
+                </p:column>
+                <p:column headerText="Описание" style="width: 50%; text-align: center;">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <h:outputText value="#{eventType.description}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputTextarea value="#{eventType.description}" style="width: 90%;" rows="2"
+                                             maxlength="512"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+                <p:column style="width: 10%; text-align: center">
+                    <p:rowEditor/>
+                </p:column>
+            </p:dataTable>
+        </h:form>
+    </ui:define>
+</ui:composition>
