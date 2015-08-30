@@ -33,6 +33,7 @@ public class EventTypesViewModel implements Serializable {
 
 	private long selectedNoWorkHour = 0;
 	private long selectedNoWorkMinute = 0;
+    private List<EventType> allEventTypes = new ArrayList<>();
 
 	public void onRowEdit(RowEditEvent event) {
 		EventType editionEventType = (EventType) event.getObject();
@@ -44,7 +45,10 @@ public class EventTypesViewModel implements Serializable {
 	}
 
 	public List<EventType> getAllEventTypes() {
-		return etDAO.getAllEventTypes();
+        if (allEventTypes.isEmpty()) {
+            allEventTypes = etDAO.getAllEventTypes();
+        }
+		return allEventTypes;
 	}
 
 	// Block with privates methods
