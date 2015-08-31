@@ -12,10 +12,10 @@
 
     <ui:define name="body">
         <h:form>
-            <p:dataTable id="event_types_directory_table" value="#{eventTypesViewModel.allEventTypes}" var="eventType"
+            <p:dataTable id="event_types_directory_table" value="#{eventTypesDirectory.allEventTypes}" var="eventType"
                          editable="true">
 
-                <p:ajax event="rowEdit" listener="#{eventTypesViewModel.onRowEdit}"/>
+                <p:ajax event="rowEdit" listener="#{eventTypesDirectory.onRowEdit}"/>
 
                 <f:facet name="header">
                     <p:commandButton id="event_type_creation_button" value="Создать"
@@ -51,24 +51,23 @@
                         </f:facet>
                         <f:facet name="input">
                             <h:panelGrid columns="2" style="margin-bottom: 10px">
-                                <h:selectOneMenu id="possible_hours" value="#{eventTypesViewModel.selectedNoWorkHour}"
+                                <h:selectOneMenu id="possible_hours" value="#{eventTypesDirectory.selectedNoWorkHour}"
                                                  required="true"
                                                  requiredMessage="Не заполена информация о кол-ве часов">
                                     <f:selectItem itemLabel="Часов" itemValue=""/>
-                                    <f:selectItems value="#{eventTypesViewModel.possibleHours}" var="hour"
+                                    <f:selectItems value="#{eventTypesDirectory.possibleHours}" var="hour"
                                                    itemLabel="#{hour}"/>
                                 </h:selectOneMenu>
                                 <h:selectOneMenu id="possible_minutes"
-                                                 value="#{eventTypesViewModel.selectedNoWorkMinute}" required="false"
+                                                 value="#{eventTypesDirectory.selectedNoWorkMinute}" required="false"
                                                  requiredMessage="Не заполена информация о кол-ве минут">
                                     <f:selectItem itemLabel="Минут" itemValue=""/>
-                                    <f:selectItems value="#{eventTypesViewModel.possibleMinutes}" var="minute"
+                                    <f:selectItems value="#{eventTypesDirectory.possibleMinutes}" var="minute"
                                                    itemLabel="#{minute}"/>
                                 </h:selectOneMenu>
                             </h:panelGrid>
                         </f:facet>
                     </p:cellEditor>
-                    <!--#{eventTypesViewModel.selectedNoWorkHour}-->
                 </p:column>
                 <p:column headerText="Описание" style="width: 50%; text-align: center;">
                     <p:cellEditor>
@@ -81,7 +80,7 @@
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
-                <p:column style="width: 10%; text-align: center">
+                <p:column style="width: 5%; text-align: center;">
                     <p:rowEditor/>
                 </p:column>
             </p:dataTable>

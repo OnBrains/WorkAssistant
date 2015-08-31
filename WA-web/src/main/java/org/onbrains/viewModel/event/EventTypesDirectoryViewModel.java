@@ -18,10 +18,10 @@ import java.util.List;
  * @author Naumov Oleg on 30.08.2015 15:30.
  */
 
-@Named
+@Named(value = "eventTypesDirectory")
 @SessionScoped
 @Transactional
-public class EventTypesViewModel implements Serializable {
+public class EventTypesDirectoryViewModel implements Serializable {
 
 	private static final long MILLIS_IN_MINUTE = 60000;
 	private static final long MILLIS_IN_HOUR = 3600000;
@@ -33,21 +33,21 @@ public class EventTypesViewModel implements Serializable {
 
 	private long selectedNoWorkHour = 0;
 	private long selectedNoWorkMinute = 0;
-    private List<EventType> allEventTypes = new ArrayList<>();
+	private List<EventType> allEventTypes = new ArrayList<>();
 
 	public void onRowEdit(RowEditEvent event) {
 		EventType editionEventType = (EventType) event.getObject();
-        long newValueForNoWorkingTime = calculationNoWorkingTime();
-        if (!editionEventType.getNotWorkingTime().equals(newValueForNoWorkingTime)) {
-            editionEventType.setNotWorkingTime(newValueForNoWorkingTime);
-        }
+		long newValueForNoWorkingTime = calculationNoWorkingTime();
+		if (!editionEventType.getNotWorkingTime().equals(newValueForNoWorkingTime)) {
+			editionEventType.setNotWorkingTime(newValueForNoWorkingTime);
+		}
 		em.merge(editionEventType);
 	}
 
 	public List<EventType> getAllEventTypes() {
-        if (allEventTypes.isEmpty()) {
-            allEventTypes = etDAO.getAllEventTypes();
-        }
+		if (allEventTypes.isEmpty()) {
+			allEventTypes = etDAO.getAllEventTypes();
+		}
 		return allEventTypes;
 	}
 
