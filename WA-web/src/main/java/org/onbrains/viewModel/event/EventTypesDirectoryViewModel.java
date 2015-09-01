@@ -3,8 +3,12 @@ package org.onbrains.viewModel.event;
 import org.onbrains.dao.workDayEvent.EventTypeDAOInterface;
 import org.onbrains.entity.event.EventCategory;
 import org.onbrains.entity.event.EventType;
+import org.primefaces.event.NodeSelectEvent;
 import org.primefaces.event.RowEditEvent;
+import org.primefaces.model.DefaultTreeNode;
+import org.primefaces.model.TreeNode;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -34,7 +38,16 @@ public class EventTypesDirectoryViewModel implements Serializable {
 
 	private long selectedNoWorkHour = 0;
 	private long selectedNoWorkMinute = 0;
-	private List<EventType> allEventTypes = new ArrayList<>();
+	private List<EventType> allTypes = new ArrayList<>();
+
+    private TreeNode categoryNode;
+    private TreeNode selectedCategoryNode;
+    private List<EventType> typesBySelectedCategory = new ArrayList<>();
+
+    @PostConstruct
+    public void postConstruct() {
+        initializationCategoryNode();
+    }
 
 	public void onRowEdit(RowEditEvent event) {
 		EventType editionEventType = (EventType) event.getObject();
@@ -45,14 +58,21 @@ public class EventTypesDirectoryViewModel implements Serializable {
 		em.merge(editionEventType);
 	}
 
-	public List<EventType> getAllEventTypes() {
-		if (allEventTypes.isEmpty()) {
-			allEventTypes = etDAO.getAllEventTypes();
+    public void onCategoryNodeSelect(NodeSelectEvent event) {
+        selectedCategoryNode = event.getTreeNode();
+        buildResultTypesBy((EventCategory) selectedCategoryNode.getData());
+    }
+
+    public List<EventType> getAllTypes() {
+		if (allTypes.isEmpty()) {
+			allTypes = etDAO.getAllEventTypes();
 		}
-		return allEventTypes;
+		return allTypes;
 	}
 
+    // *****************************************************************************************************************
 	// Block with privates methods
+    // *****************************************************************************************************************
 
 	private Long calculationNoWorkingTime() {
 		return convertToMillisFromSelectedHour() + convertToMillisFromSelectedMinute();
@@ -66,7 +86,25 @@ public class EventTypesDirectoryViewModel implements Serializable {
 		return selectedNoWorkMinute * MILLIS_IN_MINUTE;
 	}
 
-	// Simple Getters and Setters
+    private void initializationCategoryNode() {
+        categoryNode = new DefaultTreeNode("root", null);
+        for (EventCategory category: EventCategory.values()) {
+            new DefaultTreeNode(category, categoryNode);
+        }
+    }
+
+    private void buildResultTypesBy(EventCategory selectedCategory) {
+        typesBySelectedCategory.clear();
+        for (EventType type: getAllTypes()) {
+            if (type.getCategory().equals(selectedCategory)) {
+                typesBySelectedCategory.add(type);
+            }
+        }
+    }
+
+    // *****************************************************************************************************************
+    // Simple Getters and Setters
+    // *****************************************************************************************************************
 
 	public List<Integer> getPossibleHours() {
 		List<Integer> possibleHours = new ArrayList<>();
@@ -103,5 +141,17 @@ public class EventTypesDirectoryViewModel implements Serializable {
 	public void setSelectedNoWorkMinute(long selectedNoWorkMinute) {
 		this.selectedNoWorkMinute = selectedNoWorkMinute;
 	}
+
+    public TreeNode getCategoryNode() {
+        return categoryNode;
+    }
+
+    public TreeNode getSelectedCategoryNode() {
+        return selectedCategoryNode;
+    }
+
+    public List<EventType> getTypesBySelectedCategory() {
+        return typesBySelectedCategory;
+    }
 
 }

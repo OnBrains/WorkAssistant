@@ -62,7 +62,7 @@ a:hover {
 
 .layout_style {
     border: none;
-    background-color: #e5e5e5;
+    background: none;
 }
 
 /*Стили для работы с текущим днем*/
