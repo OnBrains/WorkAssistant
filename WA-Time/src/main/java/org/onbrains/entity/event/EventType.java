@@ -2,6 +2,8 @@ package org.onbrains.entity.event;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -19,7 +21,7 @@ import org.onbrains.entity.SuperClass;
  *         <li>События, время которых не идет в счет отработанного</li>
  *         <li>События, время которых никак не влияет на отработанное время</li>
  *         </ul>
- *         Для определения влияет ли событие на отработанное время используется {@linkplain #isWorking флаг}, для
+ *         Для определения влияет ли событие на отработанное время используется {@linkplain #getCategory() флаг}, для
  *         событий, время которых не идет в счет отработанного может допускаться какое то количество времени, которое
  *         {@linkplain #notWorkingTime не надо отрабатыват}
  */
@@ -38,8 +40,9 @@ public class EventType extends SuperClass {
 	@Column(name = "DESCRIPTION", nullable = true, length = 512)
 	private String description;
 
-	@Column(name = "IS_WORKING", nullable = false)
-	private boolean isWorking;
+    @Enumerated(EnumType.STRING)
+	@Column(name = "CATEGORY", nullable = false, length = 32)
+	private EventCategory category;
 
 	@Column(name = "NOT_WORKING_TIME", nullable = true)
 	private Long notWorkingTime = 0L;
@@ -89,12 +92,12 @@ public class EventType extends SuperClass {
 	 *
 	 * @return <strong>true</strong> - если влияет.
 	 */
-	public boolean isWorking() {
-		return isWorking;
+	public EventCategory getCategory() {
+		return category;
 	}
 
-	public void setWorking(boolean isWorking) {
-		this.isWorking = isWorking;
+	public void setCategory(EventCategory category) {
+		this.category = category;
 	}
 
 	/**

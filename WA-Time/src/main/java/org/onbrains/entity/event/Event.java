@@ -17,7 +17,7 @@ import java.util.Date;
  * @author Naumov Oleg on 18.04.2015 14:59. События которые могут происходить в течении рабочего дня. Описание
  *         {@linkplain EventType типов событий}. Одно событие может быть привязано к рабочим дня нескольких работников.
  *         Совместные командировки, совещания, миттинги команд и тд. <br/>
- *         Для {@linkplain EventType#isWorking событий}, время которых влияет на отработанное. Не могут пересекаться
+ *         Для {@linkplain EventType#getCategory() событий}, время которых влияет на отработанное. Не могут пересекаться
  *         рабочие интервалы. Границы интервала определяются {@linkplain #startTime началом события} и
  *         {@linkplain #endTime окончанием события}.
  */
@@ -63,13 +63,13 @@ public class Event extends SuperClass {
 
 	/**
 	 * Вычисляет время, которое пойдет в учет отработанного времени за день. На отработанное время влияют только
-	 * {@linkplain EventType#isWorking() определенные типы событий}. Если событие не влияет на рабочее время вернется
+	 * {@linkplain EventType#getCategory() определенные типы событий}. Если событие не влияет на рабочее время вернется
 	 * нулевое значение.
 	 *
 	 * @return Отработанное время в миллисекундах.
 	 */
 	public Long getWorkedTime() {
-		if (type.isWorking()) {
+		if (type.getCategory().equals(EventCategory.INFLUENCE_ON_WORKED_TIME)) {
 			return startTime.getTimeInMillis() - startTime.getTimeInMillis();
 		}
 		return 0L;

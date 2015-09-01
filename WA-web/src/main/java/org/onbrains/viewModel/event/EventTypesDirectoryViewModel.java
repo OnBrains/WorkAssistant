@@ -1,6 +1,7 @@
 package org.onbrains.viewModel.event;
 
 import org.onbrains.dao.workDayEvent.EventTypeDAOInterface;
+import org.onbrains.entity.event.EventCategory;
 import org.onbrains.entity.event.EventType;
 import org.primefaces.event.RowEditEvent;
 
@@ -82,6 +83,10 @@ public class EventTypesDirectoryViewModel implements Serializable {
 		}
 		return possibleMinutes;
 	}
+
+    public EventCategory[] getEventCategories() {
+        return EventCategory.values();
+    }
 
 	public long getSelectedNoWorkHour() {
 		return selectedNoWorkHour;
