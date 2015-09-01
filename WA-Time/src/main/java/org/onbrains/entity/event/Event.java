@@ -61,19 +61,30 @@ public class Event extends SuperClass {
 	 * Services
 	 */
 
-	/**
-	 * Вычисляет время, которое пойдет в учет отработанного времени за день. На отработанное время влияют только
-	 * {@linkplain EventType#getCategory() определенные типы событий}. Если событие не влияет на рабочее время вернется
-	 * нулевое значение.
-	 *
-	 * @return Отработанное время в миллисекундах.
-	 */
 	public Long getWorkedTime() {
-		if (type.getCategory().equals(EventCategory.INFLUENCE_ON_WORKED_TIME)) {
-			return startTime.getTimeInMillis() - startTime.getTimeInMillis();
-		}
-		return 0L;
+        if (getEndTime() != null) {
+            return calculationWorkedTime();
+        }
+        return 0L;
 	}
+
+    /**
+     * Вычисляет время, которое пойдет в учет отработанного времени за день. На отработанное время влияют только
+     * {@linkplain EventType#getCategory() определенные типы событий}. Если событие не влияет на рабочее время вернется
+     * нулевое значение.
+     *
+     * @return Отработанное время в миллисекундах.
+     */
+    private Long calculationWorkedTime() {
+        switch (type.getCategory()) {
+            case INFLUENCE_ON_WORKED_TIME:
+                return endTime.getTimeInMillis() - startTime.getTimeInMillis();
+            case WITH_FIXED_WORKED_TIME:
+                return type.getNotWorkingTime();
+            default:
+                return 0L;
+        }
+    }
 
 	/**
 	 * Simple getters & setters
