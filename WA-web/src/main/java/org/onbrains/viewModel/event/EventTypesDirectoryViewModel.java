@@ -65,7 +65,7 @@ public class EventTypesDirectoryViewModel implements Serializable {
 
     public List<EventType> getAllTypes() {
 		if (allTypes.isEmpty()) {
-			allTypes = etDAO.getAllEventTypes();
+			allTypes = etDAO.getEventTypes(true, false);
 		}
 		return allTypes;
 	}

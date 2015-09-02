@@ -9,6 +9,6 @@ import java.util.List;
  */
 public interface EventTypeDAOInterface {
 
-	public List<EventType> getAllEventTypes();
+	public List<EventType> getEventTypes(Boolean... activeFlags);
 
 }

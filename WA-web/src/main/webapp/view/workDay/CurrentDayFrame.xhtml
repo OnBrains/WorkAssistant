@@ -23,7 +23,7 @@
                 <h:selectOneMenu id="event_type" value="#{currentDayFrameModel.selectedEventType}" style="width: 150px;"
                                  converter="#{abstractPersistentEntityConverter}">
                     <f:selectItem itemLabel="Тип события" itemValue=""/>
-                    <f:selectItems value="#{currentDayFrameModel.allEventType}" var="selectedEventType"
+                    <f:selectItems value="#{currentDayFrameModel.eventTypes}" var="selectedEventType"
                                    itemLabel="#{selectedEventType.title}"/>
                     <p:ajax event="change" listener="#{currentDayFrameModel.startEvent()}"
                             update="current_day_form, :month_info_form"/>

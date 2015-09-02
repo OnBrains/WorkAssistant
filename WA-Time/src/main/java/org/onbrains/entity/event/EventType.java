@@ -27,10 +27,10 @@ import org.onbrains.entity.SuperClass;
  */
 @Entity
 @Table(name = "EVENT_TYPE", uniqueConstraints = { @UniqueConstraint(columnNames = { "TITLE" }) })
-@NamedQueries({ @NamedQuery(name = EventType.GET_ALL_EVENT_TYPE, query = "select et from EventType et") })
+@NamedQueries({ @NamedQuery(name = EventType.GET_EVENT_TYPES, query = "select et from EventType et where et.active in (:activeFlags)") })
 public class EventType extends SuperClass {
 
-	public static final String GET_ALL_EVENT_TYPE = "EventType.getAllEventTypes";
+	public static final String GET_EVENT_TYPES = "EventType.getEventTypes";
 
 	@Column(name = "TITLE", nullable = false, length = 64)
 	private String title;
@@ -38,12 +38,15 @@ public class EventType extends SuperClass {
 	@Column(name = "DESCRIPTION", nullable = true, length = 512)
 	private String description;
 
-    @Enumerated(EnumType.STRING)
+	@Enumerated(EnumType.STRING)
 	@Column(name = "CATEGORY", nullable = false, length = 32)
 	private EventCategory category;
 
 	@Column(name = "NOT_WORKING_TIME", nullable = true)
 	private Long notWorkingTime = 0L;
+
+	@Column(name = "ACTIVE", nullable = false)
+	private boolean active;
 
 	protected EventType() {
 	}
@@ -132,4 +135,17 @@ public class EventType extends SuperClass {
 		this.notWorkingTime = time;
 	}
 
+	/**
+	 * Флаг активности типа события. Деактивированные типы нельзя использовать, они хранятся только для истории уже
+	 * созданных событий.
+	 * 
+	 * @return <strong>true</strong> - если тип активен.
+	 */
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
 }

@@ -7,6 +7,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -15,14 +16,15 @@ import java.util.List;
 @Stateless
 public class EventTypeDAO implements EventTypeDAOInterface, Serializable {
 
-    private static final long serialVersionUID = -1L;
+	private static final long serialVersionUID = -1L;
 
 	@PersistenceContext(unitName = "WA")
 	private EntityManager em;
 
 	@Override
-	public List<EventType> getAllEventTypes() {
-		return em.createNamedQuery(EventType.GET_ALL_EVENT_TYPE, EventType.class).getResultList();
+	public List<EventType> getEventTypes(Boolean... activeFlags) {
+		return em.createNamedQuery(EventType.GET_EVENT_TYPES, EventType.class)
+				.setParameter("activeFlags", Arrays.asList(activeFlags)).getResultList();
 	}
 
 }
