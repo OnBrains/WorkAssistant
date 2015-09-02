@@ -3,6 +3,7 @@ package org.onbrains.viewModel.event;
 import org.onbrains.dao.workDayEvent.EventTypeDAOInterface;
 import org.onbrains.entity.event.EventCategory;
 import org.onbrains.entity.event.EventType;
+import org.primefaces.context.RequestContext;
 import org.primefaces.event.NodeSelectEvent;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.model.DefaultTreeNode;
@@ -43,6 +44,7 @@ public class EventTypesDirectoryViewModel implements Serializable {
     private TreeNode categoryNode;
     private TreeNode selectedCategoryNode;
     private List<EventType> typesBySelectedCategory = new ArrayList<>();
+    private EventType newEventType;
 
     @PostConstruct
     public void postConstruct() {
@@ -61,6 +63,17 @@ public class EventTypesDirectoryViewModel implements Serializable {
     public void onCategoryNodeSelect(NodeSelectEvent event) {
         selectedCategoryNode = event.getTreeNode();
         buildResultTypesBy((EventCategory) selectedCategoryNode.getData());
+    }
+
+    public void onCreationTypeStart() {
+        EventCategory category = selectedCategoryNode == null ? EventCategory.INFLUENCE_ON_WORKED_TIME : (EventCategory) selectedCategoryNode.getData();
+        newEventType = new EventType(category);
+        RequestContext.getCurrentInstance().update("creation_event_type_form");
+    }
+
+    public void createType() {
+        em.persist(newEventType);
+        newEventType = null;
     }
 
     public List<EventType> getAllTypes() {
@@ -152,6 +165,14 @@ public class EventTypesDirectoryViewModel implements Serializable {
 
     public List<EventType> getTypesBySelectedCategory() {
         return typesBySelectedCategory;
+    }
+
+    public EventType getNewEventType() {
+        return newEventType;
+    }
+
+    public void setNewEventType(EventType newEventType) {
+        this.newEventType = newEventType;
     }
 
 }

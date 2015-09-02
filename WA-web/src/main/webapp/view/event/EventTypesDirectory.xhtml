@@ -29,7 +29,7 @@
                 </h:form>
             </pe:layoutPane>
 
-            <pe:layoutPane id="teeeest" position="center" styleClassContent="layout_style">
+            <pe:layoutPane position="center" styleClassContent="layout_style">
                 <h:form id="event_types_directory_form">
                     <p:dataTable id="event_types_directory_table" value="#{eventTypesDirectory.typesBySelectedCategory}"
                                  var="eventType" editable="true" style="margin-top: 16px;">
@@ -37,8 +37,9 @@
                         <p:ajax event="rowEdit" listener="#{eventTypesDirectory.onRowEdit}"/>
 
                         <f:facet name="header">
-                            <p:commandButton id="event_type_creation_button" value="Создать" icon="fa fa-plus-circle"
-                                             style="float: right; margin: 5px;"/>
+                            <p:commandButton id="event_type_creation_button" value="Создать" icon="fa fa-plus-circle" process="@this"
+                                             style="float: right; margin: 5px;" action="#{eventTypesDirectory.onCreationTypeStart()}"
+                                             oncomplete="PF('creationEventTypeDialogVar').show();"/>
                         </f:facet>
 
                         <p:column headerText="Активность" style="width: 10%; text-align: center;">
@@ -103,8 +104,7 @@
                                     <h:outputText value="#{eventType.description}"/>
                                 </f:facet>
                                 <f:facet name="input">
-                                    <p:inputTextarea value="#{eventType.description}" style="width: 90%;" rows="2"
-                                                     maxlength="512"/>
+                                    <p:inputTextarea value="#{eventType.description}" style="width: 90%;" rows="2" maxlength="512"/>
                                 </f:facet>
                             </p:cellEditor>
                         </p:column>
@@ -115,5 +115,97 @@
                 </h:form>
             </pe:layoutPane>
         </pe:layout>
+
+        <p:dialog id="creation_event_type_dialog" header="Создание типа события" widgetVar="creationEventTypeDialogVar"
+                  height="380" width="550" dynamic="true" resizable="false">
+
+            <form id="creation_event_type_form" class="creationEventTypeForm">
+
+                <p:separator/>
+
+                <div class="ui-grid ui-grid-responsive">
+
+                    <div class="ui-grid-row">
+                        <div class="ui-grid-col-12">
+                            <h3>Основная информация</h3>
+                        </div>
+                    </div>
+
+                    <div class="ui-grid-row">
+                        <div class="ui-grid-col-6" style="text-align: left; margin-top: 4px;">
+                            <p:outputLabel for="event_type_category" value="Влияние на отработаное время:"/>
+                        </div>
+                        <div class="ui-grid-col-6">
+                            <p:selectOneMenu id="event_type_category" value="#{eventTypesDirectory.newEventType.category}" style="width: 250px;"
+                                             required="true" requiredMessage="Не заполнена информация о влиянии события на рабочее время">
+                                <f:selectItems value="#{eventTypesDirectory.getEventCategories()}" var="cat"
+                                               itemLabel="#{cat.desc}"/>
+                            </p:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="ui-grid-row" style="margin-top: 10px;">
+                        <div class="ui-grid-col-3" style="margin-top: 4px;">
+                            <p:outputLabel for="event_type_title" value="Наименование:"/>
+                        </div>
+                        <div class="ui-grid-col-9">
+                            <p:inputText id="event_type_title" value="#{eventTypesDirectory.newEventType.title}" style="width: 375px;"
+                                         required="true" requiredMessage="Не заполнена информация о наименовании типа" maxlength="64"/>
+                        </div>
+                    </div>
+
+                    <p:separator style="margin-top: 20px;"/>
+
+                    <div class="ui-grid-row">
+                        <div class="ui-grid-col-12">
+                            <h3>Фиксированное время</h3>
+                        </div>
+                    </div>
+
+                    <div class="ui-grid-row">
+                        <div class="ui-grid-col-3" style="text-align:center; margin-top: 4px;">
+                            <p:outputLabel for="createion_possible_hours" value="Часы:"/>
+                        </div>
+                        <div class="ui-grid-col-3">
+                                <h:selectOneMenu id="createion_possible_hours" value="#{eventTypesDirectory.selectedNoWorkHour}"
+                                                 required="true" requiredMessage="Не заполена информация о кол-ве часов">
+                                    <f:selectItems value="#{eventTypesDirectory.getPossibleHours()}" var="hour" itemLabel="#{hour}"/>
+                                </h:selectOneMenu>
+                        </div>
+                        <div class="ui-grid-col-3" style="text-align:center; margin-top: 4px;">
+                            <p:outputLabel for="creation_possible_minutes" value="Минуты:"/>
+                        </div>
+                        <div class="ui-grid-col-3">
+                                <h:selectOneMenu id="creation_possible_minutes" value="#{eventTypesDirectory.selectedNoWorkMinute}"
+                                                 required="true" requiredMessage="Не заполена информация о кол-ве минут">
+                                    <f:selectItems value="#{eventTypesDirectory.getPossibleMinutes()}" var="minute" itemLabel="#{minute}"/>
+                                </h:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <p:separator style="margin-top: 20px;"/>
+
+                    <div class="ui-grid-row">
+                        <div class="ui-grid-col-12">
+                            <h3>Описание</h3>
+                        </div>
+                    </div>
+
+                    <div class="ui-grid-row">
+                        <div class="ui-grid-col-12">
+                            <p:inputTextarea value="#{eventTypesDirectory.newEventType.description}" rows="2" maxlength="512" style="width: 98%;"/>
+                        </div>
+                    </div>
+
+                </div>
+
+                <h:form style="text-align: right; margin-top: 15px;">
+                    <p:commandButton value="Создать" action="#{eventTypesDirectory.createType()}" update=":event_types_directory_form:event_types_directory_table"
+                                     oncomplete="PF('creationEventTypeDialogVar').hide()" style="margin-right: 10px;"/>
+                    <p:commandButton value="Отмена" type="button" onclick="PF('creationEventTypeDialogVar').hide()" />
+                </h:form>
+            </form>
+        </p:dialog>
+
     </ui:define>
 </ui:composition>

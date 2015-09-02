@@ -51,6 +51,11 @@ public class EventType extends SuperClass {
 	protected EventType() {
 	}
 
+    public EventType(EventCategory category) {
+        this.active = true;
+        this.category = category;
+    }
+
 	/**
 	 * @return Наименование типа события.
 	 */
