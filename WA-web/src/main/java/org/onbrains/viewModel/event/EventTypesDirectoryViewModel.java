@@ -73,7 +73,15 @@ public class EventTypesDirectoryViewModel implements Serializable {
 
     public void createType() {
         em.persist(newEventType);
+        allTypes.add(newEventType);
+        buildResultTypesBy((EventCategory) selectedCategoryNode.getData());
         newEventType = null;
+    }
+
+    public void cancelCreationType() {
+        newEventType = null;
+        selectedNoWorkHour = 0;
+        selectedNoWorkMinute = 0;
     }
 
     public List<EventType> getAllTypes() {
@@ -157,10 +165,6 @@ public class EventTypesDirectoryViewModel implements Serializable {
 
     public TreeNode getCategoryNode() {
         return categoryNode;
-    }
-
-    public TreeNode getSelectedCategoryNode() {
-        return selectedCategoryNode;
     }
 
     public List<EventType> getTypesBySelectedCategory() {
