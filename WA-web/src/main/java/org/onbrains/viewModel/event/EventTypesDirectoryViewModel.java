@@ -3,6 +3,7 @@ package org.onbrains.viewModel.event;
 import org.onbrains.dao.workDayEvent.EventTypeDAOInterface;
 import org.onbrains.entity.event.EventCategory;
 import org.onbrains.entity.event.EventType;
+import org.onbrains.utils.information.Notification;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.NodeSelectEvent;
 import org.primefaces.event.RowEditEvent;
@@ -15,6 +16,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -53,10 +55,7 @@ public class EventTypesDirectoryViewModel implements Serializable {
 
 	public void onRowEdit(RowEditEvent event) {
 		EventType editionEventType = (EventType) event.getObject();
-		long newValueForNoWorkingTime = calculationNoWorkingTime();
-		if (!editionEventType.getNotWorkingTime().equals(newValueForNoWorkingTime)) {
-			editionEventType.setNotWorkingTime(newValueForNoWorkingTime);
-		}
+		editionEventType.setNotWorkingTime(calculationNoWorkingTime());
 		em.merge(editionEventType);
 	}
 
@@ -72,17 +71,28 @@ public class EventTypesDirectoryViewModel implements Serializable {
     }
 
     public void createType() {
+        newEventType.setNotWorkingTime(calculationNoWorkingTime());
         em.persist(newEventType);
         allTypes.add(newEventType);
         buildResultTypesBy((EventCategory) selectedCategoryNode.getData());
-        newEventType = null;
+        cleanParams();
     }
 
     public void cancelCreationType() {
-        newEventType = null;
-        selectedNoWorkHour = 0;
-        selectedNoWorkMinute = 0;
+        cleanParams();
     }
+
+    //FIXME: без flush нельзя пойтать Exeption
+	public void removeType(EventType removingType) {
+		try {
+			em.remove(em.merge(removingType));
+			em.flush();
+			typesBySelectedCategory.remove(removingType);
+		} catch (PersistenceException constraintException) {
+			Notification.warn(String.format("Невозможну удалить тип: %s", removingType.getTitle()),
+					"Данный тип имеет зависимые записи");
+		}
+	}
 
     public List<EventType> getAllTypes() {
 		if (allTypes.isEmpty()) {
@@ -121,6 +131,12 @@ public class EventTypesDirectoryViewModel implements Serializable {
                 typesBySelectedCategory.add(type);
             }
         }
+    }
+
+    private void cleanParams() {
+        newEventType = null;
+        selectedNoWorkHour = 0;
+        selectedNoWorkMinute = 0;
     }
 
     // *****************************************************************************************************************

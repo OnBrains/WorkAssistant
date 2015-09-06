@@ -63,7 +63,7 @@
                                 </f:facet>
                             </p:cellEditor>
                         </p:column>
-                        <p:column headerText="Влияет на рабочее время" style="width: 20%; text-align: center">
+                        <p:column headerText="Влияет на рабочее время" style="width: 15%; text-align: center">
                             <p:cellEditor>
                                 <f:facet name="output">
                                     <h:outputText value="#{eventType.category.desc}" disabled="true"/>
@@ -98,7 +98,7 @@
                                 </f:facet>
                             </p:cellEditor>
                         </p:column>
-                        <p:column headerText="Описание" style="width: 30%; text-align: center;">
+                        <p:column headerText="Описание" style="width: 30%;">
                             <p:cellEditor>
                                 <f:facet name="output">
                                     <h:outputText value="#{eventType.description}"/>
@@ -110,6 +110,10 @@
                         </p:column>
                         <p:column style="width: 5%; text-align: center;">
                             <p:rowEditor/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 5%;">
+                            <p:commandButton icon="ui-icon-trash" action="#{eventTypesDirectory.removeType(eventType)}"
+                                             update="event_types_directory_table"/>
                         </p:column>
                     </p:dataTable>
                 </h:form>
