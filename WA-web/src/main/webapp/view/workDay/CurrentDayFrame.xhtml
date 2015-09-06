@@ -61,9 +61,8 @@
                             <h:outputText value="#{dateFormat.toHHMM(dayEvent.endTime.time)}"/>
                         </f:facet>
                         <f:facet name="input">
-                            <pe:timePicker
-                                    value="#{dayEvent.endTime != null ? dayEvent.endTime.time : currentDayFrameModel.currentTime}"
-                                    mode="popup" minHour="#{currentDayFrameModel.getMinHourForEndEvent(dayEvent)}"/>
+                            <pe:timePicker value="#{dayEvent.endTime.time}" mode="popup"
+                                           minHour="#{currentDayFrameModel.getMinHourForEndEvent(dayEvent)}"/>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>

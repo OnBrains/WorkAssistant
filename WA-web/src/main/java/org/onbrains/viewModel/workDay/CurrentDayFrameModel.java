@@ -296,9 +296,9 @@ public class CurrentDayFrameModel implements Serializable {
 				+ currentWorkDay.getState().getDesc() : "Не найдено";
 	}
 
-	/**
-	 * Simple getters and setters
-	 */
+    // *****************************************************************************************************************
+    // Simple getters and setters
+	// *****************************************************************************************************************
 
 	private Long getCurrentTimeInMSecond() {
 		return Calendar.getInstance().getTimeInMillis();
@@ -320,11 +320,7 @@ public class CurrentDayFrameModel implements Serializable {
 		return etDAO.getEventTypes(true);
 	}
 
-	public Date getCurrentTime() {
-		return Calendar.getInstance().getTime();
-	}
-
-	public int getMinHourForEndEvent(Event event) {
+    public int getMinHourForEndEvent(Event event) {
 		return event.getStartTime().get(Calendar.HOUR_OF_DAY);
 	}
 

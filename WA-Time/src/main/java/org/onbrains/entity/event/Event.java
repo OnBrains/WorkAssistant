@@ -76,14 +76,17 @@ public class Event extends SuperClass {
      * @return Отработанное время в миллисекундах.
      */
     private Long calculationWorkedTime() {
-        switch (type.getCategory()) {
-            case INFLUENCE_ON_WORKED_TIME:
-                return endTime.getTimeInMillis() - startTime.getTimeInMillis();
-            case WITH_FIXED_WORKED_TIME:
-                return type.getNotWorkingTime();
-            default:
-                return 0L;
+        if (endTime != null) {
+            switch (type.getCategory()) {
+                case INFLUENCE_ON_WORKED_TIME:
+                    return endTime.getTimeInMillis() - startTime.getTimeInMillis();
+                case WITH_FIXED_WORKED_TIME:
+                    return type.getNotWorkingTime();
+                default:
+                    return 0L;
+            }
         }
+        return 0L;
     }
 
 	/**
@@ -149,7 +152,7 @@ public class Event extends SuperClass {
 	 * @return Время окончания события.
 	 */
 	public Calendar getEndTime() {
-		return endTime;
+		return endTime != null ? endTime : Calendar.getInstance();
 	}
 
 	public void setEndTime(Calendar endTime) {
