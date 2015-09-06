@@ -43,15 +43,15 @@ public class EventTypesDirectoryViewModel implements Serializable {
 	private long selectedNoWorkMinute = 0;
 	private List<EventType> allTypes = new ArrayList<>();
 
-    private TreeNode categoryNode;
-    private TreeNode selectedCategoryNode;
-    private List<EventType> typesBySelectedCategory = new ArrayList<>();
-    private EventType newEventType;
+	private TreeNode categoryNode;
+	private TreeNode selectedCategoryNode;
+	private List<EventType> typesBySelectedCategory = new ArrayList<>();
+	private EventType newEventType;
 
-    @PostConstruct
-    public void postConstruct() {
-        initializationCategoryNode();
-    }
+	@PostConstruct
+	public void postConstruct() {
+		initializationCategoryNode();
+	}
 
 	public void onRowEdit(RowEditEvent event) {
 		EventType editionEventType = (EventType) event.getObject();
@@ -59,30 +59,31 @@ public class EventTypesDirectoryViewModel implements Serializable {
 		em.merge(editionEventType);
 	}
 
-    public void onCategoryNodeSelect(NodeSelectEvent event) {
-        selectedCategoryNode = event.getTreeNode();
-        buildResultTypesBy((EventCategory) selectedCategoryNode.getData());
-    }
+	public void onCategoryNodeSelect(NodeSelectEvent event) {
+		selectedCategoryNode = event.getTreeNode();
+		buildResultTypesBy((EventCategory) selectedCategoryNode.getData());
+	}
 
-    public void onCreationTypeStart() {
-        EventCategory category = selectedCategoryNode == null ? EventCategory.INFLUENCE_ON_WORKED_TIME : (EventCategory) selectedCategoryNode.getData();
-        newEventType = new EventType(category);
-        RequestContext.getCurrentInstance().update("creation_event_type_form");
-    }
+	public void onCreationTypeStart() {
+		EventCategory category = selectedCategoryNode == null ? EventCategory.INFLUENCE_ON_WORKED_TIME
+				: (EventCategory) selectedCategoryNode.getData();
+		newEventType = new EventType(category);
+		RequestContext.getCurrentInstance().update("creation_event_type_form");
+	}
 
-    public void createType() {
-        newEventType.setNotWorkingTime(calculationNoWorkingTime());
-        em.persist(newEventType);
-        allTypes.add(newEventType);
-        buildResultTypesBy((EventCategory) selectedCategoryNode.getData());
-        cleanParams();
-    }
+	public void createType() {
+		newEventType.setNotWorkingTime(calculationNoWorkingTime());
+		em.persist(newEventType);
+		allTypes.add(newEventType);
+		buildResultTypesBy((EventCategory) selectedCategoryNode.getData());
+		cleanParams();
+	}
 
-    public void cancelCreationType() {
-        cleanParams();
-    }
+	public void cancelCreationType() {
+		cleanParams();
+	}
 
-    //FIXME: без flush нельзя пойтать Exeption
+	// FIXME: без flush нельзя пойтать Exeption
 	public void removeType(EventType removingType) {
 		try {
 			em.remove(em.merge(removingType));
@@ -94,16 +95,16 @@ public class EventTypesDirectoryViewModel implements Serializable {
 		}
 	}
 
-    public List<EventType> getAllTypes() {
+	public List<EventType> getAllTypes() {
 		if (allTypes.isEmpty()) {
 			allTypes = etDAO.getEventTypes(true, false);
 		}
 		return allTypes;
 	}
 
-    // *****************************************************************************************************************
+	// *****************************************************************************************************************
 	// Block with privates methods
-    // *****************************************************************************************************************
+	// *****************************************************************************************************************
 
 	private Long calculationNoWorkingTime() {
 		return convertToMillisFromSelectedHour() + convertToMillisFromSelectedMinute();
@@ -117,31 +118,31 @@ public class EventTypesDirectoryViewModel implements Serializable {
 		return selectedNoWorkMinute * MILLIS_IN_MINUTE;
 	}
 
-    private void initializationCategoryNode() {
-        categoryNode = new DefaultTreeNode("root", null);
-        for (EventCategory category: EventCategory.values()) {
-            new DefaultTreeNode(category, categoryNode);
-        }
-    }
+	private void initializationCategoryNode() {
+		categoryNode = new DefaultTreeNode("root", null);
+		for (EventCategory category : EventCategory.values()) {
+			new DefaultTreeNode(category, categoryNode);
+		}
+	}
 
-    private void buildResultTypesBy(EventCategory selectedCategory) {
-        typesBySelectedCategory.clear();
-        for (EventType type: getAllTypes()) {
-            if (type.getCategory().equals(selectedCategory)) {
-                typesBySelectedCategory.add(type);
-            }
-        }
-    }
+	private void buildResultTypesBy(EventCategory selectedCategory) {
+		typesBySelectedCategory.clear();
+		for (EventType type : getAllTypes()) {
+			if (type.getCategory().equals(selectedCategory)) {
+				typesBySelectedCategory.add(type);
+			}
+		}
+	}
 
-    private void cleanParams() {
-        newEventType = null;
-        selectedNoWorkHour = 0;
-        selectedNoWorkMinute = 0;
-    }
+	private void cleanParams() {
+		newEventType = null;
+		selectedNoWorkHour = 0;
+		selectedNoWorkMinute = 0;
+	}
 
-    // *****************************************************************************************************************
-    // Simple Getters and Setters
-    // *****************************************************************************************************************
+	// *****************************************************************************************************************
+	// Simple Getters and Setters
+	// *****************************************************************************************************************
 
 	public List<Integer> getPossibleHours() {
 		List<Integer> possibleHours = new ArrayList<>();
@@ -159,9 +160,9 @@ public class EventTypesDirectoryViewModel implements Serializable {
 		return possibleMinutes;
 	}
 
-    public EventCategory[] getEventCategories() {
-        return EventCategory.values();
-    }
+	public EventCategory[] getEventCategories() {
+		return EventCategory.values();
+	}
 
 	public long getSelectedNoWorkHour() {
 		return selectedNoWorkHour;
@@ -179,20 +180,20 @@ public class EventTypesDirectoryViewModel implements Serializable {
 		this.selectedNoWorkMinute = selectedNoWorkMinute;
 	}
 
-    public TreeNode getCategoryNode() {
-        return categoryNode;
-    }
+	public TreeNode getCategoryNode() {
+		return categoryNode;
+	}
 
-    public List<EventType> getTypesBySelectedCategory() {
-        return typesBySelectedCategory;
-    }
+	public List<EventType> getTypesBySelectedCategory() {
+		return typesBySelectedCategory;
+	}
 
-    public EventType getNewEventType() {
-        return newEventType;
-    }
+	public EventType getNewEventType() {
+		return newEventType;
+	}
 
-    public void setNewEventType(EventType newEventType) {
-        this.newEventType = newEventType;
-    }
+	public void setNewEventType(EventType newEventType) {
+		this.newEventType = newEventType;
+	}
 
 }

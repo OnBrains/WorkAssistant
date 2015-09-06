@@ -48,31 +48,6 @@ public class CurrentDayFrameModel implements Serializable {
 		}
 	}
 
-	/**
-	 * Инициализирует информацию о текущем рабочем дне, если ее нет.
-	 */
-	private void initializationCurrentWorkDay() {
-		currentWorkDay = wdDAO.getCurrentDayInfo(new Date(), SessionUtil.getWorker());
-	}
-
-	/**
-	 * Из за того, что Primefaces проставляет 1970г если использовать компонент для ввода только времени необходимо
-	 * формировать корректное значение времени.
-	 *
-	 * @param time
-	 *            корректное время.
-	 * @param day
-	 *            день года.
-	 * @return Корректное время с корректной датой.
-	 */
-	private Calendar formationCorrectTime(Calendar time, Date day) {
-		Calendar correctTime = Calendar.getInstance();
-		correctTime.setTime(day);
-		correctTime.set(Calendar.HOUR_OF_DAY, time.get(Calendar.HOUR_OF_DAY));
-		correctTime.set(Calendar.MINUTE, time.get(Calendar.MINUTE));
-		return correctTime;
-	}
-
 	public void onRowEdit(RowEditEvent event) {
 		Event editionEvent = (Event) event.getObject();
 		editionEvent.setStartTime(formationCorrectTime(editionEvent.getStartTime(), editionEvent.getDay()));
@@ -82,20 +57,6 @@ public class CurrentDayFrameModel implements Serializable {
 		} else {
 			em.merge(editionEvent);
 		}
-	}
-
-	/**
-	 * Создает новое событие и добавляет его к списку событий текущего дня.
-	 *
-	 * @return Созданное событие.
-	 */
-	private Event addNewEvent() {
-		Event workEvent = new Event(currentWorkDay.getDay().getDay(), selectedEventType, selectedEventType.getTitle(),
-				Calendar.getInstance());
-		em.persist(workEvent);
-		currentWorkDay.getEvents().add(workEvent);
-		em.merge(currentWorkDay);
-		return workEvent;
 	}
 
 	/**
@@ -223,36 +184,6 @@ public class CurrentDayFrameModel implements Serializable {
 	}
 
 	/**
-	 * @return Реальное время ухода для текущего рабочего дня в формате <strong>HH:MM</strong>.
-	 */
-	private String getRealOutTime() {
-		return DateFormatService.toHHMM(currentWorkDay.getOutTime().getTime());
-	}
-
-	/**
-	 * Вычисляет возможное время ухода для текущего рабочего дня, как сумму {@linkplain WorkDay#getComingTime() время
-	 * прихода} + {@linkplain org.onbrains.entity.workDay.DayType#getWorkTimeInMSecond() время которое надо отработать}.
-	 *
-	 * @return Возможное время ухода в милисекундах.
-	 */
-	private Long getPossibleOutTimeInMSecond() {
-		return currentWorkDay != null ? currentWorkDay.getComingTime().getTimeInMillis()
-				+ currentWorkDay.getDay().getType().getWorkTimeInMSecond() : 0L;
-	}
-
-	/**
-	 * Вычисляет возможное время ухода, в зависимости от времени прихода. Актуально для случая, когда рабочий день не
-	 * закончин.
-	 *
-	 * @return - Время прихода + время в зависимости от типа дня, если день не найден, то "__:__".
-	 */
-	private String getPossibleOutTime() {
-		Calendar possibleOutComeTime = Calendar.getInstance();
-		possibleOutComeTime.setTimeInMillis(getPossibleOutTimeInMSecond());
-		return currentWorkDay != null ? DateFormatService.toHHMM(possibleOutComeTime.getTime()) : "__:__";
-	}
-
-	/**
 	 * Вычисляет отработанное на текущий момент время. Если рабочий день не закончин, то отработанное время вычисляется
 	 * как текущие время минус {@linkplain WorkDay#getComingTime() время прихода}. Если рабочий день закончен, то
 	 * берется {@linkplain WorkDay#getSummaryWorkedTime() суммарное отработанное время}.
@@ -296,8 +227,81 @@ public class CurrentDayFrameModel implements Serializable {
 				+ currentWorkDay.getState().getDesc() : "Не найдено";
 	}
 
-    // *****************************************************************************************************************
-    // Simple getters and setters
+	// *****************************************************************************************************************
+	// Block with privates methods
+	// *****************************************************************************************************************
+
+	/**
+	 * Инициализирует информацию о текущем рабочем дне, если ее нет.
+	 */
+	private void initializationCurrentWorkDay() {
+		currentWorkDay = wdDAO.getCurrentDayInfo(new Date(), SessionUtil.getWorker());
+	}
+
+	/**
+	 * Из за того, что Primefaces проставляет 1970г если использовать компонент для ввода только времени необходимо
+	 * формировать корректное значение времени.
+	 *
+	 * @param time
+	 *            корректное время.
+	 * @param day
+	 *            день года.
+	 * @return Корректное время с корректной датой.
+	 */
+	private Calendar formationCorrectTime(Calendar time, Date day) {
+		Calendar correctTime = Calendar.getInstance();
+		correctTime.setTime(day);
+		correctTime.set(Calendar.HOUR_OF_DAY, time.get(Calendar.HOUR_OF_DAY));
+		correctTime.set(Calendar.MINUTE, time.get(Calendar.MINUTE));
+		return correctTime;
+	}
+
+	/**
+	 * Создает новое событие и добавляет его к списку событий текущего дня.
+	 *
+	 * @return Созданное событие.
+	 */
+	private Event addNewEvent() {
+		Event workEvent = new Event(currentWorkDay.getDay().getDay(), selectedEventType, selectedEventType.getTitle(),
+				Calendar.getInstance());
+		em.persist(workEvent);
+		currentWorkDay.getEvents().add(workEvent);
+		em.merge(currentWorkDay);
+		return workEvent;
+	}
+
+	/**
+	 * @return Реальное время ухода для текущего рабочего дня в формате <strong>HH:MM</strong>.
+	 */
+	private String getRealOutTime() {
+		return DateFormatService.toHHMM(currentWorkDay.getOutTime().getTime());
+	}
+
+	/**
+	 * Вычисляет возможное время ухода для текущего рабочего дня, как сумму {@linkplain WorkDay#getComingTime() время
+	 * прихода} + {@linkplain org.onbrains.entity.workDay.DayType#getWorkTimeInMSecond() время которое надо отработать}.
+	 *
+	 * @return Возможное время ухода в милисекундах.
+	 */
+	private Long getPossibleOutTimeInMSecond() {
+		return currentWorkDay != null ? currentWorkDay.getComingTime().getTimeInMillis()
+				+ currentWorkDay.getDay().getType().getWorkTimeInMSecond() : 0L;
+	}
+
+	/**
+	 * Вычисляет возможное время ухода, в зависимости от времени прихода. Актуально для случая, когда рабочий день не
+	 * закончин.
+	 *
+	 * @return - Время прихода + время в зависимости от типа дня, если день не найден, то "__:__".
+	 */
+	private String getPossibleOutTime() {
+		Calendar possibleOutComeTime = Calendar.getInstance();
+		possibleOutComeTime.setTimeInMillis(getPossibleOutTimeInMSecond());
+		return currentWorkDay != null ? DateFormatService.toHHMM(possibleOutComeTime.getTime()) : "__:__";
+	}
+
+	// *****************************************************************************************************************
+	// Simple getters and setters
 	// *****************************************************************************************************************
 
 	private Long getCurrentTimeInMSecond() {
@@ -320,7 +324,7 @@ public class CurrentDayFrameModel implements Serializable {
 		return etDAO.getEventTypes(true);
 	}
 
-    public int getMinHourForEndEvent(Event event) {
+	public int getMinHourForEndEvent(Event event) {
 		return event.getStartTime().get(Calendar.HOUR_OF_DAY);
 	}
 
