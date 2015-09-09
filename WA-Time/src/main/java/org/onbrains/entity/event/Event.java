@@ -4,6 +4,8 @@ import org.onbrains.entity.SuperClass;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -43,9 +45,13 @@ public class Event extends SuperClass {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Calendar startTime;
 
-	@Column(name = "END_TIME", nullable = true)
+	@Column(name = "END_TIME", nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Calendar endTime;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STATE", nullable = false, length = 16)
+    private EventState state;
 
 	protected Event() {
 	}
@@ -55,6 +61,8 @@ public class Event extends SuperClass {
 		this.type = type;
 		this.title = title;
 		this.startTime = startTime;
+        this.endTime = startTime;
+        this.state = EventState.NOT_END;
 	}
 
 	/**
@@ -152,11 +160,19 @@ public class Event extends SuperClass {
 	 * @return Время окончания события.
 	 */
 	public Calendar getEndTime() {
-		return endTime != null ? endTime : Calendar.getInstance();
+		return endTime;
 	}
 
 	public void setEndTime(Calendar endTime) {
 		this.endTime = endTime;
 	}
+
+    public EventState getState() {
+        return state;
+    }
+
+    public void setState(EventState state) {
+        this.state = state;
+    }
 
 }
