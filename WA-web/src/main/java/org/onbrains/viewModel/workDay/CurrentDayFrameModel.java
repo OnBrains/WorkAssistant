@@ -3,6 +3,7 @@ package org.onbrains.viewModel.workDay;
 import org.onbrains.dao.workDay.WorkDayDAOInterface;
 import org.onbrains.dao.workDayEvent.EventTypeDAOInterface;
 import org.onbrains.entity.event.Event;
+import org.onbrains.entity.event.EventCategory;
 import org.onbrains.entity.event.EventType;
 import org.onbrains.entity.workDay.WorkDay;
 import org.onbrains.entity.workDay.WorkDayState;
@@ -22,6 +23,8 @@ import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import static org.onbrains.entity.event.EventState.END;
 
 /**
  * @author Naumov Oleg on 04.08.2015 21:40.
@@ -80,13 +83,10 @@ public class CurrentDayFrameModel implements Serializable {
 	 * дня.
 	 */
 	public void startEvent() {
-		// em.joinTransaction();
-		// em.getTransaction().begin();
-		addNewEvent();
-		if (currentWorkDay.getEvents().isEmpty()) {
+		Event creationEvent = addNewEvent();
+		if (isNoWork() && !creationEvent.getType().getCategory().equals(EventCategory.NOT_INFLUENCE_ON_WORKED_TIME)) {
 			startWork();
 		}
-		// em.getTransaction().commit();
 	}
 
 	/**
@@ -95,6 +95,7 @@ public class CurrentDayFrameModel implements Serializable {
 	public void stopEvent() {
 		Event editingEvent = currentWorkDay.getLastEvent();
 		editingEvent.setEndTime(Calendar.getInstance());
+		editingEvent.setState(END);
 		em.merge(editingEvent);
 	}
 
@@ -111,9 +112,10 @@ public class CurrentDayFrameModel implements Serializable {
 	 */
 	// FIXME: Перед началом рабочего дня надо проверять, нет ли уже события влияющего на отработанное время, с таким
 	// временным интервалом
-	public void startWork() {
+	private void startWork() {
 		currentWorkDay.setComingTime(currentWorkDay.getLastEvent().getStartTime());
 		currentWorkDay.setState(WorkDayState.WORKING);
+		em.merge(currentWorkDay);
 	}
 
 	/**
@@ -169,7 +171,7 @@ public class CurrentDayFrameModel implements Serializable {
 	 * Возвращает время ухода с работы для текущего рабочего дня.
 	 * <ul>
 	 * <li>Если рабочий день не начался, то возвращает шаблон для пустого времени "__:__"</li>
-	 * <li>Если рабочий день не закончин, то возвращает {@linkplain #getPossibleOutTime() возможное время ухода}</li>
+	 * <li>Если рабочий день не закончен, то возвращает {@linkplain #getPossibleOutTime() возможное время ухода}</li>
 	 * <li>Если рабочий день окончен, то возвращает {@linkplain #getRealOutTime() реальное время ухода}</li>
 	 * </ul>
 	 *
@@ -184,18 +186,36 @@ public class CurrentDayFrameModel implements Serializable {
 	}
 
 	/**
-	 * Вычисляет отработанное на текущий момент время. Если рабочий день не закончин, то отработанное время вычисляется
-	 * как текущие время минус {@linkplain WorkDay#getComingTime() время прихода}. Если рабочий день закончен, то
-	 * берется {@linkplain WorkDay#getSummaryWorkedTime() суммарное отработанное время}.
-	 *
+	 * Вычисляет отработанное на текущий момент время. Вычисления изменяются в зависимостри от {@linkplain WorkDayState
+	 * состояния текущего рабочего дня}:
+	 * <ul>
+	 * <li><strong>Рабочий день закончен</strong> - отработанное время = {@link WorkDay#getSummaryWorkedTime()}</li>
+	 * <li><strong>Рабочий день еще идет(последнее рабочее событие закончено)</strong> - отработанное время =
+	 * {@link WorkDay#getSummaryWorkedTime()}</li>
+	 * <li><strong>Рабочий день еще идет(последнее рабочее событие не закончено)</strong> - отработанное время =
+	 * {@link WorkDay#getSummaryWorkedTime()} + {@linkplain #getCurrentTimeInMSecond() текущее время} -
+	 * {@linkplain WorkDay#getLastWorkEvent() время начала последнего события}, которое {@linkplain EventType влияет на
+	 * отработанное время}.</li>
+	 * <li><strong>Рабочий день не начат</strong> - шаблон "__:__"</li>
+	 * </ul>
+	 * 
 	 * @return Отработанное на текущий момент время, если рабочий день не начет, то "__:__".
 	 */
 	public String getCurrentWorkedTime() {
-		if (!isNoWork()) {
-			Long currentWorkedTime = isWorked() ? currentWorkDay.getSummaryWorkedTime()
-					: getCurrentTimeInMSecond() - currentWorkDay.getComingTime().getTimeInMillis();
-			return DateFormatService.mSecToHHMM(currentWorkedTime);
-		} else {
+		long workedTime = currentWorkDay.getSummaryWorkedTime();
+		switch (currentWorkDay.getState()) {
+		case WORKED:
+			return DateFormatService.mSecToHHMM(workedTime);
+		case WORKING:
+			Event lastWorkEvent = currentWorkDay.getLastWorkEvent();
+			if (lastWorkEvent != null && lastWorkEvent.getState().equals(END)) {
+				long currentWorkedTime = getCurrentTimeInMSecond() - lastWorkEvent.getStartTime().getTimeInMillis()
+						+ workedTime;
+				return DateFormatService.mSecToHHMM(currentWorkedTime);
+			} else {
+				return DateFormatService.mSecToHHMM(workedTime);
+			}
+		default:
 			return "__:__";
 		}
 	}
@@ -290,7 +310,7 @@ public class CurrentDayFrameModel implements Serializable {
 
 	/**
 	 * Вычисляет возможное время ухода, в зависимости от времени прихода. Актуально для случая, когда рабочий день не
-	 * закончин.
+	 * закончен.
 	 *
 	 * @return - Время прихода + время в зависимости от типа дня, если день не найден, то "__:__".
 	 */

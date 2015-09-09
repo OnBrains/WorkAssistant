@@ -3,8 +3,7 @@
               xmlns:f="http://java.sun.com/jsf/core"
               xmlns:ui="http://java.sun.com/jsf/facelets"
               xmlns:p="http://primefaces.org/ui"
-              xmlns:pe="http://primefaces.org/ui/extensions"
-        >
+              xmlns:pe="http://primefaces.org/ui/extensions">
 
     <ui:define name="header">
         <h:outputStylesheet name="wa-time.css"/>
@@ -13,6 +12,17 @@
 
     <h:form id="current_day_form">
         <p:fieldset legend="#{currentDayFrameModel.legendValue}">
+
+            <p:outputLabel for="coming_time" value="ВП" style="padding: 5px;"/>
+            <h:outputText id="coming_time" value="#{currentDayFrameModel.comingTime}"/>
+
+            <p:outputLabel for="out_time" value="ВУ" style="padding: 5px;"/>
+            <h:outputText id="out_time" value="#{currentDayFrameModel.outTime}"/>
+            <br/>
+            <p:outputLabel for="worked_time" value="ОВ" style="padding: 5px;"/>
+            <h:outputText id="worked_time" value="#{currentDayFrameModel.currentWorkedTime}"/>
+            <p:separator/>
+
             <p:commandLink id="start_event_button"
                            disabled="#{!currentDayFrameModel.canStartEvent()}"
                            title="Начать событие">
@@ -37,13 +47,22 @@
                 <h:graphicImage name="img/clock/clock_pause.png"/>
             </p:commandLink>
 
+            <p:commandLink id="stop_work_day_button" title="Закончить рабочий день"
+                           actionListener="#{currentDayFrameModel.endWork()}"
+                           disabled="#{currentDayFrameModel.working}"
+                           update="current_day_form, :month_info_form">
+                <h:graphicImage name="img/clock/clock_stop.png"/>
+            </p:commandLink>
+
             <p:dataTable id="current_day_events_table" value="#{currentDayFrameModel.currentWorkDay.events}"
                          var="dayEvent" editable="true">
 
                 <p:ajax event="rowEdit" listener="#{currentDayFrameModel.onRowEdit}"/>
 
-                <p:column headerText="Тип" style="width: 36%;">
+                <p:column headerText="Тип" style="width: 48%;" styleClass="with_delete_button">
                     #{dayEvent.type.title}
+                    <p:commandButton icon="ui-icon-trash" action="#{currentDayFrameModel.removeEvent(dayEvent)}"
+                                     update="current_day_form, :month_info_form"/>
                 </p:column>
                 <p:column headerText="Начало" style="text-align: center; width: 20%;">
                     <p:cellEditor>
@@ -58,7 +77,7 @@
                 <p:column headerText="Окончание" style="text-align: center; width: 20%;">
                     <p:cellEditor>
                         <f:facet name="output">
-                            <h:outputText value="#{dateFormat.toHHMM(dayEvent.endTime.time)}"/>
+                            <h:outputText value="#{dayEvent.endTime != null ? dateFormat.toHHMM(dayEvent.endTime.time) : null}"/>
                         </f:facet>
                         <f:facet name="input">
                             <pe:timePicker value="#{dayEvent.endTime.time}" mode="popup"
@@ -68,10 +87,6 @@
                 </p:column>
                 <p:column style="text-align: center; width: 12%;">
                     <p:rowEditor/>
-                </p:column>
-                <p:column style="text-align: center; width: 12%;" styleClass="with_delete_button">
-                    <p:commandButton icon="ui-icon-trash" action="#{currentDayFrameModel.removeEvent(dayEvent)}"
-                                     update="current_day_form, :month_info_form"/>
                 </p:column>
             </p:dataTable>
         </p:fieldset>
