@@ -1,5 +1,8 @@
 package org.onbrains.entity.workDay;
 
+import static org.onbrains.entity.event.EventCategory.NOT_INFLUENCE_ON_WORKED_TIME;
+import static org.onbrains.entity.event.EventState.END;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -64,7 +67,7 @@ public class WorkDay extends SuperClass {
 	@Column(name = "STATE", length = 16, nullable = false)
 	private WorkDayState state = WorkDayState.NO_WORK;
 
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.REMOVE })
 	@JoinTable(name = "WORK_DAY_EVENT", joinColumns = { @JoinColumn(name = "WORK_DAY_ID") }, inverseJoinColumns = {
 			@JoinColumn(name = "EVENT_ID") })
 	@OrderBy(value = "startTime DESC")
@@ -72,6 +75,9 @@ public class WorkDay extends SuperClass {
 
 	@Transient
 	private Event lastEvent;
+
+	@Transient
+	private Event lastWorkEvent;
 
 	protected WorkDay() {
 	}
@@ -107,7 +113,7 @@ public class WorkDay extends SuperClass {
 
 	/**
 	 * Время начала рабочего дня. Берётся минимальное время прихода из всех {@linkplain Event событий},
-	 * {@linkplain org.onbrains.entity.event.EventType#isWorking() время которых идет в зачет отработанного}.
+	 * {@linkplain org.onbrains.entity.event.EventType#getCategory() время которых идет в зачет отработанного}.
 	 *
 	 * @return Время начала рабочего дня.
 	 */
@@ -121,7 +127,7 @@ public class WorkDay extends SuperClass {
 
 	/**
 	 * Время окончания рабочего дня. Берётся максимальное время ухода из всех {@linkplain Event событий},
-	 * {@linkplain org.onbrains.entity.event.EventType#isWorking() время которых идет в зачет отработанного}
+	 * {@linkplain org.onbrains.entity.event.EventType#getCategory() время которых идет в зачет отработанного}
 	 *
 	 * @return Время окончания рабочего дня.
 	 */
@@ -158,13 +164,37 @@ public class WorkDay extends SuperClass {
 		this.events = events;
 	}
 
-    //FIXME: выбирать только события, которые влияют на рабочее время.
 	public Event getLastEvent() {
 		return !events.isEmpty() ? events.get(0) : null;
 	}
 
+	public Event getLastWorkEvent() {
+		if (!events.isEmpty()) {
+			for (int index = events.size() - 1; index >= 0; index--) {
+				Event currentEvent = events.get(index);
+				if (!currentEvent.getType().getCategory().equals(NOT_INFLUENCE_ON_WORKED_TIME)) {
+					lastWorkEvent = currentEvent;
+					break;
+				}
+			}
+		}
+		return lastWorkEvent;
+	}
+
+	public List<Event> addEvent(Event additionEvent) {
+		events.add(additionEvent);
+		return events;
+	}
+
+	private boolean eventWithPossibleStartTime(Event additionEvent) {
+		for (Event event : events) {
+
+		}
+		return false;
+	}
+
 	/**
-	 * Суммарное отработанное время в миллисекундах за все {@linkplain org.onbrains.entity.event.EventType#isWorking()
+	 * Суммарное отработанное время в миллисекундах за все {@linkplain org.onbrains.entity.event.EventType#getCategory()
 	 * события}, которые влияют на отработанное время.
 	 *
 	 * @return Суммарное отработанное время в миллисекундах.
