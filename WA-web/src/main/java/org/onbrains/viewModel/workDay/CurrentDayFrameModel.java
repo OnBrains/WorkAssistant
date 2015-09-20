@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.onbrains.entity.event.EventState.END;
+import static org.onbrains.entity.event.EventState.NOT_END;
 
 /**
  * @author Naumov Oleg on 04.08.2015 21:40.
@@ -63,37 +64,35 @@ public class CurrentDayFrameModel implements Serializable {
 	}
 
 	/**
-	 * @return <strong>true</strong> - если можно начать новое событие для текущего дня.
-	 */
-	public boolean canStartEvent() {
-		return currentWorkDay.getEvents().isEmpty() || currentWorkDay.getLastEvent().getEndTime() != null;
-	}
-
-	/**
 	 * Проверяет можно ли закончить {@linkplain WorkDay#lastEvent последнее событие}.
 	 *
 	 * @return <strong>true</strong> - если можно.
 	 */
 	public boolean canStopEvent() {
-		return !currentWorkDay.getEvents().isEmpty() && currentWorkDay.getLastEvent().getEndTime() == null;
+		return !currentWorkDay.getEvents().isEmpty() && currentWorkDay.getLastWorkEvent().getState().equals(NOT_END);
 	}
 
 	/**
 	 * {@linkplain #addNewEvent Создает событие} и отмечает начало рабочего дня если это первое событие для текущего
-	 * дня.
+	 * дня. Если в момент создания нового события, {@linkplain WorkDay#lastEvent последнее событие} не закончено, то
+	 * перед создание нового события, для него проставится статус "Закончено".
 	 */
 	public void startEvent() {
+		if (!currentWorkDay.getEvents().isEmpty() && currentWorkDay.getLastWorkEvent().getState().equals(NOT_END)) {
+			stopEvent();
+		}
 		Event creationEvent = addNewEvent();
 		if (isNoWork() && !creationEvent.getType().getCategory().equals(EventCategory.NOT_INFLUENCE_ON_WORKED_TIME)) {
 			startWork();
 		}
+		cleanAfterCreation();
 	}
 
 	/**
 	 * Проставляет время окончания для последнего события текущего дня.
 	 */
 	public void stopEvent() {
-		Event editingEvent = currentWorkDay.getLastEvent();
+		Event editingEvent = currentWorkDay.getLastWorkEvent();
 		editingEvent.setEndTime(Calendar.getInstance());
 		editingEvent.setState(END);
 		em.merge(editingEvent);
@@ -113,7 +112,7 @@ public class CurrentDayFrameModel implements Serializable {
 	// FIXME: Перед началом рабочего дня надо проверять, нет ли уже события влияющего на отработанное время, с таким
 	// временным интервалом
 	private void startWork() {
-		currentWorkDay.setComingTime(currentWorkDay.getLastEvent().getStartTime());
+		currentWorkDay.setComingTime(currentWorkDay.getLastWorkEvent().getStartTime());
 		currentWorkDay.setState(WorkDayState.WORKING);
 		em.merge(currentWorkDay);
 	}
@@ -125,7 +124,8 @@ public class CurrentDayFrameModel implements Serializable {
 	// FIXME: Перед окончанием рабочего дня надо проверять, нет ли уже события влияющего на отработанное время, с таким
 	// временным интервалом
 	public void endWork() {
-		currentWorkDay.setOutTime(Calendar.getInstance());
+        stopEvent();
+		currentWorkDay.setOutTime(currentWorkDay.getLastWorkEvent().getEndTime());
 		currentWorkDay.setState(WorkDayState.WORKED);
 	}
 
@@ -201,6 +201,7 @@ public class CurrentDayFrameModel implements Serializable {
 	 * 
 	 * @return Отработанное на текущий момент время, если рабочий день не начет, то "__:__".
 	 */
+    //FIXME: вероятно код для состояния в работе излишен, так как тоже самое вычисляется в времени события.
 	public String getCurrentWorkedTime() {
 		long workedTime = currentWorkDay.getSummaryWorkedTime();
 		switch (currentWorkDay.getState()) {
@@ -208,7 +209,7 @@ public class CurrentDayFrameModel implements Serializable {
 			return DateFormatService.mSecToHHMM(workedTime);
 		case WORKING:
 			Event lastWorkEvent = currentWorkDay.getLastWorkEvent();
-			if (lastWorkEvent != null && lastWorkEvent.getState().equals(END)) {
+			if (lastWorkEvent != null && !lastWorkEvent.getState().equals(END)) {
 				long currentWorkedTime = getCurrentTimeInMSecond() - lastWorkEvent.getStartTime().getTimeInMillis()
 						+ workedTime;
 				return DateFormatService.mSecToHHMM(currentWorkedTime);
@@ -226,14 +227,15 @@ public class CurrentDayFrameModel implements Serializable {
 	 *
 	 * @return <strong>true</strong> - если текущее время больше возможного времени ухода.
 	 */
+	@Deprecated
 	public boolean currentTimeMorePossibleOutTime() {
 		return currentWorkDay != null && getCurrentTimeInMSecond() > getPossibleOutTimeInMSecond();
 	}
 
-	// FIXME: написать комментарий
-	public String getDeltaTime() {
-		Long deltaTime = Math.abs(getPossibleOutTimeInMSecond() - getCurrentTimeInMSecond());
-		return !isNoWork() ? DateFormatService.mSecToHHMM(deltaTime) : "__:__";
+	@Deprecated
+	public String getLeftTime() {
+		Long leftTime = Math.abs(getPossibleOutTimeInMSecond() - getCurrentTimeInMSecond());
+		return !isNoWork() ? DateFormatService.mSecToHHMM(leftTime) : "__:__";
 	}
 
 	/**
@@ -250,6 +252,10 @@ public class CurrentDayFrameModel implements Serializable {
 	// *****************************************************************************************************************
 	// Block with privates methods
 	// *****************************************************************************************************************
+
+	private void cleanAfterCreation() {
+		selectedEventType = null;
+	}
 
 	/**
 	 * Инициализирует информацию о текущем рабочем дне, если ее нет.
@@ -285,7 +291,7 @@ public class CurrentDayFrameModel implements Serializable {
 		Event workEvent = new Event(currentWorkDay.getDay().getDay(), selectedEventType, selectedEventType.getTitle(),
 				Calendar.getInstance());
 		em.persist(workEvent);
-		currentWorkDay.getEvents().add(workEvent);
+		currentWorkDay.addEvent(workEvent);
 		em.merge(currentWorkDay);
 		return workEvent;
 	}
@@ -304,7 +310,7 @@ public class CurrentDayFrameModel implements Serializable {
 	 * @return Возможное время ухода в милисекундах.
 	 */
 	private Long getPossibleOutTimeInMSecond() {
-		return currentWorkDay != null ? currentWorkDay.getComingTime().getTimeInMillis()
+		return currentWorkDay != null && !isNoWork() ? currentWorkDay.getComingTime().getTimeInMillis()
 				+ currentWorkDay.getDay().getType().getWorkTimeInMSecond() : 0L;
 	}
 

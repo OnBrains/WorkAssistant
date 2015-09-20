@@ -23,13 +23,10 @@
             <h:outputText id="worked_time" value="#{currentDayFrameModel.currentWorkedTime}"/>
             <p:separator/>
 
-            <p:commandLink id="start_event_button"
-                           disabled="#{!currentDayFrameModel.canStartEvent()}"
-                           title="Начать событие">
+            <p:commandLink id="start_event_button" title="Начать событие" disabled="#{currentDayFrameModel.worked}">
                 <h:graphicImage name="img/clock/clock_play.png"/>
             </p:commandLink>
-            <p:overlayPanel id="event_types_panel" for="start_event_button" hideEffect="fade"
-                            rendered="#{currentDayFrameModel.canStartEvent()}">
+            <p:overlayPanel id="event_types_panel" for="start_event_button" hideEffect="fade">
                 <h:selectOneMenu id="event_type" value="#{currentDayFrameModel.selectedEventType}" style="width: 150px;"
                                  converter="#{abstractPersistentEntityConverter}">
                     <f:selectItem itemLabel="Тип события" itemValue=""/>
@@ -49,7 +46,7 @@
 
             <p:commandLink id="stop_work_day_button" title="Закончить рабочий день"
                            actionListener="#{currentDayFrameModel.endWork()}"
-                           disabled="#{currentDayFrameModel.working}"
+                           disabled="#{currentDayFrameModel.worked}"
                            update="current_day_form, :month_info_form">
                 <h:graphicImage name="img/clock/clock_stop.png"/>
             </p:commandLink>
@@ -77,7 +74,7 @@
                 <p:column headerText="Окончание" style="text-align: center; width: 20%;">
                     <p:cellEditor>
                         <f:facet name="output">
-                            <h:outputText value="#{dayEvent.endTime != null ? dateFormat.toHHMM(dayEvent.endTime.time) : null}"/>
+                            <h:outputText value="#{dayEvent.state == 'END' ? dateFormat.toHHMM(dayEvent.endTime.time) : null}"/>
                         </f:facet>
                         <f:facet name="input">
                             <pe:timePicker value="#{dayEvent.endTime.time}" mode="popup"
