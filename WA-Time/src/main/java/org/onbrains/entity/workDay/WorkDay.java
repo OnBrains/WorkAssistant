@@ -5,6 +5,8 @@ import static org.onbrains.entity.event.EventState.END;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -183,6 +185,7 @@ public class WorkDay extends SuperClass {
 
 	public List<Event> addEvent(Event additionEvent) {
 		events.add(additionEvent);
+        Collections.sort(events, new EventComparator());
 		return events;
 	}
 
@@ -229,5 +232,14 @@ public class WorkDay extends SuperClass {
 		Long resultWorkedTimeInMSecond = Math.abs(getSummaryWorkedTime() - day.getType().getWorkTimeInMSecond());
 		return getState().equals(WorkDayState.WORKED) ? resultWorkedTimeInMSecond : 0L;
 	}
+
+    private class EventComparator implements Comparator<Event> {
+
+        @Override
+        public int compare(Event first, Event second) {
+            return second.getStartTime().compareTo(first.getStartTime());
+        }
+
+    }
 
 }
