@@ -15,6 +15,8 @@ import javax.persistence.TemporalType;
 import java.util.Calendar;
 import java.util.Date;
 
+import static org.onbrains.entity.event.EventState.END;
+
 /**
  * @author Naumov Oleg on 18.04.2015 14:59. События которые могут происходить в течении рабочего дня. Описание
  *         {@linkplain EventType типов событий}. Одно событие может быть привязано к рабочим дня нескольких работников.
@@ -49,9 +51,9 @@ public class Event extends SuperClass {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Calendar endTime;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "STATE", nullable = false, length = 16)
-    private EventState state;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "STATE", nullable = false, length = 16)
+	private EventState state;
 
 	protected Event() {
 	}
@@ -61,8 +63,8 @@ public class Event extends SuperClass {
 		this.type = type;
 		this.title = title;
 		this.startTime = startTime;
-        this.endTime = startTime;
-        this.state = EventState.NOT_END;
+		this.endTime = startTime;
+		this.state = EventState.NOT_END;
 	}
 
 	/**
@@ -70,32 +72,34 @@ public class Event extends SuperClass {
 	 */
 
 	public Long getWorkedTime() {
-        if (getEndTime() != null) {
-            return calculationWorkedTime();
-        }
-        return 0L;
+		if (getEndTime() != null) {
+			return calculationWorkedTime();
+		}
+		return 0L;
 	}
 
-    /**
-     * Вычисляет время, которое пойдет в учет отработанного времени за день. На отработанное время влияют только
-     * {@linkplain EventType#getCategory() определенные типы событий}. Если событие не влияет на рабочее время вернется
-     * нулевое значение.
-     *
-     * @return Отработанное время в миллисекундах.
-     */
-    private Long calculationWorkedTime() {
-        if (endTime != null) {
-            switch (type.getCategory()) {
-                case INFLUENCE_ON_WORKED_TIME:
-                    return endTime.getTimeInMillis() - startTime.getTimeInMillis();
-                case WITH_FIXED_WORKED_TIME:
-                    return type.getNotWorkingTime();
-                default:
-                    return 0L;
-            }
-        }
-        return 0L;
-    }
+	/**
+	 * Вычисляет время, которое пойдет в учет отработанного времени за день. На отработанное время влияют только
+	 * {@linkplain EventType#getCategory() определенные типы событий}. Если событие не влияет на рабочее время вернется
+	 * нулевое значение.
+	 *
+	 * @return Отработанное время в миллисекундах.
+	 */
+	private Long calculationWorkedTime() {
+		switch (type.getCategory()) {
+		case INFLUENCE_ON_WORKED_TIME:
+			if (state.equals(END)) {
+				return endTime.getTimeInMillis() - startTime.getTimeInMillis();
+			} else {
+				long currentTimeInMillis = Calendar.getInstance().getTimeInMillis();
+				return currentTimeInMillis - startTime.getTimeInMillis();
+			}
+		case WITH_FIXED_WORKED_TIME:
+			return state.equals(END) ? type.getNotWorkingTime() : 0L;
+		default:
+			return 0L;
+		}
+	}
 
 	/**
 	 * Simple getters & setters
@@ -167,12 +171,12 @@ public class Event extends SuperClass {
 		this.endTime = endTime;
 	}
 
-    public EventState getState() {
-        return state;
-    }
+	public EventState getState() {
+		return state;
+	}
 
-    public void setState(EventState state) {
-        this.state = state;
-    }
+	public void setState(EventState state) {
+		this.state = state;
+	}
 
 }
