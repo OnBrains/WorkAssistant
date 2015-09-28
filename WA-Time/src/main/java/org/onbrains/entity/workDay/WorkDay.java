@@ -1,7 +1,6 @@
 package org.onbrains.entity.workDay;
 
 import static org.onbrains.entity.event.EventCategory.NOT_INFLUENCE_ON_WORKED_TIME;
-import static org.onbrains.entity.event.EventState.END;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -31,6 +30,7 @@ import javax.persistence.UniqueConstraint;
 import org.onbrains.entity.SuperClass;
 import org.onbrains.entity.day.Day;
 import org.onbrains.entity.event.Event;
+import org.onbrains.entity.event.EventCategory;
 import org.onbrains.entity.worker.Worker;
 
 /**
@@ -172,28 +172,102 @@ public class WorkDay extends SuperClass {
 
 	public Event getLastWorkEvent() {
 		if (!events.isEmpty()) {
-			for (int index = events.size() - 1; index >= 0; index--) {
-				Event currentEvent = events.get(index);
-				if (!currentEvent.getType().getCategory().equals(NOT_INFLUENCE_ON_WORKED_TIME)) {
-					lastWorkEvent = currentEvent;
-					break;
+			for (Event event : events) {
+				if (!event.getType().getCategory().equals(NOT_INFLUENCE_ON_WORKED_TIME)) {
+					return event;
 				}
 			}
 		}
-		return lastWorkEvent;
+		return null;
 	}
 
 	public List<Event> addEvent(Event additionEvent) {
 		events.add(additionEvent);
-        Collections.sort(events, new EventComparator());
+		Collections.sort(events, new EventComparator());
 		return events;
 	}
 
-	private boolean eventWithPossibleStartTime(Event additionEvent) {
-		for (Event event : events) {
+	/**
+	 * Проверяет нужно ли изменить {@linkplain #getComingTime() время начала РД} на новое.
+	 * 
+	 * @param time
+	 *            время, для которого выполняется проверка.
+	 * @return <strong>true</strong> - если надо изменить.
+	 */
+	public boolean needChangeComingTimeTo(Calendar time) {
+		return comingTime != null && time.getTimeInMillis() < comingTime.getTimeInMillis();
+	}
 
-		}
-		return false;
+	/**
+	 * Проверяет нужно ли изменить {@linkplain #getOutTime() время окончания РД} на новое.
+	 * 
+	 * @param time
+	 *            время, для которого выполняется проверка.
+	 * @return <strong>true</strong> - если надо изменить.
+	 */
+	public boolean needChangeOutTimeTo(Calendar time) {
+		return outTime != null && time.getTimeInMillis() > outTime.getTimeInMillis();
+	}
+
+	/**
+	 * Проверяет возможна ли данная граница временого интервала. Для {@linkplain EventCategory категорий} событий,
+	 * влияющих на отработаное время временые интервалы пересекаться не должны.
+	 * 
+	 * @param startTime
+	 *            время начала.
+	 * @param endTime
+	 *            время окончания.
+	 * @return <strong>true</strong> - если данная граница допустима.
+	 */
+	public boolean isPossibleTimeBoundaryForEvent(Calendar startTime, Calendar endTime) {
+		if (!events.isEmpty())
+			for (Event event : events) {
+				if (!event.getType().getCategory().equals(EventCategory.NOT_INFLUENCE_ON_WORKED_TIME)) {
+					if (intervalInsideEvent(event, startTime, endTime)
+							|| eventInsideInterval(event, startTime, endTime)) {
+						return false;
+					}
+				}
+			}
+		return true;
+	}
+
+	/**
+	 * Проверяет находится ли время во временном интервале события.
+	 * 
+	 * @param event
+	 *            событие.
+	 * @param startTime
+	 *            время начала.
+	 * @param endTime
+	 *            время окончания.
+	 * @return <strong>true</strong> - если время находится внутри интервала.
+	 */
+	private boolean intervalInsideEvent(Event event, Calendar startTime, Calendar endTime) {
+		boolean startTimeInsideInterval = event.getStartTime().getTimeInMillis() < startTime.getTimeInMillis()
+				&& startTime.getTimeInMillis() < event.getEndTime().getTimeInMillis();
+		boolean endTimeInsideInterval = event.getStartTime().getTimeInMillis() < endTime.getTimeInMillis()
+				&& endTime.getTimeInMillis() < event.getEndTime().getTimeInMillis();
+		return startTimeInsideInterval || endTimeInsideInterval;
+	}
+
+	/**
+	 * Проверяет находится ли интервал события в границах интервала времени.
+	 *
+	 * @param event
+	 *            событие.
+	 * @param startTime
+	 *            время начала.
+	 * @param endTime
+	 *            время окончания.
+	 * @return <strong>true</strong> - если интервал события назодится в границах времени.
+	 */
+	private boolean eventInsideInterval(Event event, Calendar startTime, Calendar endTime) {
+		boolean startEventTimeInsideInterval = startTime.getTimeInMillis() < event.getStartTime().getTimeInMillis()
+				&& event.getStartTime().getTimeInMillis() < endTime.getTimeInMillis();
+		boolean endEventTimeInsideInterval = startTime.getTimeInMillis() < event.getEndTime().getTimeInMillis()
+				&& event.getEndTime().getTimeInMillis() < endTime.getTimeInMillis();
+		return startEventTimeInsideInterval || endEventTimeInsideInterval;
 	}
 
 	/**
@@ -233,13 +307,13 @@ public class WorkDay extends SuperClass {
 		return getState().equals(WorkDayState.WORKED) ? resultWorkedTimeInMSecond : 0L;
 	}
 
-    private class EventComparator implements Comparator<Event> {
+	private class EventComparator implements Comparator<Event> {
 
-        @Override
-        public int compare(Event first, Event second) {
-            return second.getStartTime().compareTo(first.getStartTime());
-        }
+		@Override
+		public int compare(Event first, Event second) {
+			return second.getStartTime().compareTo(first.getStartTime());
+		}
 
-    }
+	}
 
 }

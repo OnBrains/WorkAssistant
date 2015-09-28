@@ -54,12 +54,19 @@ public class CurrentDayFrameModel implements Serializable {
 
 	public void onRowEdit(RowEditEvent event) {
 		Event editionEvent = (Event) event.getObject();
-		editionEvent.setStartTime(formationCorrectTime(editionEvent.getStartTime(), editionEvent.getDay()));
-		editionEvent.setEndTime(formationCorrectTime(editionEvent.getEndTime(), editionEvent.getDay()));
-		if (editionEvent.getEndTime().getTimeInMillis() < editionEvent.getStartTime().getTimeInMillis()) {
-			Notification.warn("Невозможно сохранить изменения", "Время окончания события больше времени начала");
+		Calendar startTime = formationCorrectTime(editionEvent.getStartTime(), editionEvent.getDay());
+		Calendar endTime = formationCorrectTime(editionEvent.getEndTime(), editionEvent.getDay());
+		if (isPossibleEventTimeInterval(startTime, endTime)) {
+			updateWorkDayTime(startTime, endTime);
+			editionEvent.setStartTime(startTime);
+			editionEvent.setEndTime(endTime);
+			if (editionEvent.getEndTime().getTimeInMillis() < editionEvent.getStartTime().getTimeInMillis()) {
+                Notification.warn("Невозможно сохранить изменения", "Время окончания события больше времени начала");
+			} else {
+				em.merge(editionEvent);
+			}
 		} else {
-			em.merge(editionEvent);
+			Notification.warn("Невозможно сохранить изменения", "Пересечение временых интервалов у событий");
 		}
 	}
 
@@ -124,7 +131,7 @@ public class CurrentDayFrameModel implements Serializable {
 	// FIXME: Перед окончанием рабочего дня надо проверять, нет ли уже события влияющего на отработанное время, с таким
 	// временным интервалом
 	public void endWork() {
-        stopEvent();
+		stopEvent();
 		currentWorkDay.setOutTime(currentWorkDay.getLastWorkEvent().getEndTime());
 		currentWorkDay.setState(WorkDayState.WORKED);
 	}
@@ -201,7 +208,7 @@ public class CurrentDayFrameModel implements Serializable {
 	 * 
 	 * @return Отработанное на текущий момент время, если рабочий день не начет, то "__:__".
 	 */
-    //FIXME: вероятно код для состояния в работе излишен, так как тоже самое вычисляется в времени события.
+	// FIXME: вероятно код для состояния в работе излишен, так как тоже самое вычисляется в времени события.
 	public String getCurrentWorkedTime() {
 		long workedTime = currentWorkDay.getSummaryWorkedTime();
 		switch (currentWorkDay.getState()) {
@@ -262,6 +269,25 @@ public class CurrentDayFrameModel implements Serializable {
 	 */
 	private void initializationCurrentWorkDay() {
 		currentWorkDay = wdDAO.getCurrentDayInfo(new Date(), SessionUtil.getWorker());
+	}
+
+	private boolean isPossibleEventTimeInterval(Calendar startTime, Calendar endTime) {
+		return currentWorkDay.isPossibleTimeBoundaryForEvent(startTime, endTime);
+	}
+
+	private void updateWorkDayTime(Calendar comingTime, Calendar outTime) {
+		boolean isChange = false;
+		if (comingTime != null && currentWorkDay.needChangeComingTimeTo(comingTime)) {
+			currentWorkDay.setComingTime(comingTime);
+			isChange = true;
+		}
+		if (outTime != null && currentWorkDay.needChangeOutTimeTo(outTime)) {
+			currentWorkDay.setOutTime(comingTime);
+			isChange = true;
+		}
+		if (isChange) {
+			em.merge(currentWorkDay);
+		}
 	}
 
 	/**
