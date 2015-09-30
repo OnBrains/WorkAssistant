@@ -61,7 +61,7 @@ public class CurrentDayFrameModel implements Serializable {
 			editionEvent.setStartTime(startTime);
 			editionEvent.setEndTime(endTime);
 			if (editionEvent.getEndTime().getTimeInMillis() < editionEvent.getStartTime().getTimeInMillis()) {
-                Notification.warn("Невозможно сохранить изменения", "Время окончания события больше времени начала");
+				Notification.warn("Невозможно сохранить изменения", "Время окончания события больше времени начала");
 			} else {
 				em.merge(editionEvent);
 			}
@@ -85,6 +85,7 @@ public class CurrentDayFrameModel implements Serializable {
 	 * перед создание нового события, для него проставится статус "Закончено".
 	 */
 	public void startEvent() {
+		// FIXME: заканчивать событие надо если создается событие влияющее на рабочее время
 		if (!currentWorkDay.getEvents().isEmpty() && currentWorkDay.getLastWorkEvent().getState().equals(NOT_END)) {
 			stopEvent();
 		}
@@ -209,22 +210,20 @@ public class CurrentDayFrameModel implements Serializable {
 	 * @return Отработанное на текущий момент время, если рабочий день не начет, то "__:__".
 	 */
 	// FIXME: вероятно код для состояния в работе излишен, так как тоже самое вычисляется в времени события.
-	public String getCurrentWorkedTime() {
+	public Long getCurrentWorkedTime() {
 		long workedTime = currentWorkDay.getSummaryWorkedTime();
 		switch (currentWorkDay.getState()) {
 		case WORKED:
-			return DateFormatService.mSecToHHMM(workedTime);
+			return workedTime;
 		case WORKING:
 			Event lastWorkEvent = currentWorkDay.getLastWorkEvent();
 			if (lastWorkEvent != null && !lastWorkEvent.getState().equals(END)) {
-				long currentWorkedTime = getCurrentTimeInMSecond() - lastWorkEvent.getStartTime().getTimeInMillis()
-						+ workedTime;
-				return DateFormatService.mSecToHHMM(currentWorkedTime);
+				return getCurrentTimeInMSecond() - lastWorkEvent.getStartTime().getTimeInMillis() + workedTime;
 			} else {
-				return DateFormatService.mSecToHHMM(workedTime);
+				return workedTime;
 			}
 		default:
-			return "__:__";
+			return 0L;
 		}
 	}
 
@@ -255,6 +254,46 @@ public class CurrentDayFrameModel implements Serializable {
 		return currentWorkDay != null ? DateFormatService.toDDEE(currentWorkDay.getDay().getDay()) + " - "
 				+ currentWorkDay.getState().getDesc() : "Не найдено";
 	}
+
+	// *****************************************************************************************************************
+	// day statistic
+	// *****************************************************************************************************************
+
+	public boolean isRealWorkedTimeMoreIdeal() {
+		return getCurrentWorkedTime() > currentWorkDay.getDay().getType().getWorkTimeInMSecond();
+	}
+
+	public long getWorkedTime() {
+		return isRealWorkedTimeMoreIdeal() ? currentWorkDay.getDay().getType().getWorkTimeInMSecond()
+				: getCurrentWorkedTime();
+	}
+
+	public long getDeltaTime() {
+		long idealWorkedTime = currentWorkDay.getDay().getType().getWorkTimeInMSecond();
+		return isRealWorkedTimeMoreIdeal() ? getCurrentWorkedTime() - idealWorkedTime
+				: idealWorkedTime - getCurrentWorkedTime();
+	}
+
+	public String getStyleForWorkedTime() {
+		String display = getWorkedTime() == 0 ? "none" : "table-cell";
+		return "background-color: #4da9f1;padding: 4px; width: " + getPercentage(getSummaryTime(), getWorkedTime())
+				+ "%; display: " + display + ";";
+	}
+
+	public String getStyleForDeltaTime() {
+		String color = isRealWorkedTimeMoreIdeal() ? "green" : "chocolate";
+		String display = getDeltaTime() == 0 ? "none" : "table-cell";
+		return "background-color: " + color + "; padding: 4px;width: " + getPercentage(getSummaryTime(), getDeltaTime())
+				+ "%; display: " + display + ";";
+	}
+
+	private float getPercentage(Long fullTime, Long partTime) {
+		return (float) partTime * 100 / fullTime;
+	}
+
+    private long getSummaryTime() {
+        return getWorkedTime() + getDeltaTime();
+    }
 
 	// *****************************************************************************************************************
 	// Block with privates methods

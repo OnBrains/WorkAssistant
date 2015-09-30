@@ -13,14 +13,36 @@
     <h:form id="current_day_form">
         <p:fieldset legend="#{currentDayFrameModel.legendValue}">
 
+            <h:form id="day_statistic_form">
+                <p:outputPanel styleClass="panel_for_statistic">
+                    <ul id="list_with_legend" style="display: #{currentDayFrameModel.currentWorkDay != null ? 'table' : 'none'};">
+                        <li style="#{currentDayFrameModel.workedTime == 0 ? 'display: none' : ''};">
+                            <div class="circle" style="background-color: #4da9f1;"/>
+                            #{dateFormat.mSecToHHMM(currentDayFrameModel.workedTime)} Отработано
+                        </li>
+                        <li style="#{currentDayFrameModel.deltaTime == 0 ? 'display: none' : ''};">
+                            <div class="circle"
+                                 style="background-color: #{currentDayFrameModel.realWorkedTimeMoreIdeal ? 'green' : 'chocolate'};"/>
+                            #{dateFormat.mSecToHHMM(currentDayFrameModel.deltaTime)}
+                            #{currentDayFrameModel.realWorkedTimeMoreIdeal ? 'Переработок' : 'Осталось'}
+                        </li>
+                    </ul>
+                </p:outputPanel>
+
+                <div style="display: #{currentDayFrameModel.currentWorkDay != null ? 'table' : 'none'}; width: 100%;">
+                    <span style="#{currentDayFrameModel.getStyleForWorkedTime()}"/>
+                    <span style="#{currentDayFrameModel.getStyleForDeltaTime()}"/>
+                </div>
+            </h:form>
+            <p:separator/>
             <p:outputLabel for="coming_time" value="ВП" style="padding: 5px;"/>
             <h:outputText id="coming_time" value="#{currentDayFrameModel.comingTime}"/>
-
+            <br/>
             <p:outputLabel for="out_time" value="ВУ" style="padding: 5px;"/>
             <h:outputText id="out_time" value="#{currentDayFrameModel.outTime}"/>
             <br/>
             <p:outputLabel for="worked_time" value="ОВ" style="padding: 5px;"/>
-            <h:outputText id="worked_time" value="#{currentDayFrameModel.currentWorkedTime}"/>
+            <h:outputText id="worked_time" value="#{dateFormat.mSecToHHMM(currentDayFrameModel.currentWorkedTime)}"/>
             <p:separator/>
 
             <p:commandLink id="start_event_button" title="Начать событие" disabled="#{currentDayFrameModel.worked}">
