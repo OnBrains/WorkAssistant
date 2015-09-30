@@ -72,7 +72,7 @@ public class Event extends SuperClass {
 	 */
 
 	public Long getWorkedTime() {
-		if (getEndTime() != null) {
+		if (getState().equals(EventState.END)) {
 			return calculationWorkedTime();
 		}
 		return 0L;
