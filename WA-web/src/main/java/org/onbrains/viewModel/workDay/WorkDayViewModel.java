@@ -5,6 +5,7 @@ import org.onbrains.dao.workDay.WorkDayDAOInterface;
 import org.onbrains.entity.day.Day;
 import org.onbrains.entity.workDay.DayType;
 import org.onbrains.entity.workDay.WorkDay;
+import org.onbrains.entity.workDay.WorkDayState;
 import org.onbrains.service.SessionUtil;
 import org.onbrains.utils.parsing.DateFormatService;
 
@@ -37,6 +38,8 @@ public class WorkDayViewModel implements Serializable {
 	private DayDAOInterface dDAO;
 	@Inject
 	private SessionUtil sessionUtil;
+    @Inject
+    private MonthStatistic statistic;
 
 	private Calendar selectedMonth = Calendar.getInstance();
 	private List<WorkDay> daysBySelectedMonth = new ArrayList<>();
@@ -45,6 +48,7 @@ public class WorkDayViewModel implements Serializable {
 	@PostConstruct
 	private void postConstruct() {
 		initializationWorkDayForSelectedMonth();
+        statistic.calculateStatistic(getWorkDaysBySelectedMonth(), getDaysByMonthType());
 	}
 
 	/**
@@ -53,6 +57,7 @@ public class WorkDayViewModel implements Serializable {
 	public void nextMonth() {
 		selectedMonth.add(Calendar.MONTH, 1);
 		initializationWorkDayForSelectedMonth();
+        statistic.calculateStatistic(getWorkDaysBySelectedMonth(), getDaysByMonthType());
 	}
 
 	/**
@@ -61,6 +66,7 @@ public class WorkDayViewModel implements Serializable {
 	public void previousMonth() {
 		selectedMonth.add(Calendar.MONTH, -1);
 		initializationWorkDayForSelectedMonth();
+        statistic.calculateStatistic(getWorkDaysBySelectedMonth(), getDaysByMonthType());
 	}
 
 	/**
@@ -68,8 +74,45 @@ public class WorkDayViewModel implements Serializable {
 	 * {@linkplain #getSelectedMonth() месяца}
 	 */
 	private void initializationWorkDayForSelectedMonth() {
-		daysBySelectedMonth = wdDAO.getDayInfoByMonth(getSelectedMonth().getTime(), sessionUtil.getWorker());
+        if (selectedMonth == null) {
+            selectedMonth = Calendar.getInstance();
+        }
+		daysBySelectedMonth = wdDAO.getDayInfoByMonth(getSelectedMonth().getTime(), SessionUtil.getWorker());
 	}
+
+    private List<WorkDay> getDaysPriorCurrentDay() {
+        List<WorkDay> daysPriorCurrentDay = new ArrayList<>();
+        for (WorkDay wd : daysBySelectedMonth) {
+            if (wd.getDay().getDay().getTime() < getCurrentDay().getDay().getDay().getTime()) {
+                daysPriorCurrentDay.add(wd);
+            }
+            if (wd.getDay().equals(getCurrentDay().getDay())
+                    && getCurrentDay().getState().equals(WorkDayState.WORKED)) {
+                daysPriorCurrentDay.add(wd);
+            }
+        }
+        return daysPriorCurrentDay;
+    }
+
+    private boolean isCurrentMonth() {
+        Calendar currentMonth = Calendar.getInstance();
+        return currentMonth.YEAR == selectedMonth.YEAR && currentMonth.MONTH == selectedMonth.MONTH;
+    }
+
+    private boolean isLastMonth() {
+        Calendar currentMonth = Calendar.getInstance();
+        return selectedMonth.YEAR <= currentMonth.YEAR && selectedMonth.MONTH < currentMonth.MONTH;
+    }
+
+    private List<WorkDay> getDaysByMonthType() {
+        if (isCurrentMonth()) {
+            return getDaysPriorCurrentDay();
+        }
+        if (isLastMonth()) {
+            return getWorkDaysBySelectedMonth();
+        }
+        return null;
+    }
 
 	/**
 	 * Создает {@linkplain WorkDay рабочие дни} для выбранного месяца и {@linkplain SessionUtil#getWorker()
@@ -82,6 +125,8 @@ public class WorkDayViewModel implements Serializable {
 		for (Day day : daysBySelectedMonth) {
 			em.persist(new WorkDay(sessionUtil.getWorker(), day));
 		}
+        initializationWorkDayForSelectedMonth();
+        statistic.calculateStatistic(getWorkDaysBySelectedMonth(), getDaysByMonthType());
 	}
 
 	/**
@@ -153,6 +198,34 @@ public class WorkDayViewModel implements Serializable {
 		}
 	}
 
+    // =================================================================================================================
+    // Методы для получения стилей блока статистики
+    // =================================================================================================================
+
+    private float getPercentage(Long fullTime, Long partTime) {
+        return (float) partTime * 100 / fullTime;
+    }
+
+    public String getStyleForWorkedTime() {
+        String display = statistic.getWorkedTime() == 0 ? "none" : "table-cell";
+        return "background-color: #4da9f1;padding: 4px; width: "
+                + getPercentage(statistic.getSummaryTime(), statistic.getWorkedTime()) + "%; display: " + display + ";";
+    }
+
+    public String getStyleForDeltaTime() {
+        String color = statistic.isRealWorkedTimeMoreIdeal() ? "green" : "red";
+        String display = statistic.getDeltaTime() == 0 ? "none" : "table-cell";
+        return "background-color: " + color + "; padding: 4px;width: "
+                + getPercentage(statistic.getSummaryTime(), statistic.getDeltaTime()) + "%; display: " + display + ";";
+    }
+
+    public String getStyleForRemainingTime() {
+        String display = statistic.getRemainingTime() == 0 ? "none" : "table-cell";
+        return "background-color: chocolate; padding: 4px;width: "
+                + getPercentage(statistic.getSummaryTime(), statistic.getRemainingTime()) + "%; display: " + display
+                + ";";
+    }
+
 	/**
 	 * Simple getters & setters
 	 */
@@ -163,5 +236,9 @@ public class WorkDayViewModel implements Serializable {
 		}
 		return currentWorkDay;
 	}
+
+    public MonthStatistic getStatistic() {
+        return statistic;
+    }
 
 }

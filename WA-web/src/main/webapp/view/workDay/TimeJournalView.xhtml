@@ -35,8 +35,28 @@
             <pe:layoutPane position="center" resizable="true" styleClassContent="layout_style">
                 <h:form id="month_statistic">
                     <p:outputPanel styleClass="panel_for_statistic">
-                        <!--легенда отработанного времени за месяц-->
+                        <ul id="list_with_legend" style="display: #{workDayViewModel.selectedMonth != null ? 'table' : 'none'};">
+                            <li style="#{workDayViewModel.statistic.workedTime == 0 ? 'display: none' : ''};">
+                                <div class="circle" style="background-color: #4da9f1;"/>
+                                #{dateFormat.mSecToHHMM(workDayViewModelOld.statistic.workedTime)} Отработано
+                            </li>
+                            <li style="#{workDayViewModel.statistic.deltaTime == 0 ? 'display: none' : ''};">
+                                <div class="circle" style="background-color: #{workDayViewModel.statistic.realWorkedTimeMoreIdeal ? 'green' : 'red'};"/>
+                                #{dateFormat.mSecToHHMM(workDayViewModel.statistic.deltaTime)}
+                                #{workDayViewModel.statistic.realWorkedTimeMoreIdeal ? 'Переработок' : 'Недоработок'}
+                            </li>
+                            <li style="#{workDayViewModel.statistic.remainingTime == 0 ? 'display: none' : ''};">
+                                <div class="circle" style="background-color: chocolate;"/>
+                                #{dateFormat.mSecToHHMM(workDayViewModel.statistic.remainingTime)} Осталось
+                            </li>
+                        </ul>
                     </p:outputPanel>
+
+                    <div style="display: #{workDayViewModel.selectedMonth != null ? 'table' : 'none'}; width: 100%;">
+                        <span style="#{workDayViewModel.getStyleForWorkedTime()}"/>
+                        <span style="#{workDayViewModel.getStyleForDeltaTime()}"/>
+                        <span style="#{workDayViewModel.getStyleForRemainingTime()}"/>
+                    </div>
                 </h:form>
                 <h:form id="month_action">
                     <p:outputPanel style="height: 43px;">

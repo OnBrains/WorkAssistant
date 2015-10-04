@@ -3,6 +3,7 @@ package org.onbrains.viewModel.workDay;
 import org.onbrains.entity.workDay.WorkDay;
 
 import javax.ejb.Stateful;
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -10,7 +11,7 @@ import java.util.List;
  */
 
 @Stateful
-public class MonthStatistic {
+public class MonthStatistic implements Serializable {
 
 	private long idealWorkedTimeByAllMonth;
 	private long idealWorkedTimeByCurrentDay;
