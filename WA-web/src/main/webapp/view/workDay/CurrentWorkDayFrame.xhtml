@@ -1,0 +1,21 @@
+<ui:component xmlns="http://www.w3.org/1999/xhtml"
+              xmlns:h="http://java.sun.com/jsf/html"
+              xmlns:f="http://java.sun.com/jsf/core"
+              xmlns:ui="http://java.sun.com/jsf/facelets"
+              xmlns:p="http://primefaces.org/ui"
+              xmlns:pe="http://primefaces.org/ui/extensions">
+
+    <ui:define name="header">
+        <h:outputStylesheet name="wa-time.css"/>
+        <title>Влияй на свое будущее</title>
+    </ui:define>
+
+    <h:form id="current_day_form">
+        <p:fieldset legend="#{currentDayFrameModel.legendValue}">
+            <ui:include src="WorkDayFrame.xhtml">
+                <!--<ui:param name="command_buttons_rendered" value="true"/>-->
+            </ui:include>
+        </p:fieldset>
+    </h:form>
+
+</ui:component>
