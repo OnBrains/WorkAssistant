@@ -29,62 +29,66 @@
 
             <pe:layoutPane position="west" closable="true" resizable="false" size="450" minSize="450"
                            styleClassContent="layout_style">
-                <ui:include src="/view/workDay/CurrentDayFrame.xhtml"/>
+                <ui:include src="/view/workDay/CurrentWorkDayFrame.xhtml"/>
             </pe:layoutPane>
 
             <pe:layoutPane position="center" resizable="true" styleClassContent="layout_style">
-                <h:form id="month_statistic">
+                <h:form id="month_statistic" styleClass="monthStatisticClass">
                     <p:outputPanel styleClass="panel_for_statistic">
-                        <ul id="list_with_legend" style="display: #{workDayViewModel.selectedMonth != null ? 'table' : 'none'};">
-                            <li style="#{workDayViewModel.statistic.workedTime == 0 ? 'display: none' : ''};">
+                        <ul id="list_with_legend" style="display: #{timeJournalViewModel.selectedMonth != null ? 'table' : 'none'};">
+                            <li style="#{timeJournalViewModel.statistic.workedTime == 0 ? 'display: none' : ''};">
                                 <div class="circle" style="background-color: #4da9f1;"/>
-                                #{dateFormat.mSecToHHMM(workDayViewModelOld.statistic.workedTime)} Отработано
+                                #{dateFormat.mSecToHHMM(timeJournalViewModel.statistic.workedTime)} Отработано
                             </li>
-                            <li style="#{workDayViewModel.statistic.deltaTime == 0 ? 'display: none' : ''};">
-                                <div class="circle" style="background-color: #{workDayViewModel.statistic.realWorkedTimeMoreIdeal ? 'green' : 'red'};"/>
-                                #{dateFormat.mSecToHHMM(workDayViewModel.statistic.deltaTime)}
-                                #{workDayViewModel.statistic.realWorkedTimeMoreIdeal ? 'Переработок' : 'Недоработок'}
+                            <li style="#{timeJournalViewModel.statistic.deltaTime == 0 ? 'display: none' : ''};">
+                                <div class="circle" style="background-color: #{timeJournalViewModel.statistic.realWorkedTimeMoreIdeal ? 'green' : 'red'};"/>
+                                #{dateFormat.mSecToHHMM(timeJournalViewModel.statistic.deltaTime)}
+                                #{timeJournalViewModel.statistic.realWorkedTimeMoreIdeal ? 'Переработок' : 'Недоработок'}
                             </li>
-                            <li style="#{workDayViewModel.statistic.remainingTime == 0 ? 'display: none' : ''};">
+                            <li style="#{timeJournalViewModel.statistic.remainingTime == 0 ? 'display: none' : ''};">
                                 <div class="circle" style="background-color: chocolate;"/>
-                                #{dateFormat.mSecToHHMM(workDayViewModel.statistic.remainingTime)} Осталось
+                                #{dateFormat.mSecToHHMM(timeJournalViewModel.statistic.remainingTime)} Осталось
                             </li>
                         </ul>
                     </p:outputPanel>
 
-                    <div style="display: #{workDayViewModel.selectedMonth != null ? 'table' : 'none'}; width: 100%;">
-                        <span style="#{workDayViewModel.getStyleForWorkedTime()}"/>
-                        <span style="#{workDayViewModel.getStyleForDeltaTime()}"/>
-                        <span style="#{workDayViewModel.getStyleForRemainingTime()}"/>
+                    <div style="display: #{timeJournalViewModel.selectedMonth != null ? 'table' : 'none'}; width: 100%;">
+                        <span style="#{timeJournalViewModel.getStyleForWorkedTime()}"/>
+                        <span style="#{timeJournalViewModel.getStyleForDeltaTime()}"/>
+                        <span style="#{timeJournalViewModel.getStyleForRemainingTime()}"/>
                     </div>
                 </h:form>
                 <h:form id="month_action">
                     <p:outputPanel style="height: 43px;">
                         <p:commandButton id="create_days_for_month" value="+"
-                                         action="#{workDayViewModel.createWorkDaysForSelectedMonth}"
-                                         rendered="#{workDayViewModel.workDaysBySelectedMonth.size() == 0}"
+                                         action="#{timeJournalViewModel.createWorkDaysForSelectedMonth}"
+                                         rendered="#{timeJournalViewModel.workDaysBySelectedMonth.size() == 0}"
                                          style="float:left; margin: 10px;" update=":month_info_form, :month_statistic"/>
                         <p:commandButton value="Событие" style="float:right; margin: 10px;"
                                          title="Данная функция еще не реализована"/>
                     </p:outputPanel>
                 </h:form>
                 <h:form id="month_info_form">
-                    <p:dataTable id="month_info_table" value="#{workDayViewModel.workDaysBySelectedMonth}" var="dayInfo"
+                    <p:dataTable id="month_info_table" styleClass="monthInfoTable" value="#{timeJournalViewModel.workDaysBySelectedMonth}" var="dayInfo"
                                  rowStyleClass="#{workDayViewModelOld.getStyleClassForRow(dayInfo)}" editable="true"
                                  scrollable="true" scrollHeight="700">
+
                         <f:facet name="header">
-                            <p:commandButton id="previous_month" value="#{workDayViewModel.nameForPreviousMonth}"
-                                             action="#{workDayViewModel.previousMonth}"
+                            <p:commandButton id="previous_month" value="#{timeJournalViewModel.nameForPreviousMonth}"
+                                             action="#{timeJournalViewModel.previousMonth}"
                                              update=":month_info_form, :month_statistic, :month_action"
                                              style="float: left; margin: 5px;"/>
-                            <h:outputText value="#{dateFormat.toMMMMMYYYY(workDayViewModel.selectedMonth.time)}"
+                            <h:outputText value="#{dateFormat.toMMMMMYYYY(timeJournalViewModel.selectedMonth.time)}"
                                           style="vertical-align: -webkit-baseline-middle;"/>
-                            <p:commandButton id="next_month" value="#{workDayViewModel.nameForNextMonth}"
-                                             action="#{workDayViewModel.nextMonth}"
+                            <p:commandButton id="next_month" value="#{timeJournalViewModel.nameForNextMonth}"
+                                             action="#{timeJournalViewModel.nextMonth}"
                                              update=":month_info_form, :month_statistic, :month_action"
                                              style="float: right; margin: 5px;"/>
                         </f:facet>
-                        <p:column headerText="Тип дня">
+
+                        <p:ajax event="rowEdit" listener="#{timeJournalViewModel.onRowEdit}" update=":month_statistic"/>
+
+                        <p:column headerText="Тип дня" width="10%">
                             <h:outputText value="#{dayInfo.day.type.desc}"/>
                         </p:column>
                         <p:column headerText="День" style="text-align: center;">
@@ -114,8 +118,21 @@
                             </f:facet>
                             <h:outputText value="#{dateFormat.mSecToHHMM(dayInfo.getDeltaTime())}"/>
                         </p:column>
-                        <p:column id="state_work_day_id" headerText="Состояние" style="text-align: center; width: 25%;">
-                            <h:outputText value="#{dayInfo.state.desc}"/>
+                        <p:column id="state_work_day_id" headerText="Состояние" style="text-align: center; width: 20%;">
+                            <p:cellEditor>
+                                <f:facet name="output">
+                                    <h:outputText value="#{dayInfo.state.desc}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:selectOneMenu value="#{dayInfo.state}" style="width: 50%;">
+                                        <f:selectItems value="#{workDayViewModelOld.states}" var="state"
+                                                       itemValue="#{state}" itemLabel="#{state.desc}"/>
+                                    </p:selectOneMenu>
+                                </f:facet>
+                            </p:cellEditor>
+                        </p:column>
+                        <p:column style="width: 5%;">
+                            <p:rowEditor/>
                         </p:column>
                     </p:dataTable>
                 </h:form>

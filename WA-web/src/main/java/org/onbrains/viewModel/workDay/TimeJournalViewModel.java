@@ -8,9 +8,10 @@ import org.onbrains.entity.workDay.WorkDay;
 import org.onbrains.entity.workDay.WorkDayState;
 import org.onbrains.service.SessionUtil;
 import org.onbrains.utils.parsing.DateFormatService;
+import org.primefaces.event.RowEditEvent;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.SessionScoped;
+import javax.enterprise.context.ConversationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
@@ -26,9 +27,9 @@ import java.util.List;
  * @author Naumov Oleg on 30.07.2015 21:43.
  */
 @Named
-@SessionScoped
+@ConversationScoped
 @Transactional
-public class WorkDayViewModel implements Serializable {
+public class TimeJournalViewModel implements Serializable {
 
     @PersistenceContext(unitName = "WA")
     private EntityManager em;
@@ -68,6 +69,18 @@ public class WorkDayViewModel implements Serializable {
 		initializationWorkDayForSelectedMonth();
         statistic.calculateStatistic(getWorkDaysBySelectedMonth(), getDaysByMonthType());
 	}
+
+    /**
+     * Изменяем запись в таблице
+     *
+     * @param event
+     *            - запись, которая редактируется
+     */
+    public void onRowEdit(RowEditEvent event) {
+        WorkDay day = (WorkDay) event.getObject();
+        em.merge(day);
+        statistic.calculateStatistic(getWorkDaysBySelectedMonth(), getDaysByMonthType());
+    }
 
 	/**
 	 * Инициализирует коллекцию рабочих дней для выбранного {@linkplain #getSelectedMonth() месяца} и выбранного
