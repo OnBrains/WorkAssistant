@@ -7,13 +7,13 @@ import org.onbrains.entity.event.EventCategory;
 import org.onbrains.entity.event.EventType;
 import org.onbrains.entity.workDay.WorkDay;
 import org.onbrains.entity.workDay.WorkDayState;
-import org.onbrains.service.SessionUtil;
 import org.onbrains.utils.information.Notification;
 import org.onbrains.utils.parsing.DateFormatService;
 import org.primefaces.event.RowEditEvent;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ConversationScoped;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
@@ -32,6 +32,7 @@ import static org.onbrains.entity.event.EventState.NOT_END;
  */
 @Named
 @ConversationScoped
+// @RequestScoped
 @Transactional
 public class WorkDayFrameModel implements Serializable {
 
@@ -47,9 +48,12 @@ public class WorkDayFrameModel implements Serializable {
 
 	@PostConstruct
 	public void postConstruct() {
-		if (workDay == null) {
-			initWorkDay();
-		}
+		workDay = initSelectedWorkDay();
+	}
+
+	public WorkDay initSelectedWorkDay() {
+        String path = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("workDay");
+		return path == null ? null : em.find(WorkDay.class, Long.parseLong(path.split("-")[1]));
 	}
 
 	public void onRowEdit(RowEditEvent event) {
@@ -183,8 +187,7 @@ public class WorkDayFrameModel implements Serializable {
 	 * @return Время прихода на работу для текущего рабочего дня в формате <strong>HH:MM</strong>.
 	 */
 	public String getComingTime() {
-		return workDay != null && !isNoWork()
-				? DateFormatService.toHHMM(workDay.getComingTime().getTime()) : "__:__";
+		return workDay != null && !isNoWork() ? DateFormatService.toHHMM(workDay.getComingTime().getTime()) : "__:__";
 	}
 
 	/**
@@ -248,8 +251,7 @@ public class WorkDayFrameModel implements Serializable {
 	}
 
 	public long getWorkedTime() {
-		return isRealWorkedTimeMoreIdeal() ? workDay.getDay().getType().getWorkTimeInMSecond()
-				: getCurrentWorkedTime();
+		return isRealWorkedTimeMoreIdeal() ? workDay.getDay().getType().getWorkTimeInMSecond() : getCurrentWorkedTime();
 	}
 
 	public long getDeltaTime() {
@@ -286,17 +288,6 @@ public class WorkDayFrameModel implements Serializable {
 	private void cleanAfterCreation() {
 		selectedEventType = null;
 	}
-
-	/**
-	 * Инициализирует информацию о текущем рабочем дне, если ее нет.
-	 */
-	public void initWorkDay() {
-		workDay = wdDAO.getCurrentDayInfo(new Date(), SessionUtil.getWorker());
-	}
-
-    public void initWorkDay(Date selectedDate) {
-        workDay = wdDAO.getCurrentDayInfo(selectedDate, SessionUtil.getWorker());
-    }
 
 	private boolean isPossibleEventTimeInterval(Calendar startTime, Calendar endTime) {
 		return workDay.isPossibleTimeBoundaryForEvent(startTime, endTime);
@@ -363,8 +354,8 @@ public class WorkDayFrameModel implements Serializable {
 	 * @return Возможное время ухода в милисекундах.
 	 */
 	private Long getPossibleOutTimeInMSecond() {
-		return workDay != null && !isNoWork() ? workDay.getComingTime().getTimeInMillis()
-				+ workDay.getDay().getType().getWorkTimeInMSecond() : 0L;
+		return workDay != null && !isNoWork()
+				? workDay.getComingTime().getTimeInMillis() + workDay.getDay().getType().getWorkTimeInMSecond() : 0L;
 	}
 
 	/**
@@ -385,6 +376,10 @@ public class WorkDayFrameModel implements Serializable {
 
 	private Long getCurrentTimeInMSecond() {
 		return Calendar.getInstance().getTimeInMillis();
+	}
+
+	public void setWorkDay(WorkDay workDay) {
+		this.workDay = workDay;
 	}
 
 	public WorkDay getWorkDay() {

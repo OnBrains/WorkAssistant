@@ -32,7 +32,7 @@
                      var="dayEvent" editable="true" style="padding-top: 10px;">
 
             <p:ajax event="rowEdit" listener="#{workDayFrameModel.onRowEdit}"
-                    update="current_day_form:day_statistic_form, month_info_form:month_info_table"/>
+                    update="#{update}"/>
 
             <f:facet name="header">
                 <div class="ui-grid ui-grid-responsive">
@@ -60,14 +60,14 @@
                                         <f:selectItems value="#{workDayFrameModel.eventTypes}" var="selectedEventType"
                                                        itemLabel="#{selectedEventType.title}"/>
                                         <p:ajax event="change" listener="#{workDayFrameModel.startEvent()}"
-                                                update="current_day_form, :month_info_form"/>
+                                                update="#{update}"/>
                                     </h:selectOneMenu>
                                 </p:overlayPanel>
 
                                 <p:commandLink id="stop_event_button" title="Закончить событие"
                                                actionListener="#{workDayFrameModel.stopEvent()}"
                                                disabled="#{!workDayFrameModel.canStopEvent()}"
-                                               update="current_day_form, :month_info_form"
+                                               update="#{update}"
                                                style="padding-right: 15px;">
                                     <h:graphicImage name="img/clock/clock_pause.png"/>
                                 </p:commandLink>
@@ -75,7 +75,7 @@
                                 <p:commandLink id="stop_work_day_button" title="Закончить рабочий день"
                                                actionListener="#{workDayFrameModel.endWork()}"
                                                disabled="#{workDayFrameModel.worked}"
-                                               update="current_day_form, :month_info_form">
+                                               update="#{update}">
                                     <h:graphicImage name="img/clock/clock_stop.png"/>
                                 </p:commandLink>
                             </p:outputPanel>
@@ -87,7 +87,7 @@
             <p:column headerText="Тип" style="width: 48%;" styleClass="with_delete_button">
                 #{dayEvent.type.title}
                 <p:commandButton icon="ui-icon-trash" action="#{workDayFrameModel.removeEvent(dayEvent)}"
-                                 update="current_day_form, :month_info_form"/>
+                                 update="#{update}"/>
             </p:column>
             <p:column headerText="Начало" style="text-align: center; width: 20%;">
                 <p:cellEditor>

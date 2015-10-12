@@ -1,5 +1,8 @@
 package org.onbrains.viewModel.workDay;
 
+import org.onbrains.dao.workDay.WorkDayDAOInterface;
+import org.onbrains.entity.workDay.WorkDay;
+import org.onbrains.service.SessionUtil;
 import org.onbrains.utils.parsing.DateFormatService;
 
 import javax.annotation.PostConstruct;
@@ -19,11 +22,13 @@ import java.util.Date;
 public class CurrentDayFrameModel implements Serializable {
 
 	@Inject
-	private WorkDayFrameModel workDayModel;
+	private WorkDayDAOInterface wdDAO;
+
+	private WorkDay currentWorkDay;
 
 	@PostConstruct
 	public void postConstruct() {
-		workDayModel.initWorkDay(new Date());
+		initCurrentWorkDay();
 	}
 
 	/**
@@ -33,8 +38,16 @@ public class CurrentDayFrameModel implements Serializable {
 	 * @return Заголовок для блока управления текущим рабочим днем.
 	 */
 	public String getLegendValue() {
-		return workDayModel.getWorkDay() != null ? DateFormatService.toDDEE(workDayModel.getWorkDay().getDay().getDay())
-				+ " - " + workDayModel.getWorkDay().getState().getDesc() : "Не найдено";
+		return currentWorkDay != null ? DateFormatService.toDDEE(currentWorkDay.getDay().getDay()) + " - "
+				+ currentWorkDay.getState().getDesc() : "Не найдено";
 	}
+
+	private void initCurrentWorkDay() {
+		currentWorkDay = wdDAO.getCurrentDayInfo(new Date(), SessionUtil.getWorker());
+	}
+
+    public WorkDay getCurrentWorkDay() {
+        return currentWorkDay;
+    }
 
 }

@@ -72,7 +72,7 @@ public class WorkDay extends SuperClass {
 	@ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.REMOVE })
 	@JoinTable(name = "WORK_DAY_EVENT", joinColumns = { @JoinColumn(name = "WORK_DAY_ID") }, inverseJoinColumns = {
 			@JoinColumn(name = "EVENT_ID") })
-	@OrderBy(value = "startTime DESC")
+	@OrderBy(value = "startTime desc")
 	private List<Event> events = new ArrayList<>();
 
 	@Transient
