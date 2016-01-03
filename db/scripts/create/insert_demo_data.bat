@@ -1,0 +1,1 @@
+sqlplus C##WORK_ASSISTANT/WORK_ASSISTANT@DB1 @insert_demo_data.sql
