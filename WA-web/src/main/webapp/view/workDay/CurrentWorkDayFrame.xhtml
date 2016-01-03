@@ -12,11 +12,102 @@
 
     <h:form id="current_day_form">
         <p:fieldset legend="#{currentDayFrameModel.legendValue}">
-            <ui:include src="WorkDayFrame.xhtml">
-                <f:param name="workDay" value="#{currentDayFrameModel.currentWorkDay}"/>
-                <ui:param name="command_buttons_rendered" value="true"/>
-                <ui:param name="update" value="current_day_form, :month_info_form"/>
-            </ui:include>
+
+            <h:form id="day_statistic_form">
+                <p:outputPanel styleClass="panel_for_statistic">
+                    <ul id="list_with_legend" style="display: #{currentDayFrameModel.currentWorkDay != null ? 'table' : 'none'};">
+                        <li style="#{currentDayFrameModel.workedTime == 0 ? 'display: none' : ''};">
+                            <div class="circle" style="background-color: #4da9f1;"/>
+                            #{dateFormat.mSecToHHMM(currentDayFrameModel.workedTime)} Отработано
+                        </li>
+                        <li style="#{currentDayFrameModel.deltaTime == 0 ? 'display: none' : ''};">
+                            <div class="circle"
+                                 style="background-color: #{currentDayFrameModel.realWorkedTimeMoreIdeal ? 'green' : 'chocolate'};"/>
+                            #{dateFormat.mSecToHHMM(currentDayFrameModel.deltaTime)}
+                            #{currentDayFrameModel.realWorkedTimeMoreIdeal ? 'Переработок' : 'Осталось'}
+                        </li>
+                    </ul>
+                </p:outputPanel>
+
+                <div style="display: #{currentDayFrameModel.currentWorkDay != null ? 'table' : 'none'}; width: 100%;">
+                    <span style="#{currentDayFrameModel.getStyleForWorkedTime()}"/>
+                    <span style="#{currentDayFrameModel.getStyleForDeltaTime()}"/>
+                </div>
+            </h:form>
+            <p:separator/>
+            <p:outputLabel for="coming_time" value="ВП" style="padding: 5px;"/>
+            <h:outputText id="coming_time" value="#{currentDayFrameModel.comingTime}"/>
+            <br/>
+            <p:outputLabel for="out_time" value="ВУ" style="padding: 5px;"/>
+            <h:outputText id="out_time" value="#{currentDayFrameModel.outTime}"/>
+            <br/>
+            <p:outputLabel for="worked_time" value="ОВ" style="padding: 5px;"/>
+            <h:outputText id="worked_time" value="#{dateFormat.mSecToHHMM(currentDayFrameModel.currentWorkedTime)}"/>
+            <p:separator/>
+
+            <p:commandLink id="start_event_button" title="Начать событие" disabled="#{currentDayFrameModel.worked}">
+                <h:graphicImage name="img/clock/clock_play.png"/>
+            </p:commandLink>
+            <p:overlayPanel id="event_types_panel" for="start_event_button" hideEffect="fade">
+                <h:selectOneMenu id="event_type" value="#{currentDayFrameModel.selectedEventType}" style="width: 150px;"
+                                 converter="#{abstractPersistentEntityConverter}">
+                    <f:selectItem itemLabel="Тип события" itemValue=""/>
+                    <f:selectItems value="#{currentDayFrameModel.eventTypes}" var="selectedEventType"
+                                   itemLabel="#{selectedEventType.title}"/>
+                    <p:ajax event="change" listener="#{currentDayFrameModel.startEvent()}"
+                            update="current_day_form, :month_info_form"/>
+                </h:selectOneMenu>
+            </p:overlayPanel>
+
+            <p:commandLink id="stop_event_button" title="Закончить событие"
+                           actionListener="#{currentDayFrameModel.stopEvent()}"
+                           disabled="#{!currentDayFrameModel.canStopEvent()}"
+                           update="current_day_form, :month_info_form">
+                <h:graphicImage name="img/clock/clock_pause.png"/>
+            </p:commandLink>
+
+            <p:commandLink id="stop_work_day_button" title="Закончить рабочий день"
+                           actionListener="#{currentDayFrameModel.endWork()}"
+                           disabled="#{currentDayFrameModel.worked}"
+                           update="current_day_form, :month_info_form">
+                <h:graphicImage name="img/clock/clock_stop.png"/>
+            </p:commandLink>
+
+            <p:dataTable id="current_day_events_table" value="#{currentDayFrameModel.currentWorkDay.events}"
+                         var="dayEvent" editable="true">
+
+                <p:ajax event="rowEdit" listener="#{currentDayFrameModel.onRowEdit}"/>
+
+                <p:column headerText="Тип" style="width: 48%;" styleClass="with_delete_button">
+                    #{dayEvent.type.title}
+                    <p:commandButton icon="ui-icon-trash" action="#{currentDayFrameModel.removeEvent(dayEvent)}"
+                                     update="current_day_form, :month_info_form"/>
+                </p:column>
+                <p:column headerText="Начало" style="text-align: center; width: 20%;">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <h:outputText value="#{dateFormat.toHHMM(dayEvent.startTime.time)}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <pe:timePicker value="#{dayEvent.startTime.time}" mode="popup"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+                <p:column headerText="Окончание" style="text-align: center; width: 20%;">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <h:outputText value="#{dayEvent.state == 'END' ? dateFormat.toHHMM(dayEvent.endTime.time) : null}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <pe:timePicker value="#{dayEvent.endTime.time}" mode="popup"
+                                           minHour="#{currentDayFrameModel.getMinHourForEndEvent(dayEvent)}"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+                <p:column style="text-align: center; width: 12%;">
+                    <p:rowEditor/>
+                </p:column>
+            </p:dataTable>
         </p:fieldset>
     </h:form>
 

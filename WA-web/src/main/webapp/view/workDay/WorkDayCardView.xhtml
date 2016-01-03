@@ -12,7 +12,9 @@
     </ui:define>
 
     <ui:define name="body">
-        <ui:include src="WorkDayFrame.xhtml"/>
+        <h:form>
+            #{workDayCardViewModel.selectedWorkDay.day}
+        </h:form>
     </ui:define>
 
 </ui:composition>

@@ -75,7 +75,7 @@
                 <h:form id="month_info_form">
                     <p:dataTable id="month_info_table" styleClass="monthInfoTable"
                                  value="#{timeJournalViewModel.workDaysBySelectedMonth}" var="dayInfo"
-                                 rowStyleClass="#{workDayViewModelOld.getStyleClassForRow(dayInfo)}" editable="true"
+                                 rowStyleClass="#{timeJournalViewModel.getStyleClassForRow(dayInfo)}" editable="true"
                                  scrollable="true" scrollHeight="600">
 
                         <f:facet name="header">
@@ -132,17 +132,7 @@
                         </p:column>
 
                         <p:column id="state_work_day_id" headerText="Состояние" style="text-align: center; width: 20%;">
-                            <p:cellEditor>
-                                <f:facet name="output">
-                                    <h:outputText value="#{dayInfo.state.desc}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:selectOneMenu value="#{dayInfo.state}" style="width: 50%;">
-                                        <f:selectItems value="#{workDayViewModelOld.states}" var="state"
-                                                       itemValue="#{state}" itemLabel="#{state.desc}"/>
-                                    </p:selectOneMenu>
-                                </f:facet>
-                            </p:cellEditor>
+                            <h:outputText value="#{dayInfo.state.desc}"/>
                         </p:column>
 
                         <p:column id="work_day_events_id" style="width: 2em; text-align: center;">
