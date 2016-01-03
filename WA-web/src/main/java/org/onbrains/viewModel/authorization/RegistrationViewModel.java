@@ -1,5 +1,6 @@
 package org.onbrains.viewModel.authorization;
 
+import org.onbrains.dao.EntityManagerUtils;
 import org.onbrains.dao.worker.LoginDAOInterface;
 import org.onbrains.dao.worker.WorkerDAOInterface;
 import org.onbrains.entity.worker.Login;
@@ -24,11 +25,10 @@ import java.io.Serializable;
 
 @ManagedBean
 @RequestScoped
-@Transactional
 public class RegistrationViewModel implements Serializable {
 
-	@PersistenceContext(unitName = "WA")
-	private EntityManager em;
+	@Inject
+	private EntityManagerUtils em;
 	@Inject
 	LoginDAOInterface lDAO;
 	@Inject
@@ -55,7 +55,7 @@ public class RegistrationViewModel implements Serializable {
 			return "";
 		} else {
 			em.persist(newWorker);
-			em.persist(new Login(login, password, newWorker.getId()));
+			em.persist(new Login(login, password, newWorker));
 			login();
 			return "home";
 		}

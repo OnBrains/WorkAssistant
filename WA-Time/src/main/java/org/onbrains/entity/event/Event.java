@@ -1,29 +1,24 @@
 package org.onbrains.entity.event;
 
-import org.onbrains.entity.SuperClass;
+import static org.onbrains.entity.event.EventState.END;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import java.util.Calendar;
 import java.util.Date;
 
-import static org.onbrains.entity.event.EventState.END;
+import javax.persistence.*;
+
+import org.onbrains.entity.SuperClass;
 
 /**
- * @author Naumov Oleg on 18.04.2015 14:59. События которые могут происходить в течении рабочего дня. Описание
- *         {@linkplain EventType типов событий}. Одно событие может быть привязано к рабочим дня нескольких работников.
- *         Совместные командировки, совещания, миттинги команд и тд. <br/>
- *         Для {@linkplain EventType#getCategory() событий}, время которых влияет на отработанное. Не могут пересекаться
- *         рабочие интервалы. Границы интервала определяются {@linkplain #startTime началом события} и
- *         {@linkplain #endTime окончанием события}.
+ * События которые могут происходить в течении рабочего дня. Описание {@linkplain EventType типов событий}. Одно событие
+ * может быть привязано к рабочим дня нескольких работников. Совместные командировки, совещания, миттинги команд и тд.
+ * <br/>
+ * Для {@linkplain EventType#getCategory() событий}, время которых влияет на отработанное. Не могут пересекаться рабочие
+ * интервалы. Границы интервала определяются {@linkplain #startTime началом события} и {@linkplain #endTime окончанием
+ * события}.
+ * <p/>
+ * 
+ * @author Naumov Oleg on 18.04.2015 14:59.
  */
 @Entity
 @Table(name = "EVENT")

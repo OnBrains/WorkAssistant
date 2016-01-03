@@ -19,7 +19,6 @@ import java.util.List;
 
 @ManagedBean
 @ViewScoped
-@Transactional
 public class WorkerViewModel implements Serializable {
 
     @PersistenceContext

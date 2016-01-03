@@ -35,7 +35,7 @@ public class Day extends SuperClass {
 	private Date day;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "DAY_TYPE", nullable = false, length = 16)
+	@Column(nullable = false, length = 16)
 	private DayType type;
 
 	public Day() {

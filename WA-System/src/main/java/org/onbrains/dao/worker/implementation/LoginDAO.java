@@ -22,10 +22,9 @@ public class LoginDAO implements LoginDAOInterface {
     @Override
     public Worker checkLogin(String login, String password) {
         try {
-            Worker worker = em.createNamedQuery(Login.CHECK_LOGIN, Worker.class)
+            return em.createNamedQuery(Login.CHECK_LOGIN, Worker.class)
                     .setParameter("login", login)
                     .setParameter("password", password).getSingleResult();
-            return worker;
         } catch (NoResultException ex) {
             return null;
         }

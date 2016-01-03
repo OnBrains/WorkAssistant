@@ -1,11 +1,14 @@
 package org.onbrains.viewModel;
 
+import org.onbrains.dao.EntityManagerUtils;
+
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -19,13 +22,12 @@ import java.util.regex.Pattern;
  */
 @Named
 @RequestScoped
-@Transactional
 public class AbstractPersistentEntityConverter implements Converter, Serializable {
 
 	private static final Pattern SERIALIZED_FORMAT = Pattern.compile("(.*)\\-([0-9]+)");
 
-    @PersistenceContext(unitName = "WA")
-    private EntityManager em;
+    @Inject
+	private EntityManagerUtils em;
 
 	@Override
 	public Object getAsObject(FacesContext context, UIComponent component, String value) {

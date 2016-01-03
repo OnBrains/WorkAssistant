@@ -1,5 +1,7 @@
 package org.onbrains.entity.worker;
 
+import org.onbrains.entity.SuperClass;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -14,18 +16,14 @@ import java.io.Serializable;
                         query = "select l.worker from Login l where l.login = :login and l.password = :password"),
           @NamedQuery(name = Login.IS_LOGIN_USED,
                         query = "select 1 from Login l where l.login = :login")})
-public class Login implements Serializable {
+public class Login extends SuperClass {
 
     public static final String CHECK_LOGIN = "Login.checkLogin";
     public static final String IS_LOGIN_USED = "Login.isLoginUsed";
     public static final Long pref  = 8399978L;
 
-    @Id
-    @Column(name = "WORKER_ID", nullable = false)
-    private Long workerId;
-
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name="WORKER_ID")
     private Worker worker;
 
     @Column(name = "LOGIN", nullable = false, length = 32)
@@ -37,18 +35,10 @@ public class Login implements Serializable {
     protected Login() {
     }
 
-    public Login(String login, String password, Long workerId) {
+    public Login(String login, String password, Worker worker) {
         this.login = login;
         this.password = password;
-        this.workerId = workerId;
-    }
-
-    public Long getWorkerId() {
-        return workerId;
-    }
-
-    public void setWorkerId(Long workerId) {
-        this.workerId = workerId;
+        this.worker = worker;
     }
 
     public Worker getWorker() {

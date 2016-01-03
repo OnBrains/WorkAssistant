@@ -1,10 +1,12 @@
 package org.onbrains.viewModel.workDay;
 
+import org.onbrains.dao.EntityManagerUtils;
 import org.onbrains.entity.workDay.WorkDay;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ConversationScoped;
 import javax.faces.context.FacesContext;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -16,11 +18,10 @@ import java.io.Serializable;
  */
 @Named
 @ConversationScoped
-@Transactional
 public class WorkDayCardViewModel implements Serializable {
 
-    @PersistenceContext
-    private EntityManager em;
+    @Inject
+    private EntityManagerUtils em;
 
     private WorkDay selectedWorkDay;
 

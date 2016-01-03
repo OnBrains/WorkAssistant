@@ -1,5 +1,6 @@
 package org.onbrains.viewModel.workDay;
 
+import org.onbrains.dao.EntityManagerUtils;
 import org.onbrains.dao.day.DayDAOInterface;
 import org.onbrains.dao.workDay.WorkDayDAOInterface;
 import org.onbrains.entity.day.Day;
@@ -28,11 +29,10 @@ import java.util.List;
  */
 @Named
 @ConversationScoped
-@Transactional
 public class TimeJournalViewModel implements Serializable {
 
-    @PersistenceContext(unitName = "WA")
-    private EntityManager em;
+    @Inject
+	private EntityManagerUtils em;
 	@Inject
 	private WorkDayDAOInterface wdDAO;
 	@Inject

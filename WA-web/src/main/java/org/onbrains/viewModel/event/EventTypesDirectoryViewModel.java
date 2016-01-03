@@ -1,5 +1,6 @@
 package org.onbrains.viewModel.event;
 
+import org.onbrains.dao.EntityManagerUtils;
 import org.onbrains.dao.workDayEvent.EventTypeDAOInterface;
 import org.onbrains.entity.event.EventCategory;
 import org.onbrains.entity.event.EventType;
@@ -28,14 +29,13 @@ import java.util.List;
 
 @Named(value = "eventTypesDirectory")
 @SessionScoped
-@Transactional
 public class EventTypesDirectoryViewModel implements Serializable {
 
 	private static final long MILLIS_IN_MINUTE = 60000;
 	private static final long MILLIS_IN_HOUR = 3600000;
 
-	@PersistenceContext(unitName = "WA")
-	private EntityManager em;
+	@Inject
+	private EntityManagerUtils em;
 	@Inject
 	private EventTypeDAOInterface etDAO;
 
@@ -87,7 +87,7 @@ public class EventTypesDirectoryViewModel implements Serializable {
 	public void removeType(EventType removingType) {
 		try {
 			em.remove(em.merge(removingType));
-			em.flush();
+//			em.flush();
 			typesBySelectedCategory.remove(removingType);
 		} catch (PersistenceException constraintException) {
 			Notification.warn(String.format("Невозможну удалить тип: %s", removingType.getTitle()),
