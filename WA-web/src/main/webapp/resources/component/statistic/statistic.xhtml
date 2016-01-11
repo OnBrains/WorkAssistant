@@ -1,0 +1,32 @@
+<ui:component xmlns="http://www.w3.org/1999/xhtml"
+              xmlns:ui="http://java.sun.com/jsf/facelets"
+              xmlns:p="http://primefaces.org/ui"
+              xmlns:cc="http://java.sun.com/jsf/composite">
+
+    <cc:interface componentType="statistic" displayName="Статискика">
+        <cc:attribute name="id" type="java.lang.String" default="statistic"/>
+        <cc:attribute name="statisticValues" type="java.util.List"/>
+        <cc:attribute name="valueType" type="java.lang.String" default="time" displayName="Тип выводимого значения"/>
+        <cc:attribute name="rendered" type="boolean" default="true"/>
+    </cc:interface>
+
+    <cc:implementation>
+        <p:outputPanel id="#{cc.attrs.id}" styleClass="panel_for_statistic">
+            <ul id="list_with_legend" style="display: table;">
+                <ui:repeat value="#{cc.values}" var="statisticValue">
+                    <li>
+                        <div class="circle" style="background-color: #{statisticValue.color};"></div>
+                        #{statisticValue.getValue(cc.attrs.valueType)} #{statisticValue.title}
+                    </li>
+                </ui:repeat>
+            </ul>
+        </p:outputPanel>
+
+        <div style="display: table; width: 100%;">
+            <ui:repeat value="#{cc.values}" var="statisticValue">
+                <span style="#{cc.getStyleFor(statisticValue)}"/>
+            </ui:repeat>
+        </div>
+    </cc:implementation>
+
+</ui:component>
