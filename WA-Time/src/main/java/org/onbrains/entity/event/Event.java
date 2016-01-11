@@ -42,7 +42,7 @@ public class Event extends SuperClass {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Calendar startTime;
 
-	@Column(name = "END_TIME", nullable = false)
+	@Column(name = "END_TIME", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Calendar endTime;
 
@@ -62,16 +62,20 @@ public class Event extends SuperClass {
 		this.state = EventState.NOT_END;
 	}
 
-	/**
-	 * Services
-	 */
+	// *****************************************************************************************************************
+	// Service methods
+	// *****************************************************************************************************************
 
 	public Long getWorkedTime() {
-		if (getState().equals(EventState.END)) {
+//		if (getState().equals(EventState.END)) {
 			return calculationWorkedTime();
-		}
-		return 0L;
+//		}
+//		return 0L;
 	}
+
+	// *****************************************************************************************************************
+	// Private methods
+	// *****************************************************************************************************************
 
 	/**
 	 * Вычисляет время, которое пойдет в учет отработанного времени за день. На отработанное время влияют только
@@ -96,9 +100,9 @@ public class Event extends SuperClass {
 		}
 	}
 
-	/**
-	 * Simple getters & setters
-	 */
+	// *****************************************************************************************************************
+	// Simple getters and setters
+	// *****************************************************************************************************************
 
 	/**
 	 * @return День, в который происходит событие.

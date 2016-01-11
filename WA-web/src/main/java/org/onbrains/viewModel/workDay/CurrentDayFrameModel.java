@@ -6,16 +6,16 @@ import static org.onbrains.entity.event.EventState.NOT_END;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.SessionScoped;
+import javax.enterprise.context.ConversationScoped;
+import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
 
+import org.onbrains.component.statistic.StatisticValue;
 import org.onbrains.dao.EntityManagerUtils;
 import org.onbrains.dao.workDay.WorkDayDAOInterface;
 import org.onbrains.dao.workDayEvent.EventTypeDAOInterface;
@@ -33,8 +33,7 @@ import org.primefaces.event.RowEditEvent;
  * @author Naumov Oleg on 04.08.2015 21:40.
  */
 @Named
-@SessionScoped
-@Transactional
+@ViewScoped
 public class CurrentDayFrameModel implements Serializable {
 
 	@Inject
@@ -50,8 +49,21 @@ public class CurrentDayFrameModel implements Serializable {
 	@PostConstruct
 	public void postConstruct() {
 		if (currentWorkDay == null) {
-			initializationCurrentWorkDay();
+			initCurrentWorkDay();
 		}
+	}
+
+	public List<StatisticValue> getWorkDayStatistic() {
+		List<StatisticValue> workDayStatistic = new LinkedList<>();
+		if (!isNoWork()) {
+			long workedTime = currentWorkDay.isWorkedFullDay()
+					? currentWorkDay.getDay().getType().getWorkTimeInMSecond() : currentWorkDay.getSummaryWorkedTime();
+			workDayStatistic.add(new StatisticValue(workedTime, "Отработано", "#4da9f1"));
+		}
+		workDayStatistic.add(currentWorkDay.isWorkedFullDay()
+				? new StatisticValue(currentWorkDay.getDeltaTime(), "Переработок", "green")
+				: new StatisticValue(currentWorkDay.getDeltaTime(), "Осталось", "chocolate"));
+		return workDayStatistic;
 	}
 
 	public void onRowEdit(RowEditEvent event) {
@@ -73,7 +85,7 @@ public class CurrentDayFrameModel implements Serializable {
 	}
 
 	/**
-	 * Проверяет можно ли закончить {@linkplain WorkDay#lastEvent последнее событие}.
+	 * Проверяет можно ли закончить {@linkplain WorkDay#getLastWorkEvent последнее событие}.
 	 *
 	 * @return <strong>true</strong> - если можно.
 	 */
@@ -83,8 +95,8 @@ public class CurrentDayFrameModel implements Serializable {
 
 	/**
 	 * {@linkplain #addNewEvent Создает событие} и отмечает начало рабочего дня если это первое событие для текущего
-	 * дня. Если в момент создания нового события, {@linkplain WorkDay#lastEvent последнее событие} не закончено, то
-	 * перед создание нового события, для него проставится статус "Закончено".
+	 * дня. Если в момент создания нового события, {@linkplain WorkDay#getLastWorkEvent последнее событие} не закончено,
+	 * то перед создание нового события, для него проставится статус "Закончено".
 	 */
 	public void startEvent() {
 		// FIXME: заканчивать событие надо если создается событие влияющее на рабочее время
@@ -95,6 +107,7 @@ public class CurrentDayFrameModel implements Serializable {
 		if (isNoWork() && !creationEvent.getType().getCategory().equals(EventCategory.NOT_INFLUENCE_ON_WORKED_TIME)) {
 			startWork();
 		}
+        em.merge(currentWorkDay);
 		cleanAfterCreation();
 	}
 
@@ -123,8 +136,7 @@ public class CurrentDayFrameModel implements Serializable {
 	// временным интервалом
 	private void startWork() {
 		currentWorkDay.setComingTime(currentWorkDay.getLastWorkEvent().getStartTime());
-		currentWorkDay.setState(WorkDayState.WORKING);
-		em.merge(currentWorkDay);
+        currentWorkDay.setState(WorkDayState.WORKING);
 	}
 
 	/**
@@ -137,6 +149,7 @@ public class CurrentDayFrameModel implements Serializable {
 		stopEvent();
 		currentWorkDay.setOutTime(currentWorkDay.getLastWorkEvent().getEndTime());
 		currentWorkDay.setState(WorkDayState.WORKED);
+		em.merge(currentWorkDay);
 	}
 
 	/**
@@ -196,57 +209,6 @@ public class CurrentDayFrameModel implements Serializable {
 	}
 
 	/**
-	 * Вычисляет отработанное на текущий момент время. Вычисления изменяются в зависимостри от {@linkplain WorkDayState
-	 * состояния текущего рабочего дня}:
-	 * <ul>
-	 * <li><strong>Рабочий день закончен</strong> - отработанное время = {@link WorkDay#getSummaryWorkedTime()}</li>
-	 * <li><strong>Рабочий день еще идет(последнее рабочее событие закончено)</strong> - отработанное время =
-	 * {@link WorkDay#getSummaryWorkedTime()}</li>
-	 * <li><strong>Рабочий день еще идет(последнее рабочее событие не закончено)</strong> - отработанное время =
-	 * {@link WorkDay#getSummaryWorkedTime()} + {@linkplain #getCurrentTimeInMSecond() текущее время} -
-	 * {@linkplain WorkDay#getLastWorkEvent() время начала последнего события}, которое {@linkplain EventType влияет на
-	 * отработанное время}.</li>
-	 * <li><strong>Рабочий день не начат</strong> - шаблон "__:__"</li>
-	 * </ul>
-	 *
-	 * @return Отработанное на текущий момент время, если рабочий день не начет, то "__:__".
-	 */
-	// FIXME: вероятно код для состояния в работе излишен, так как тоже самое вычисляется в времени события.
-	public Long getCurrentWorkedTime() {
-		long workedTime = currentWorkDay.getSummaryWorkedTime();
-		switch (currentWorkDay.getState()) {
-		case WORKED:
-			return workedTime;
-		case WORKING:
-			Event lastWorkEvent = currentWorkDay.getLastWorkEvent();
-			if (lastWorkEvent != null && !lastWorkEvent.getState().equals(END)) {
-				return getCurrentTimeInMSecond() - lastWorkEvent.getStartTime().getTimeInMillis() + workedTime;
-			} else {
-				return workedTime;
-			}
-		default:
-			return 0L;
-		}
-	}
-
-	/**
-	 * Определяет больше ли текущее время, чем возможное {@linkplain #getPossibleOutTimeInMSecond() возможное время
-	 * ухода}. Если да, то получается что идут переработки, в противном случае еще недоработки.
-	 *
-	 * @return <strong>true</strong> - если текущее время больше возможного времени ухода.
-	 */
-	@Deprecated
-	public boolean currentTimeMorePossibleOutTime() {
-		return currentWorkDay != null && getCurrentTimeInMSecond() > getPossibleOutTimeInMSecond();
-	}
-
-	@Deprecated
-	public String getLeftTime() {
-		Long leftTime = Math.abs(getPossibleOutTimeInMSecond() - getCurrentTimeInMSecond());
-		return !isNoWork() ? DateFormatService.mSecToHHMM(leftTime) : "__:__";
-	}
-
-	/**
 	 * Формирует заголовок для блока управления текущим рабочим днем. Заголовок формируется из даты в формате 'dd EE.' +
 	 * состояние рабочего дня.
 	 *
@@ -258,47 +220,7 @@ public class CurrentDayFrameModel implements Serializable {
 	}
 
 	// *****************************************************************************************************************
-	// day statistic
-	// *****************************************************************************************************************
-
-	public boolean isRealWorkedTimeMoreIdeal() {
-		return getCurrentWorkedTime() > currentWorkDay.getDay().getType().getWorkTimeInMSecond();
-	}
-
-	public long getWorkedTime() {
-		return isRealWorkedTimeMoreIdeal() ? currentWorkDay.getDay().getType().getWorkTimeInMSecond()
-				: getCurrentWorkedTime();
-	}
-
-	public long getDeltaTime() {
-		long idealWorkedTime = currentWorkDay.getDay().getType().getWorkTimeInMSecond();
-		return isRealWorkedTimeMoreIdeal() ? getCurrentWorkedTime() - idealWorkedTime
-				: idealWorkedTime - getCurrentWorkedTime();
-	}
-
-	public String getStyleForWorkedTime() {
-		String display = getWorkedTime() == 0 ? "none" : "table-cell";
-		return "background-color: #4da9f1;padding: 4px; width: " + getPercentage(getSummaryTime(), getWorkedTime())
-				+ "%; display: " + display + ";";
-	}
-
-	public String getStyleForDeltaTime() {
-		String color = isRealWorkedTimeMoreIdeal() ? "green" : "chocolate";
-		String display = getDeltaTime() == 0 ? "none" : "table-cell";
-		return "background-color: " + color + "; padding: 4px;width: " + getPercentage(getSummaryTime(), getDeltaTime())
-				+ "%; display: " + display + ";";
-	}
-
-	private float getPercentage(Long fullTime, Long partTime) {
-		return (float) partTime * 100 / fullTime;
-	}
-
-	private long getSummaryTime() {
-		return getWorkedTime() + getDeltaTime();
-	}
-
-	// *****************************************************************************************************************
-	// Block with privates methods
+	// Privates methods
 	// *****************************************************************************************************************
 
 	private void cleanAfterCreation() {
@@ -308,7 +230,7 @@ public class CurrentDayFrameModel implements Serializable {
 	/**
 	 * Инициализирует информацию о текущем рабочем дне, если ее нет.
 	 */
-	private void initializationCurrentWorkDay() {
+	private void initCurrentWorkDay() {
 		currentWorkDay = wdDAO.getCurrentDayInfo(new Date(), SessionUtil.getWorker());
 	}
 
@@ -359,7 +281,6 @@ public class CurrentDayFrameModel implements Serializable {
 				Calendar.getInstance());
 		em.persist(workEvent);
 		currentWorkDay.addEvent(workEvent);
-		em.merge(currentWorkDay);
 		return workEvent;
 	}
 
@@ -396,10 +317,6 @@ public class CurrentDayFrameModel implements Serializable {
 	// *****************************************************************************************************************
 	// Simple getters and setters
 	// *****************************************************************************************************************
-
-	private Long getCurrentTimeInMSecond() {
-		return Calendar.getInstance().getTimeInMillis();
-	}
 
 	public WorkDay getCurrentWorkDay() {
 		return currentWorkDay;

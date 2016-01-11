@@ -75,12 +75,6 @@ public class WorkDay extends SuperClass {
 	@OrderBy(value = "startTime desc")
 	private List<Event> events = new ArrayList<>();
 
-	@Transient
-	private Event lastEvent;
-
-	@Transient
-	private Event lastWorkEvent;
-
 	protected WorkDay() {
 	}
 
@@ -90,6 +84,159 @@ public class WorkDay extends SuperClass {
 		// TODO: надо ли сетить состояние тут?
 		this.state = WorkDayState.NO_WORK;
 	}
+
+	// *****************************************************************************************************************
+	// Service methods
+	// *****************************************************************************************************************
+
+	public Event getLastWorkEvent() {
+		if (!events.isEmpty()) {
+			for (Event event : events) {
+				if (!event.getType().getCategory().equals(NOT_INFLUENCE_ON_WORKED_TIME)) {
+					return event;
+				}
+			}
+		}
+		return null;
+	}
+
+	public List<Event> addEvent(Event additionEvent) {
+		events.add(additionEvent);
+		Collections.sort(events, new EventComparator());
+		return events;
+	}
+
+	/**
+	 * Проверяет нужно ли изменить {@linkplain #getComingTime() время начала РД} на новое.
+	 *
+	 * @param time
+	 *            время, для которого выполняется проверка.
+	 * @return <strong>true</strong> - если надо изменить.
+	 */
+	public boolean needChangeComingTimeTo(Calendar time) {
+		return comingTime != null && time.getTimeInMillis() < comingTime.getTimeInMillis();
+	}
+
+	/**
+	 * Проверяет нужно ли изменить {@linkplain #getOutTime() время окончания РД} на новое.
+	 *
+	 * @param time
+	 *            время, для которого выполняется проверка.
+	 * @return <strong>true</strong> - если надо изменить.
+	 */
+	public boolean needChangeOutTimeTo(Calendar time) {
+		return outTime != null && time.getTimeInMillis() > outTime.getTimeInMillis();
+	}
+
+	/**
+	 * Проверяет возможна ли данная граница временого интервала. Для {@linkplain EventCategory категорий} событий,
+	 * влияющих на отработаное время временые интервалы пересекаться не должны.
+	 *
+	 * @param startTime
+	 *            время начала.
+	 * @param endTime
+	 *            время окончания.
+	 * @return <strong>true</strong> - если данная граница допустима.
+	 */
+	public boolean isPossibleTimeBoundaryForEvent(Calendar startTime, Calendar endTime) {
+		if (!events.isEmpty())
+			for (Event event : events) {
+				if (!event.getType().getCategory().equals(EventCategory.NOT_INFLUENCE_ON_WORKED_TIME)) {
+					if (intervalInsideEvent(event, startTime, endTime)
+							|| eventInsideInterval(event, startTime, endTime)) {
+						return false;
+					}
+				}
+			}
+		return true;
+	}
+
+	/**
+	 * Суммарное отработанное время в миллисекундах за все {@linkplain org.onbrains.entity.event.EventType#getCategory()
+	 * события}, которые влияют на отработанное время.
+	 *
+	 * @return Суммарное отработанное время в миллисекундах.
+	 */
+	public Long getSummaryWorkedTime() {
+		Long summaryWorkedTime = 0L;
+		if (!events.isEmpty()) {
+			for (Event event : events) {
+				summaryWorkedTime = summaryWorkedTime + event.getWorkedTime();
+			}
+		}
+		return summaryWorkedTime;
+	}
+
+	/**
+	 * Определяет отработано ли все положенное время, за текущий рабочий день. Для каждого типа рабочего дня может быть
+	 * своя {@linkplain org.onbrains.entity.workDay.DayType#getWorkTimeInMSecond() номра времени}, которое положено
+	 * отработать.
+	 *
+	 * @return <strong>true</strong> если отработанно все положенное время.
+	 */
+	public boolean isWorkedFullDay() {
+		return getSummaryWorkedTime() > day.getType().getWorkTimeInMSecond();
+	}
+
+	/**
+	 * Вычисляет переработанное или недоработанное время.
+	 *
+	 * @return Переработанное/недоработанное время в миллисекундах, если день не закончен вернет 0.
+	 */
+	public Long getDeltaTime() {
+		return Math.abs(getSummaryWorkedTime() - day.getType().getWorkTimeInMSecond());
+	}
+
+	// *****************************************************************************************************************
+	// Private methods
+	// *****************************************************************************************************************
+
+	/**
+	 * Проверяет находится ли время во временном интервале события.
+	 *
+	 * @param event
+	 *            событие.
+	 * @param startTime
+	 *            время начала.
+	 * @param endTime
+	 *            время окончания.
+	 * @return <strong>true</strong> - если время находится внутри интервала.
+	 */
+	private boolean intervalInsideEvent(Event event, Calendar startTime, Calendar endTime) {
+		// boolean startTimeInsideInterval = event.getStartTime().getTimeInMillis() < startTime.getTimeInMillis()
+		// && startTime.getTimeInMillis() < event.getEndTime().getTimeInMillis();
+		// boolean endTimeInsideInterval = event.getStartTime().getTimeInMillis() < endTime.getTimeInMillis()
+		// && endTime.getTimeInMillis() < event.getEndTime().getTimeInMillis();
+		boolean startTimeInsideInterval = event.getStartTime().before(startTime) && event.getEndTime().after(startTime);
+		boolean endTimeInsideInterval = event.getStartTime().before(endTime) && event.getEndTime().after(endTime);
+		return startTimeInsideInterval || endTimeInsideInterval;
+	}
+
+	/**
+	 * Проверяет находится ли интервал события в границах интервала времени.
+	 *
+	 * @param event
+	 *            событие.
+	 * @param startTime
+	 *            время начала.
+	 * @param endTime
+	 *            время окончания.
+	 * @return <strong>true</strong> - если интервал события назодится в границах времени.
+	 */
+	private boolean eventInsideInterval(Event event, Calendar startTime, Calendar endTime) {
+		// boolean startEventTimeInsideInterval = startTime.getTimeInMillis() < event.getStartTime().getTimeInMillis()
+		// && event.getStartTime().getTimeInMillis() < endTime.getTimeInMillis();
+		// boolean endEventTimeInsideInterval = startTime.getTimeInMillis() < event.getEndTime().getTimeInMillis()
+		// && event.getEndTime().getTimeInMillis() < endTime.getTimeInMillis();
+		boolean startEventTimeInsideInterval = startTime.before(event.getStartTime())
+				&& endTime.after(event.getStartTime());
+		boolean endEventTimeInsideInterval = startTime.before(event.getEndTime()) && endTime.after(event.getEndTime());
+		return startEventTimeInsideInterval || endEventTimeInsideInterval;
+	}
+
+	// *****************************************************************************************************************
+	// Simple getters and setters
+	// *****************************************************************************************************************
 
 	/**
 	 * @return Работник, к которому относится данный рабочий день.
@@ -164,147 +311,6 @@ public class WorkDay extends SuperClass {
 
 	public void setEvents(List<Event> events) {
 		this.events = events;
-	}
-
-	public Event getLastEvent() {
-		return !events.isEmpty() ? events.get(0) : null;
-	}
-
-	public Event getLastWorkEvent() {
-		if (!events.isEmpty()) {
-			for (Event event : events) {
-				if (!event.getType().getCategory().equals(NOT_INFLUENCE_ON_WORKED_TIME)) {
-					return event;
-				}
-			}
-		}
-		return null;
-	}
-
-	public List<Event> addEvent(Event additionEvent) {
-		events.add(additionEvent);
-		Collections.sort(events, new EventComparator());
-		return events;
-	}
-
-	/**
-	 * Проверяет нужно ли изменить {@linkplain #getComingTime() время начала РД} на новое.
-	 * 
-	 * @param time
-	 *            время, для которого выполняется проверка.
-	 * @return <strong>true</strong> - если надо изменить.
-	 */
-	public boolean needChangeComingTimeTo(Calendar time) {
-		return comingTime != null && time.getTimeInMillis() < comingTime.getTimeInMillis();
-	}
-
-	/**
-	 * Проверяет нужно ли изменить {@linkplain #getOutTime() время окончания РД} на новое.
-	 * 
-	 * @param time
-	 *            время, для которого выполняется проверка.
-	 * @return <strong>true</strong> - если надо изменить.
-	 */
-	public boolean needChangeOutTimeTo(Calendar time) {
-		return outTime != null && time.getTimeInMillis() > outTime.getTimeInMillis();
-	}
-
-	/**
-	 * Проверяет возможна ли данная граница временого интервала. Для {@linkplain EventCategory категорий} событий,
-	 * влияющих на отработаное время временые интервалы пересекаться не должны.
-	 * 
-	 * @param startTime
-	 *            время начала.
-	 * @param endTime
-	 *            время окончания.
-	 * @return <strong>true</strong> - если данная граница допустима.
-	 */
-	public boolean isPossibleTimeBoundaryForEvent(Calendar startTime, Calendar endTime) {
-		if (!events.isEmpty())
-			for (Event event : events) {
-				if (!event.getType().getCategory().equals(EventCategory.NOT_INFLUENCE_ON_WORKED_TIME)) {
-					if (intervalInsideEvent(event, startTime, endTime)
-							|| eventInsideInterval(event, startTime, endTime)) {
-						return false;
-					}
-				}
-			}
-		return true;
-	}
-
-	/**
-	 * Проверяет находится ли время во временном интервале события.
-	 * 
-	 * @param event
-	 *            событие.
-	 * @param startTime
-	 *            время начала.
-	 * @param endTime
-	 *            время окончания.
-	 * @return <strong>true</strong> - если время находится внутри интервала.
-	 */
-	private boolean intervalInsideEvent(Event event, Calendar startTime, Calendar endTime) {
-		boolean startTimeInsideInterval = event.getStartTime().getTimeInMillis() < startTime.getTimeInMillis()
-				&& startTime.getTimeInMillis() < event.getEndTime().getTimeInMillis();
-		boolean endTimeInsideInterval = event.getStartTime().getTimeInMillis() < endTime.getTimeInMillis()
-				&& endTime.getTimeInMillis() < event.getEndTime().getTimeInMillis();
-		return startTimeInsideInterval || endTimeInsideInterval;
-	}
-
-	/**
-	 * Проверяет находится ли интервал события в границах интервала времени.
-	 *
-	 * @param event
-	 *            событие.
-	 * @param startTime
-	 *            время начала.
-	 * @param endTime
-	 *            время окончания.
-	 * @return <strong>true</strong> - если интервал события назодится в границах времени.
-	 */
-	private boolean eventInsideInterval(Event event, Calendar startTime, Calendar endTime) {
-		boolean startEventTimeInsideInterval = startTime.getTimeInMillis() < event.getStartTime().getTimeInMillis()
-				&& event.getStartTime().getTimeInMillis() < endTime.getTimeInMillis();
-		boolean endEventTimeInsideInterval = startTime.getTimeInMillis() < event.getEndTime().getTimeInMillis()
-				&& event.getEndTime().getTimeInMillis() < endTime.getTimeInMillis();
-		return startEventTimeInsideInterval || endEventTimeInsideInterval;
-	}
-
-	/**
-	 * Суммарное отработанное время в миллисекундах за все {@linkplain org.onbrains.entity.event.EventType#getCategory()
-	 * события}, которые влияют на отработанное время.
-	 *
-	 * @return Суммарное отработанное время в миллисекундах.
-	 */
-	public Long getSummaryWorkedTime() {
-		Long summaryWorkedTime = 0L;
-		if (!events.isEmpty()) {
-			for (Event event : events) {
-				summaryWorkedTime = summaryWorkedTime + event.getWorkedTime();
-			}
-		}
-		return summaryWorkedTime;
-	}
-
-	/**
-	 * Определяет отработано ли все положенное время, за текущий рабочий день. Для каждого типа рабочего дня может быть
-	 * своя {@linkplain org.onbrains.entity.workDay.DayType#getWorkTimeInMSecond() номра времени}, которое положено
-	 * отработать.
-	 *
-	 * @return <strong>true</strong> если отработанно все положенное время.
-	 */
-	public boolean isWorkedFullDay() {
-		return getSummaryWorkedTime() > day.getType().getWorkTimeInMSecond();
-	}
-
-	/**
-	 * Вычисляет переработанное или недоработанное время, для завершенного дня.
-	 *
-	 * @return Переработанное/недоработанное время в миллисекундах, если день не закончен вернет 0.
-	 */
-	public Long getDeltaTime() {
-		Long resultWorkedTimeInMSecond = Math.abs(getSummaryWorkedTime() - day.getType().getWorkTimeInMSecond());
-		return getState().equals(WorkDayState.WORKED) ? resultWorkedTimeInMSecond : 0L;
 	}
 
 	private class EventComparator implements Comparator<Event> {
