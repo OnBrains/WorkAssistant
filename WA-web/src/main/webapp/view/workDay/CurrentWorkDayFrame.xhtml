@@ -46,7 +46,7 @@
                                     </h:selectOneMenu>
                                 </p:overlayPanel>
 
-                                <p:commandLink id="stop_event_button" title="Закончить событие" actionListener="#{currentDayFrameModel.stopEvent()}"
+                                <p:commandLink id="stop_event_button" title="Закончить событие" actionListener="#{currentDayFrameModel.stopLastActiveEvent()}"
                                                disabled="#{!currentDayFrameModel.canStopEvent()}" update="current_day_form, :month_info_form"
                                                styleClass="padding-right-10-px">
                                     <h:graphicImage name="img/clock/clock_pause.png"/>

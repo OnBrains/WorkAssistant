@@ -1,5 +1,6 @@
 package org.onbrains.entity.workDay;
 
+import static org.onbrains.entity.event.EventCategory.INFLUENCE_ON_WORKED_TIME;
 import static org.onbrains.entity.event.EventCategory.NOT_INFLUENCE_ON_WORKED_TIME;
 
 import java.util.ArrayList;
@@ -24,7 +25,6 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.onbrains.entity.SuperClass;
@@ -100,32 +100,45 @@ public class WorkDay extends SuperClass {
 		return null;
 	}
 
-	public List<Event> addEvent(Event additionEvent) {
+	/**
+	 * Добавляет событие в список событий рабочего дня. Если событие влияет на рабочее время, то осуществляется
+	 * проверка, что нет пересечений с другими событиями, а так же изменяется время {@linkplain #comingTime начала РД} и
+	 * {@linkplain #outTime окончания РД}
+	 * 
+	 * @param additionEvent
+	 *            добавляемое событие.
+	 * @return Сообщение об ошибки, если невозможно добавить событие или пустую строку если событие добавлено.
+	 */
+	public String addEvent(Event additionEvent) {
+		if (!additionEvent.getType().getCategory().equals(NOT_INFLUENCE_ON_WORKED_TIME)) {
+			if (isPossibleTimeBoundaryForEvent(additionEvent.getStartTime(), additionEvent.getEndTime())) {
+				changeTimeBy(additionEvent);
+			} else {
+				return "Пересечение временых интервалов у событий";
+			}
+		}
 		events.add(additionEvent);
 		Collections.sort(events, new EventComparator());
-		return events;
+		return "";
 	}
 
 	/**
-	 * Проверяет нужно ли изменить {@linkplain #getComingTime() время начала РД} на новое.
-	 *
-	 * @param time
-	 *            время, для которого выполняется проверка.
-	 * @return <strong>true</strong> - если надо изменить.
+	 * Изменяет время начала и окончания РД если это необходимо. Время может изменится при добавлении нового события или
+	 * изменении существующего. При этом на время РД влияют только {@link EventCategory#INFLUENCE_ON_WORKED_TIME}
+	 * события.
+	 * 
+	 * @param event
+	 *            событие из-за которого могло изменится время.
 	 */
-	public boolean needChangeComingTimeTo(Calendar time) {
-		return comingTime != null && time.getTimeInMillis() < comingTime.getTimeInMillis();
-	}
-
-	/**
-	 * Проверяет нужно ли изменить {@linkplain #getOutTime() время окончания РД} на новое.
-	 *
-	 * @param time
-	 *            время, для которого выполняется проверка.
-	 * @return <strong>true</strong> - если надо изменить.
-	 */
-	public boolean needChangeOutTimeTo(Calendar time) {
-		return outTime != null && time.getTimeInMillis() > outTime.getTimeInMillis();
+	public void changeTimeBy(Event event) {
+		if (event.getType().getCategory().equals(INFLUENCE_ON_WORKED_TIME)) {
+			if (needChangeComingTimeTo(event.getStartTime())) {
+				setComingTime(event.getStartTime());
+			}
+			if (needChangeOutTimeTo(event.getEndTime())) {
+				setOutTime(event.getEndTime());
+			}
+		}
 	}
 
 	/**
@@ -190,6 +203,28 @@ public class WorkDay extends SuperClass {
 	// *****************************************************************************************************************
 	// Private methods
 	// *****************************************************************************************************************
+
+	/**
+	 * Проверяет нужно ли изменить {@linkplain #getComingTime() время начала РД} на новое.
+	 *
+	 * @param time
+	 *            время, для которого выполняется проверка.
+	 * @return <strong>true</strong> - если надо изменить.
+	 */
+	private boolean needChangeComingTimeTo(Calendar time) {
+		return comingTime != null && time.getTimeInMillis() < comingTime.getTimeInMillis();
+	}
+
+	/**
+	 * Проверяет нужно ли изменить {@linkplain #getOutTime() время окончания РД} на новое.
+	 *
+	 * @param time
+	 *            время, для которого выполняется проверка.
+	 * @return <strong>true</strong> - если надо изменить.
+	 */
+	private boolean needChangeOutTimeTo(Calendar time) {
+		return outTime != null && time.getTimeInMillis() > outTime.getTimeInMillis();
+	}
 
 	/**
 	 * Проверяет находится ли время во временном интервале события.

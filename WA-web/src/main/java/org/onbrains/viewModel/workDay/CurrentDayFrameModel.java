@@ -8,9 +8,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.ConversationScoped;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -55,14 +55,17 @@ public class CurrentDayFrameModel implements Serializable {
 
 	public List<StatisticValue> getWorkDayStatistic() {
 		List<StatisticValue> workDayStatistic = new LinkedList<>();
-		if (!isNoWork()) {
-			long workedTime = currentWorkDay.isWorkedFullDay()
-					? currentWorkDay.getDay().getType().getWorkTimeInMSecond() : currentWorkDay.getSummaryWorkedTime();
-			workDayStatistic.add(new StatisticValue(workedTime, "Отработано", "#4da9f1"));
+		if (currentWorkDay != null) {
+			if (!isNoWork()) {
+				long workedTime = currentWorkDay.isWorkedFullDay()
+						? currentWorkDay.getDay().getType().getWorkTimeInMSecond()
+						: currentWorkDay.getSummaryWorkedTime();
+				workDayStatistic.add(new StatisticValue(workedTime, "Отработано", "#4da9f1"));
+			}
+			workDayStatistic.add(currentWorkDay.isWorkedFullDay()
+					? new StatisticValue(currentWorkDay.getDeltaTime(), "Переработок", "green")
+					: new StatisticValue(currentWorkDay.getDeltaTime(), "Осталось", "chocolate"));
 		}
-		workDayStatistic.add(currentWorkDay.isWorkedFullDay()
-				? new StatisticValue(currentWorkDay.getDeltaTime(), "Переработок", "green")
-				: new StatisticValue(currentWorkDay.getDeltaTime(), "Осталось", "chocolate"));
 		return workDayStatistic;
 	}
 
@@ -70,11 +73,12 @@ public class CurrentDayFrameModel implements Serializable {
 		Event editionEvent = (Event) event.getObject();
 		Calendar startTime = formationCorrectTime(editionEvent.getStartTime(), editionEvent.getDay());
 		Calendar endTime = formationCorrectTime(editionEvent.getEndTime(), editionEvent.getDay());
-		if (isPossibleEventTimeInterval(startTime, endTime)) {
-			updateWorkDayTime(startTime, endTime);
+		if (currentWorkDay.isPossibleTimeBoundaryForEvent(startTime, endTime)) {
 			editionEvent.setStartTime(startTime);
 			editionEvent.setEndTime(endTime);
-			if (editionEvent.getEndTime().getTimeInMillis() < editionEvent.getStartTime().getTimeInMillis()) {
+			currentWorkDay.changeTimeBy(editionEvent);
+			em.merge(currentWorkDay);
+			if (editionEvent.getEndTime().before(editionEvent.getStartTime())) {
 				Notification.warn("Невозможно сохранить изменения", "Время окончания события больше времени начала");
 			} else {
 				em.merge(editionEvent);
@@ -90,35 +94,44 @@ public class CurrentDayFrameModel implements Serializable {
 	 * @return <strong>true</strong> - если можно.
 	 */
 	public boolean canStopEvent() {
-		return !currentWorkDay.getEvents().isEmpty() && currentWorkDay.getLastWorkEvent().getState().equals(NOT_END);
+		return currentWorkDay != null && !currentWorkDay.getEvents().isEmpty()
+				&& currentWorkDay.getLastWorkEvent().getState().equals(NOT_END);
 	}
 
 	/**
-	 * {@linkplain #addNewEvent Создает событие} и отмечает начало рабочего дня если это первое событие для текущего
-	 * дня. Если в момент создания нового события, {@linkplain WorkDay#getLastWorkEvent последнее событие} не закончено,
-	 * то перед создание нового события, для него проставится статус "Закончено".
+	 * Создает событие и отмечает начало рабочего дня если это первое событие для текущего дня. Если в момент создания
+	 * нового события, {@linkplain WorkDay#getLastWorkEvent последнее событие} не закончено, то перед создание нового
+	 * события, для него проставится статус "Закончено".
 	 */
 	public void startEvent() {
-		// FIXME: заканчивать событие надо если создается событие влияющее на рабочее время
-		if (!currentWorkDay.getEvents().isEmpty() && currentWorkDay.getLastWorkEvent().getState().equals(NOT_END)) {
-			stopEvent();
+		stopLastActiveEvent();
+		Event creationEvent = new Event(currentWorkDay.getDay().getDay(), selectedEventType,
+				selectedEventType.getTitle(), Calendar.getInstance());
+		String addEventMessage = currentWorkDay.addEvent(creationEvent);
+		if (Objects.equals(addEventMessage, "")) {
+			em.persist(creationEvent);
+			if (isNoWork()
+					&& !creationEvent.getType().getCategory().equals(EventCategory.NOT_INFLUENCE_ON_WORKED_TIME)) {
+				startWork();
+			}
+			em.merge(currentWorkDay);
+		} else {
+			Notification.warn("Невозможно создать событие", addEventMessage);
 		}
-		Event creationEvent = addNewEvent();
-		if (isNoWork() && !creationEvent.getType().getCategory().equals(EventCategory.NOT_INFLUENCE_ON_WORKED_TIME)) {
-			startWork();
-		}
-        em.merge(currentWorkDay);
 		cleanAfterCreation();
 	}
 
 	/**
-	 * Проставляет время окончания для последнего события текущего дня.
+	 * Проставляет время окончания для последнего события, которое влияет на отработанное время, текущего дня.
 	 */
-	public void stopEvent() {
-		Event editingEvent = currentWorkDay.getLastWorkEvent();
-		editingEvent.setEndTime(Calendar.getInstance());
-		editingEvent.setState(END);
-		em.merge(editingEvent);
+	// FIXME: заканчивать событие надо если создается событие влияющее на рабочее время
+	public void stopLastActiveEvent() {
+		Event lastWorkEvent = currentWorkDay.getLastWorkEvent();
+		if (!currentWorkDay.getEvents().isEmpty() && lastWorkEvent.getState().equals(NOT_END)) {
+			lastWorkEvent.setEndTime(Calendar.getInstance());
+			lastWorkEvent.setState(END);
+			em.merge(lastWorkEvent);
+		}
 	}
 
 	// FIXME: разобраться почему не работает каскадное изменение. Должно происходить удаление события из БД при удалении
@@ -136,7 +149,7 @@ public class CurrentDayFrameModel implements Serializable {
 	// временным интервалом
 	private void startWork() {
 		currentWorkDay.setComingTime(currentWorkDay.getLastWorkEvent().getStartTime());
-        currentWorkDay.setState(WorkDayState.WORKING);
+		currentWorkDay.setState(WorkDayState.WORKING);
 	}
 
 	/**
@@ -146,7 +159,7 @@ public class CurrentDayFrameModel implements Serializable {
 	// FIXME: Перед окончанием рабочего дня надо проверять, нет ли уже события влияющего на отработанное время, с таким
 	// временным интервалом
 	public void endWork() {
-		stopEvent();
+		stopLastActiveEvent();
 		currentWorkDay.setOutTime(currentWorkDay.getLastWorkEvent().getEndTime());
 		currentWorkDay.setState(WorkDayState.WORKED);
 		em.merge(currentWorkDay);
@@ -234,25 +247,6 @@ public class CurrentDayFrameModel implements Serializable {
 		currentWorkDay = wdDAO.getCurrentDayInfo(new Date(), SessionUtil.getWorker());
 	}
 
-	private boolean isPossibleEventTimeInterval(Calendar startTime, Calendar endTime) {
-		return currentWorkDay.isPossibleTimeBoundaryForEvent(startTime, endTime);
-	}
-
-	private void updateWorkDayTime(Calendar comingTime, Calendar outTime) {
-		boolean isChange = false;
-		if (comingTime != null && currentWorkDay.needChangeComingTimeTo(comingTime)) {
-			currentWorkDay.setComingTime(comingTime);
-			isChange = true;
-		}
-		if (outTime != null && currentWorkDay.needChangeOutTimeTo(outTime)) {
-			currentWorkDay.setOutTime(comingTime);
-			isChange = true;
-		}
-		if (isChange) {
-			em.merge(currentWorkDay);
-		}
-	}
-
 	/**
 	 * Из за того, что Primefaces проставляет 1970г если использовать компонент для ввода только времени необходимо
 	 * формировать корректное значение времени.
@@ -269,19 +263,6 @@ public class CurrentDayFrameModel implements Serializable {
 		correctTime.set(Calendar.HOUR_OF_DAY, time.get(Calendar.HOUR_OF_DAY));
 		correctTime.set(Calendar.MINUTE, time.get(Calendar.MINUTE));
 		return correctTime;
-	}
-
-	/**
-	 * Создает новое событие и добавляет его к списку событий текущего дня.
-	 *
-	 * @return Созданное событие.
-	 */
-	private Event addNewEvent() {
-		Event workEvent = new Event(currentWorkDay.getDay().getDay(), selectedEventType, selectedEventType.getTitle(),
-				Calendar.getInstance());
-		em.persist(workEvent);
-		currentWorkDay.addEvent(workEvent);
-		return workEvent;
 	}
 
 	/**
