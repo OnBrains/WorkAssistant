@@ -1,5 +1,6 @@
 package org.onbrains.viewModel.workDay.monthStatistic;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -20,11 +21,12 @@ public class CurrentMonthStatisticService extends MonthStatisticService {
 
 	@Override
 	protected void initRawData() {
-		Date currentDay = new Date();
+		Calendar currentDay = Calendar.getInstance();
+        currentDay.add(Calendar.DATE, -1);
 		for (WorkDay workDay : workDays) {
 			idealWorkedTimeForMonth = idealWorkedTimeForMonth + workDay.getIdealWorkedTime();
-			if (workDay.getDay().getDay().before(currentDay)) {
-				realWorkedTime = realWorkedTime + workDay.getSummaryWorkedTime();
+			if (workDay.getDay().getDay().before(currentDay.getTime())) {
+				realWorkedTime = realWorkedTime + workDay.getWorkedTime();
 				idealWorkedTimeUpToCurrentDay = idealWorkedTimeUpToCurrentDay + workDay.getIdealWorkedTime();
 			}
 		}
@@ -41,16 +43,15 @@ public class CurrentMonthStatisticService extends MonthStatisticService {
 
 	@Override
 	protected void initDeltaTime() {
-		deltaTime = isWorkedFullMonth() ? Math.abs(realWorkedTime - idealWorkedTimeUpToCurrentDay)
-				: Math.abs(realWorkedTime - idealWorkedTimeUpToCurrentDay);
+		deltaTime = Math.abs(realWorkedTime - idealWorkedTimeUpToCurrentDay);
 	}
 
 	@Override
 	protected void initRemainderTime() {
 		if (isWorkedFullMonth()) {
-			realWorkedTime = 0;
+            remainderTime = 0;
 		} else {
-			realWorkedTime = isWorkedRequiredTime() ? Math.abs(idealWorkedTimeForMonth - realWorkedTime)
+            remainderTime = isWorkedRequiredTime() ? Math.abs(idealWorkedTimeForMonth - realWorkedTime)
 					: Math.abs(idealWorkedTimeForMonth - idealWorkedTimeUpToCurrentDay);
 		}
 	}

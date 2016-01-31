@@ -34,7 +34,7 @@ public class MonthStatistic implements Serializable {
 		cleanSummeryTimes();
 		if (workDaysByMonthType != null) {
 			for (WorkDay wd : workDaysByMonthType) {
-				realWorkedTime = realWorkedTime + wd.getSummaryWorkedTime();
+				realWorkedTime = realWorkedTime + wd.getWorkingTime();
 				idealWorkedTimeByCurrentDay = idealWorkedTimeByCurrentDay
 						+ wd.getDay().getType().getWorkTimeInMSecond();
 			}

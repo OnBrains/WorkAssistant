@@ -1,5 +1,6 @@
 package org.onbrains.viewModel.workDay.monthStatistic;
 
+import java.util.Calendar;
 import java.util.List;
 
 import org.onbrains.entity.workDay.WorkDay;
@@ -23,9 +24,10 @@ public class MonthStatisticService {
 
 	public MonthStatisticService(List<WorkDay> workDays) {
 		this.workDays = workDays;
+		calculate();
 	}
 
-	public void calculate() {
+	protected void calculate() {
 		initRawData();
 		initWorkedTime();
 		initDeltaTime();
@@ -37,7 +39,7 @@ public class MonthStatisticService {
 		for (WorkDay workDay : workDays) {
 			idealWorkedTimeForMonth = idealWorkedTimeForMonth + workDay.getDay().getType().getWorkTimeInMSecond();
 			if (workDay.isWorked()) {
-				realWorkedTime = remainderTime + workDay.getSummaryWorkedTime();
+				realWorkedTime = realWorkedTime + workDay.getWorkedTime();
 			}
 		}
 	}
@@ -47,11 +49,11 @@ public class MonthStatisticService {
 	}
 
 	protected void initDeltaTime() {
-		deltaTime = Math.abs(realWorkedTime - idealWorkedTimeForMonth);
+		deltaTime = !isFutureMonth() ? Math.abs(realWorkedTime - idealWorkedTimeForMonth) : 0;
 	}
 
 	protected void initRemainderTime() {
-		remainderTime = isWorkedFullMonth() ? 0 : idealWorkedTimeForMonth - realWorkedTime;
+		remainderTime = !isFutureMonth() ? 0 : idealWorkedTimeForMonth - realWorkedTime;
 	}
 
 	protected void initDeltaType() {
@@ -60,6 +62,15 @@ public class MonthStatisticService {
 
 	protected boolean isWorkedFullMonth() {
 		return realWorkedTime > idealWorkedTimeForMonth;
+	}
+
+	private boolean isFutureMonth() {
+		Calendar currentDate = Calendar.getInstance();
+		Calendar selectedMonth = Calendar.getInstance();
+		selectedMonth.setTime(workDays.get(0).getDay().getDay());
+		return currentDate.get(Calendar.YEAR) < selectedMonth.get(Calendar.YEAR)
+				|| (currentDate.get(Calendar.YEAR) == selectedMonth.get(Calendar.YEAR)
+						&& currentDate.get(Calendar.MONTH) < selectedMonth.get(Calendar.MONTH));
 	}
 
 	public long getWorkedTime() {
