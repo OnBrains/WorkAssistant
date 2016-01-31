@@ -1,20 +1,15 @@
-<ui:composition template="/view/View.xhtml"
-                xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:h="http://java.sun.com/jsf/html"
-                xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:p="http://primefaces.org/ui"
-                xmlns:f="http://java.sun.com/jsf/core"
+<ui:composition template="/view/overall/View.xhtml" xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html" xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core"
                 xmlns:pe="http://primefaces.org/ui/extensions">
 
     <ui:define name="header">
-        <h:outputStylesheet name="wa-time.css"/>
-        <title>Влияй на свое будущее</title>
+        <title>Справочник типов событий</title>
     </ui:define>
 
     <ui:define name="body">
 
-        <pe:layout styleClass="layout_style">
-            <pe:layoutPane position="west" styleClassContent="layout_style" size="340" resizable="false">
+            <pe:layoutPane position="west" size="340" resizable="false">
                 <h:form id="event_types_category_form">
                     <p:fieldset legend="Влияние на отработанное время">
                         <p:tree id="event_types_category_tree" value="#{eventTypesDirectory.categoryNode}" var="categoryNode"
@@ -29,7 +24,7 @@
                 </h:form>
             </pe:layoutPane>
 
-            <pe:layoutPane position="center" styleClassContent="layout_style">
+            <pe:layoutPane position="center">
                 <h:form id="event_types_directory_form">
                     <p:dataTable id="event_types_directory_table" value="#{eventTypesDirectory.typesBySelectedCategory}"
                                  var="eventType" editable="true" style="margin-top: 16px;">
@@ -118,7 +113,6 @@
                     </p:dataTable>
                 </h:form>
             </pe:layoutPane>
-        </pe:layout>
 
         <ui:include src="EventTypeCreationDialog.xhtml">
             <ui:param name="elementsUpdate" value=":event_types_directory_form:event_types_directory_table" />

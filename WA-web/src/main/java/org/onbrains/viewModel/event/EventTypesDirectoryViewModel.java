@@ -13,6 +13,7 @@ import org.primefaces.model.TreeNode;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
@@ -28,7 +29,7 @@ import java.util.List;
  */
 
 @Named(value = "eventTypesDirectory")
-@SessionScoped
+@ViewScoped
 public class EventTypesDirectoryViewModel implements Serializable {
 
 	private static final long MILLIS_IN_MINUTE = 60000;
@@ -83,12 +84,12 @@ public class EventTypesDirectoryViewModel implements Serializable {
 		cleanParams();
 	}
 
-	// FIXME: без flush нельзя пойтать Exeption
+	// FIXME: без flush нельзя пойтать Exception
 	public void removeType(EventType removingType) {
 		try {
+            typesBySelectedCategory.remove(removingType);
 			em.remove(em.merge(removingType));
 //			em.flush();
-			typesBySelectedCategory.remove(removingType);
 		} catch (PersistenceException constraintException) {
 			Notification.warn(String.format("Невозможну удалить тип: %s", removingType.getTitle()),
 					"Данный тип имеет зависимые записи");

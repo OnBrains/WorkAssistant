@@ -1,39 +1,38 @@
-<ui:composition template="/view/View.xhtml"
-      xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:p="http://primefaces.org/ui"
-      xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition template="/view/overall/View.xhtml" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
 
-<ui:define name="header">
-    <h:outputStylesheet name="wa-time.css" />
-    <title>Авторизация</title>
-</ui:define>
+    <ui:define name="header">
+        <title>Авторизация</title>
+    </ui:define>
 
-<ui:define name="body">
-    <h:form id="login_form">
-        <p:panel header="Вход в систему" styleClass="login_panel">
-            <h:panelGrid id="login_panel" columns="3">
+    <ui:define name="mainMenu">
+        <ui:param name="hideMenuPanel" value="true"/>
+    </ui:define>
 
-                <h:outputText value="Логин"/>
-                <p:inputText id="login" value="#{loginViewModel.login}" required="true"/>
-                <p:spacer/>
+    <ui:define name="body">
+        <h:form id="login_form">
+            <p:panel header="Вход в систему" styleClass="login_panel">
+                <h:panelGrid id="login_panel" columns="3">
 
-                <h:outputText value="Пароль" />
-                <p:password id="password" value="#{loginViewModel.password}" feedback="false" required="true"/>
-                <p:spacer/>
+                    <h:outputText value="Логин"/>
+                    <p:inputText id="login" value="#{loginViewModel.login}" required="true"/>
+                    <p:spacer/>
 
-                <p:spacer/>
-                <p:commandButton action="#{loginViewModel.checkLogin}" value="Вход" update="login_form" ajax="true"/>
+                    <h:outputText value="Пароль" />
+                    <p:password id="password" value="#{loginViewModel.password}" feedback="false" required="true"/>
+                    <p:spacer/>
 
-            </h:panelGrid>
-            <p:separator/>
-            <p:outputPanel style="text-align: center;">
-                <p:link outcome="registration" value="Присоединиться к WorkAssistant"/>
-            </p:outputPanel>
-        </p:panel>
-    </h:form>
-</ui:define>
+                    <p:spacer/>
+                    <p:commandButton action="#{loginViewModel.checkLogin}" value="Вход" update="login_form" ajax="true"/>
+
+                </h:panelGrid>
+                <p:separator/>
+                <p:outputPanel style="text-align: center;">
+                    <p:link outcome="registration" value="Присоединиться к WorkAssistant"/>
+                </p:outputPanel>
+            </p:panel>
+        </h:form>
+    </ui:define>
 
 </ui:composition>
