@@ -1,178 +1,95 @@
-<ui:composition template="/view/View.xhtml"
-                xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:h="http://java.sun.com/jsf/html"
-                xmlns:f="http://java.sun.com/jsf/core"
-                xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:p="http://primefaces.org/ui"
-                xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition template="/view/overall/View.xhtml" xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions" xmlns:wa="http://onbrains.org/wa">
 
     <ui:define name="header">
-        <h:outputStylesheet name="wa-time.css"/>
-        <h:outputStylesheet name="system.css"/>
         <title>Влияй на свое будущее</title>
     </ui:define>
 
     <ui:define name="body">
 
-        <pe:layout>
-
-            <pe:layoutPane position="north" closable="false" resizable="true" styleClassContent="layout_style">
-                <p:menubar>
-                    <p:submenu label="Справочники" id="directories_submenu">
-                        <p:menuitem value="Типы событий" url="/view/event/EventTypesDirectory.xhtml"/>
-                    </p:submenu>
-                    <f:facet name="options">
-                        <h:outputText value="#{loginViewModel.worker.toString()}"/>
-                        <p:commandButton value="Выйти" action="#{loginViewModel.logout}" icon="ui-icon-extlink"/>
-                    </f:facet>
-                </p:menubar>
-            </pe:layoutPane>
-
-            <pe:layoutPane position="west" closable="true" resizable="false" size="450" minSize="450"
-                           styleClassContent="layout_style">
+            <pe:layoutPane id="current_work_day_panel" position="west" closable="true" resizable="false" size="450" minSize="450">
                 <ui:include src="/view/workDay/CurrentWorkDayFrame.xhtml"/>
             </pe:layoutPane>
 
-            <pe:layoutPane position="center" resizable="true" styleClassContent="layout_style">
+            <pe:layoutPane position="center" resizable="true">
                 <h:form id="month_statistic" styleClass="monthStatisticClass">
-                    <p:outputPanel styleClass="panel_for_statistic">
-                        <ul id="list_with_legend"
-                            style="display: #{timeJournalViewModel.selectedMonth != null ? 'table' : 'none'};">
-                            <li style="#{timeJournalViewModel.statistic.workedTime == 0 ? 'display: none' : ''};">
-                                <div class="circle" style="background-color: #4da9f1;"></div>
-                                #{dateFormat.mSecToHHMM(timeJournalViewModel.statistic.workedTime)} Отработано
-                            </li>
-                            <li style="#{timeJournalViewModel.statistic.deltaTime == 0 ? 'display: none' : ''};">
-                                <div class="circle"
-                                     style="background-color: #{timeJournalViewModel.statistic.realWorkedTimeMoreIdeal ? 'green' : 'red'};"></div>
-                                #{dateFormat.mSecToHHMM(timeJournalViewModel.statistic.deltaTime)}
-                                #{timeJournalViewModel.statistic.realWorkedTimeMoreIdeal ? 'Переработок' : 'Недоработок'}
-                            </li>
-                            <li style="#{timeJournalViewModel.statistic.remainingTime == 0 ? 'display: none' : ''};">
-                                <div class="circle" style="background-color: chocolate;"></div>
-                                #{dateFormat.mSecToHHMM(timeJournalViewModel.statistic.remainingTime)} Осталось
-                            </li>
-                        </ul>
-                    </p:outputPanel>
-
-                    <div style="display: #{timeJournalViewModel.selectedMonth != null ? 'table' : 'none'}; width: 100%;">
-                        <span style="#{timeJournalViewModel.getStyleForWorkedTime()}"/>
-                        <span style="#{timeJournalViewModel.getStyleForDeltaTime()}"/>
-                        <span style="#{timeJournalViewModel.getStyleForRemainingTime()}"/>
-                    </div>
+                    <wa:statistic id="component_statistic" statisticValues="#{timeJournalViewModel.workDayStatistic}"
+                                  rendered="#{empty timeJournalViewModel.workDays}"/>
                 </h:form>
 
                 <h:form id="month_action">
-                    <p:outputPanel style="height: 43px;">
-                        <p:commandButton id="create_days_for_month" value="+"
-                                         action="#{timeJournalViewModel.createWorkDaysForSelectedMonth}"
-                                         rendered="#{timeJournalViewModel.workDaysBySelectedMonth.size() == 0}"
-                                         style="float:left; margin: 10px;" update=":month_info_form, :month_statistic"/>
-                        <p:commandButton value="Событие" style="float:right; margin: 10px;"
-                                         title="Данная функция еще не реализована"/>
+                    <p:outputPanel styleClass="height-40-px">
+                        <p:commandButton id="create_days_for_month" value="+" action="#{timeJournalViewModel.createWorkDays}"
+                                         rendered="#{empty timeJournalViewModel.workDays}" styleClass="float-left margin-10-px"
+                                         update=":month_info_form, :month_statistic"/>
+                        <p:commandButton value="Событие" styleClass="float-right margin-10-px" title="Данная функция еще не реализована"/>
                     </p:outputPanel>
                 </h:form>
 
                 <h:form id="month_info_form">
-                    <p:dataTable id="month_info_table" styleClass="monthInfoTable"
-                                 value="#{timeJournalViewModel.workDaysBySelectedMonth}" var="dayInfo"
-                                 rowStyleClass="#{timeJournalViewModel.getStyleClassForRow(dayInfo)}" editable="true"
-                                 scrollable="true" scrollHeight="600">
+                    <p:dataTable id="month_info_table" styleClass="monthInfoTable" value="#{timeJournalViewModel.workDays}"
+                                 var="workDay" scrollable="true" scrollHeight="600"
+                                 rowStyleClass="#{timeJournalViewModel.getStyleClassForRow(workDay)}">
 
                         <f:facet name="header">
                             <p:commandButton id="previous_month" value="#{timeJournalViewModel.nameForPreviousMonth}"
-                                             action="#{timeJournalViewModel.previousMonth}"
-                                             update=":month_info_form, :month_statistic, :month_action"
-                                             style="float: left; margin: 5px;"/>
+                                             action="#{timeJournalViewModel.previousMonth}" styleClass="float-left margin-5-px"
+                                             update=":month_info_form, :month_statistic, :month_action"/>
                             <h:outputText value="#{dateFormat.toMMMMMYYYY(timeJournalViewModel.selectedMonth.time)}"
-                                          style="vertical-align: -webkit-baseline-middle;"/>
+                                          styleClass="vertical-align-sub"/>
                             <p:commandButton id="next_month" value="#{timeJournalViewModel.nameForNextMonth}"
-                                             action="#{timeJournalViewModel.nextMonth}"
-                                             update=":month_info_form, :month_statistic, :month_action"
-                                             style="float: right; margin: 5px;"/>
+                                             action="#{timeJournalViewModel.nextMonth}" styleClass="float-right margin-5-px"
+                                             update=":month_info_form, :month_statistic, :month_action"/>
                         </f:facet>
 
-                        <p:ajax event="rowEdit" listener="#{timeJournalViewModel.onRowEdit}" update=":month_statistic"/>
-
                         <p:column headerText="Тип дня" width="10%">
-                            <h:link value="#{dayInfo.day.type.desc}" outcome="WorkDayCardView.xhtml">
-                                <f:param name="workDay" value="#{dayInfo}"/>
+                            <h:link value="#{workDay.day.type.desc}" outcome="WorkDayCardView.xhtml">
+                                <f:param name="workDay" value="#{workDay}"/>
                             </h:link>
                         </p:column>
 
-                        <p:column headerText="День" style="text-align: center;">
-                            <h:outputText value="#{dateFormat.toDDEE(dayInfo.day.day)}"/>
+                        <p:column headerText="День" styleClass="align-center">
+                            <h:outputText value="#{dateFormat.toDDEE(workDay.day.day)}"/>
                         </p:column>
 
-                        <p:column id="start_work_day_id" style="text-align: center; width: 10%;">
+                        <p:column id="start_work_day_id" styleClass="align-center width-10">
                             <f:facet name="header">
                                 <h:graphicImage name="img/clock/clock_play.png" title="Начало рабочего дня"/>
                             </f:facet>
-                            <h:outputText value="#{dateFormat.toHHMM(dayInfo.comingTime.time)}"/>
+                            <h:outputText value="#{dateFormat.toHHMM(workDay.comingTime.time)}"/>
                         </p:column>
 
-                        <p:column id="end_work_day_id" style="text-align: center; width: 10%">
+                        <p:column id="end_work_day_id" styleClass="align-center width-10">
                             <f:facet name="header">
                                 <h:graphicImage name="img/clock/clock_stop.png" title="Окончание рабочего дня"/>
                             </f:facet>
-                            <h:outputText value="#{dateFormat.toHHMM(dayInfo.outTime.time)}"/>
+                            <h:outputText value="#{dateFormat.toHHMM(workDay.outTime.time)}" rendered="#{workDay.worked}"/>
                         </p:column>
 
-                        <p:column id="summary_work_day_id" style="text-align: center; width: 10%;">
+                        <p:column id="summary_work_day_id" styleClass="align-center width-10">
                             <f:facet name="header">
                                 <h:graphicImage name="img/clock/clock_link.png" title="Отработанное время"/>
                             </f:facet>
-                            <h:outputText value="#{dateFormat.mSecToHHMM(dayInfo.getSummaryWorkedTime())}"/>
+                            <h:outputText value="#{dateFormat.mSecToHHMM(workDay.workedTime)}" rendered="#{workDay.worked}"/>
                         </p:column>
 
-                        <p:column id="delta_work_day_id" style="text-align: center; width: 10%;">
+                        <p:column id="delta_work_day_id" styleClass="align-center width-10">
                             <f:facet name="header">
                                 <h:graphicImage name="img/clock/clock_add.png" title="Переработано/Недоработано"/>
                             </f:facet>
-                            <h:outputText value="#{dateFormat.mSecToHHMM(dayInfo.getDeltaTime())}"/>
+                            <h:outputText value="#{dateFormat.mSecToHHMM(workDay.getDeltaTime())}" rendered="#{workDay.worked}"
+                                          style="#{timeJournalViewModel.getDeltaTimeStyle(workDay)}"/>
                         </p:column>
 
-                        <p:column id="state_work_day_id" headerText="Состояние" style="text-align: center; width: 20%;">
-                            <h:outputText value="#{dayInfo.state.desc}"/>
-                        </p:column>
-
-                        <p:column id="work_day_events_id" style="width: 2em; text-align: center;">
-                            <p:commandLink id="work_day_events_show" value="#{dayInfo.events.size()}"
-                                           rendered="#{dayInfo.events.size() != 0}"/>
-                            <p:overlayPanel for="work_day_events_show" hideEffect="fade" style="width: 400px;">
-                                <p:dataTable value="#{dayInfo.events}" var="dayEvent">
-
-                                    <p:column headerText="Событие">
-                                        <h:outputText value="#{dayEvent.title}"/>
-                                    </p:column>
-
-                                    <p:column headerText="Начало">
-                                        <h:outputText value="#{dateFormat.toHHMM(dayEvent.startTime.time)}"/>
-                                    </p:column>
-
-                                    <p:column headerText="Окончание">
-                                        <h:outputText value="#{dateFormat.toHHMM(dayEvent.endTime.time)}"
-                                                      rendered="#{dayEvent.state == 'END'}"/>
-                                    </p:column>
-
-                                </p:dataTable>
-                            </p:overlayPanel>
-                        </p:column>
-
-                        <p:column style="width: 2em;">
-                            <p:rowEditor/>
+                        <p:column id="state_work_day_id" headerText="Состояние" styleClass="align-center width-20">
+                            <h:outputText value="#{workDay.state.desc}"/>
                         </p:column>
 
                     </p:dataTable>
                 </h:form>
             </pe:layoutPane>
-
-            <pe:layoutPane position="south" closable="false" resizable="false" styleContent="text-align: center"
-                           styleClassContent="layout_style">
-                <p:graphicImage name="img/iconNC.png"/>
-            </pe:layoutPane>
-
-        </pe:layout>
 
     </ui:define>
 
