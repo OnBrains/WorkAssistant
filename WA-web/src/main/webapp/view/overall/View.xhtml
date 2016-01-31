@@ -13,7 +13,8 @@
     <ui:insert name="metadata"/>
 
     <h:head>
-        <h:outputStylesheet name="system.css"/>
+        <h:outputStylesheet name="css/overall.css"/>
+        <h:outputStylesheet name="css/theme.css"/>
         <h:outputStylesheet name="wa-time.css"/>
         <!--<h:outputScript name="ru-local.js"/>-->
         <ui:insert name="header"/>
@@ -22,11 +23,12 @@
     <h:body>
         <ui:insert name="layout">
             <pe:layout id="main_layout" togglerTipClosed="Показать" togglerTipOpen="Спрятать" widgetVar="mainLayoutVar">
-                <pe:layoutPane id="menu_panel" position="north" resizable="false" closable="false" size="60" styleClassContent="layout_style">
                     <ui:insert name="mainMenu">
-                        <ui:include src="MenuFrame.xhtml"/>
+                        <pe:layoutPane id="menu_panel" position="north" resizable="false" closable="false" size="60"
+                                       rendered="#{!hideMenuPanel}">
+                            <ui:include src="MenuFrame.xhtml"/>
+                        </pe:layoutPane>
                     </ui:insert>
-                </pe:layoutPane>
 
                 <pe:layoutPane id="content_body" position="center">
                     <ui:insert name="body"/>
