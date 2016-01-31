@@ -2,6 +2,7 @@ package org.onbrains.entity.workDay;
 
 import static org.onbrains.entity.event.EventCategory.INFLUENCE_ON_WORKED_TIME;
 import static org.onbrains.entity.event.EventCategory.NOT_INFLUENCE_ON_WORKED_TIME;
+import static org.onbrains.entity.workDay.WorkDayState.WORKED;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -40,14 +41,14 @@ import org.onbrains.entity.worker.Worker;
 @Entity
 @Table(name = "WORK_DAY", uniqueConstraints = { @UniqueConstraint(columnNames = { "WORKER_ID", "DAY_ID" }) })
 @NamedQueries({
-		@NamedQuery(name = WorkDay.GET_WORK_DAYS_BY_MONTH, query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day.day, 'yyyyMM') = to_char(:month, 'yyyyMM') order by wt.day"),
-		@NamedQuery(name = WorkDay.GET_CURRENT_DAY, query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day.day, 'yyyyMMdd') = to_char(:day, 'yyyyMMdd')"),
-		@NamedQuery(name = WorkDay.GET_DAYS_PRIOR_CURRENT_DAY, query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day, 'yyyyMM') = to_char(:month, 'yyyyMM') and wt.day <= :month order by wt.day") })
+		@NamedQuery(name = WorkDay.GET_WORK_DAYS_BY_MONTH, query =
+                "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day.day, 'yyyyMM') = to_char(:month, 'yyyyMM') order by wt.day"),
+		@NamedQuery(name = WorkDay.GET_WORK_DAY, query =
+                "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day.day, 'yyyyMMdd') = to_char(:day, 'yyyyMMdd')")})
 public class WorkDay extends SuperClass {
 
 	public static final String GET_WORK_DAYS_BY_MONTH = "WorkTimeDAO.getWorkDaysByMonth";
-	public static final String GET_CURRENT_DAY = "WorkTimeDAO.getCurrentDay";
-	public static final String GET_DAYS_PRIOR_CURRENT_DAY = "WorkTimeDAO.getDaysPriorCurrentDay";
+	public static final String GET_WORK_DAY = "WorkTimeDAO.getWorkDay";
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "WORKER_ID", nullable = false)
@@ -81,13 +82,39 @@ public class WorkDay extends SuperClass {
 	public WorkDay(Worker worker, Day day) {
 		this.worker = worker;
 		this.day = day;
-		// TODO: надо ли сетить состояние тут?
 		this.state = WorkDayState.NO_WORK;
 	}
 
 	// *****************************************************************************************************************
 	// Service methods
 	// *****************************************************************************************************************
+
+	/**
+	 * Проверяет находится ли текущий день в {@linkplain WorkDayState состоянии} "Не работал".
+	 *
+	 * @return <strong>true</strong> - если состояние текущего дня "Не работал".
+	 */
+	public boolean isNoWork() {
+		return getState().equals(WorkDayState.NO_WORK);
+	}
+
+	/**
+	 * Проверяет находится ли текущий день в {@linkplain WorkDayState состоянии} "На работе".
+	 *
+	 * @return <strong>true</strong> - если состояние текущего дня "На работе".
+	 */
+	public boolean isWorking() {
+		return getState().equals(WorkDayState.WORKING);
+	}
+
+	/**
+	 * Проверяет находится ли текущий день в {@linkplain WorkDayState состоянии} "Отработал".
+	 *
+	 * @return <strong>true</strong> - если состояние текущего дня "Отработал".
+	 */
+	public boolean isWorked() {
+		return getState().equals(WORKED);
+	}
 
 	public Event getLastWorkEvent() {
 		if (!events.isEmpty()) {
@@ -104,7 +131,7 @@ public class WorkDay extends SuperClass {
 	 * Добавляет событие в список событий рабочего дня. Если событие влияет на рабочее время, то осуществляется
 	 * проверка, что нет пересечений с другими событиями, а так же изменяется время {@linkplain #comingTime начала РД} и
 	 * {@linkplain #outTime окончания РД}
-	 * 
+	 *
 	 * @param additionEvent
 	 *            добавляемое событие.
 	 * @return Сообщение об ошибки, если невозможно добавить событие или пустую строку если событие добавлено.
@@ -126,7 +153,7 @@ public class WorkDay extends SuperClass {
 	 * Изменяет время начала и окончания РД если это необходимо. Время может изменится при добавлении нового события или
 	 * изменении существующего. При этом на время РД влияют только {@link EventCategory#INFLUENCE_ON_WORKED_TIME}
 	 * события.
-	 * 
+	 *
 	 * @param event
 	 *            событие из-за которого могло изменится время.
 	 */
@@ -170,15 +197,17 @@ public class WorkDay extends SuperClass {
 	 *
 	 * @return Суммарное отработанное время в миллисекундах.
 	 */
-	public Long getSummaryWorkedTime() {
-		Long summaryWorkedTime = 0L;
-		if (!events.isEmpty()) {
-			for (Event event : events) {
-				summaryWorkedTime = summaryWorkedTime + event.getWorkedTime();
-			}
-		}
-		return summaryWorkedTime;
+	public Long getWorkingTime() {
+		return calculateWorkedTime();
 	}
+
+    public Long getWorkedTime() {
+        return state.equals(WORKED) ? calculateWorkedTime() : 0;
+    }
+
+    public Long getIdealWorkedTime() {
+        return getDay().getType().getWorkTimeInMSecond();
+    }
 
 	/**
 	 * Определяет отработано ли все положенное время, за текущий рабочий день. Для каждого типа рабочего дня может быть
@@ -188,8 +217,12 @@ public class WorkDay extends SuperClass {
 	 * @return <strong>true</strong> если отработанно все положенное время.
 	 */
 	public boolean isWorkedFullDay() {
-		return getSummaryWorkedTime() > day.getType().getWorkTimeInMSecond();
+		return getWorkedTime() > day.getType().getWorkTimeInMSecond();
 	}
+
+    public boolean isWorkingRequiredTime() {
+        return getWorkingTime() > day.getType().getWorkTimeInMSecond();
+    }
 
 	/**
 	 * Вычисляет переработанное или недоработанное время.
@@ -197,7 +230,7 @@ public class WorkDay extends SuperClass {
 	 * @return Переработанное/недоработанное время в миллисекундах, если день не закончен вернет 0.
 	 */
 	public Long getDeltaTime() {
-		return Math.abs(getSummaryWorkedTime() - day.getType().getWorkTimeInMSecond());
+		return Math.abs(getWorkingTime() - day.getType().getWorkTimeInMSecond());
 	}
 
 	// *****************************************************************************************************************
@@ -238,10 +271,6 @@ public class WorkDay extends SuperClass {
 	 * @return <strong>true</strong> - если время находится внутри интервала.
 	 */
 	private boolean intervalInsideEvent(Event event, Calendar startTime, Calendar endTime) {
-		// boolean startTimeInsideInterval = event.getStartTime().getTimeInMillis() < startTime.getTimeInMillis()
-		// && startTime.getTimeInMillis() < event.getEndTime().getTimeInMillis();
-		// boolean endTimeInsideInterval = event.getStartTime().getTimeInMillis() < endTime.getTimeInMillis()
-		// && endTime.getTimeInMillis() < event.getEndTime().getTimeInMillis();
 		boolean startTimeInsideInterval = event.getStartTime().before(startTime) && event.getEndTime().after(startTime);
 		boolean endTimeInsideInterval = event.getStartTime().before(endTime) && event.getEndTime().after(endTime);
 		return startTimeInsideInterval || endTimeInsideInterval;
@@ -259,15 +288,21 @@ public class WorkDay extends SuperClass {
 	 * @return <strong>true</strong> - если интервал события назодится в границах времени.
 	 */
 	private boolean eventInsideInterval(Event event, Calendar startTime, Calendar endTime) {
-		// boolean startEventTimeInsideInterval = startTime.getTimeInMillis() < event.getStartTime().getTimeInMillis()
-		// && event.getStartTime().getTimeInMillis() < endTime.getTimeInMillis();
-		// boolean endEventTimeInsideInterval = startTime.getTimeInMillis() < event.getEndTime().getTimeInMillis()
-		// && event.getEndTime().getTimeInMillis() < endTime.getTimeInMillis();
 		boolean startEventTimeInsideInterval = startTime.before(event.getStartTime())
 				&& endTime.after(event.getStartTime());
 		boolean endEventTimeInsideInterval = startTime.before(event.getEndTime()) && endTime.after(event.getEndTime());
 		return startEventTimeInsideInterval || endEventTimeInsideInterval;
 	}
+
+    private Long calculateWorkedTime() {
+        Long summaryWorkedTime = 0L;
+        if (!events.isEmpty()) {
+            for (Event event : events) {
+                summaryWorkedTime = summaryWorkedTime + event.getWorkedTime();
+            }
+        }
+        return summaryWorkedTime;
+    }
 
 	// *****************************************************************************************************************
 	// Simple getters and setters

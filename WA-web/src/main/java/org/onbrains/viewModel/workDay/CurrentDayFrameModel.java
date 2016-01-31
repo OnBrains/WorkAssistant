@@ -56,13 +56,12 @@ public class CurrentDayFrameModel implements Serializable {
 	public List<StatisticValue> getWorkDayStatistic() {
 		List<StatisticValue> workDayStatistic = new LinkedList<>();
 		if (currentWorkDay != null) {
-			if (!isNoWork()) {
-				long workedTime = currentWorkDay.isWorkedFullDay()
-						? currentWorkDay.getDay().getType().getWorkTimeInMSecond()
-						: currentWorkDay.getSummaryWorkedTime();
+			if (!currentWorkDay.isNoWork()) {
+				long workedTime = currentWorkDay.isWorkingRequiredTime()
+						? currentWorkDay.getDay().getType().getWorkTimeInMSecond() : currentWorkDay.getWorkingTime();
 				workDayStatistic.add(new StatisticValue(workedTime, "Отработано", "#4da9f1"));
 			}
-			workDayStatistic.add(currentWorkDay.isWorkedFullDay()
+			workDayStatistic.add(currentWorkDay.isWorkingRequiredTime()
 					? new StatisticValue(currentWorkDay.getDeltaTime(), "Переработок", "green")
 					: new StatisticValue(currentWorkDay.getDeltaTime(), "Осталось", "chocolate"));
 		}
@@ -78,7 +77,7 @@ public class CurrentDayFrameModel implements Serializable {
 			editionEvent.setEndTime(endTime);
 			currentWorkDay.changeTimeBy(editionEvent);
 			em.merge(currentWorkDay);
-			if (editionEvent.getEndTime().before(editionEvent.getStartTime())) {
+			if (editionEvent.getState().equals(END) && editionEvent.getEndTime().before(editionEvent.getStartTime())) {
 				Notification.warn("Невозможно сохранить изменения", "Время окончания события больше времени начала");
 			} else {
 				em.merge(editionEvent);
@@ -110,7 +109,7 @@ public class CurrentDayFrameModel implements Serializable {
 		String addEventMessage = currentWorkDay.addEvent(creationEvent);
 		if (Objects.equals(addEventMessage, "")) {
 			em.persist(creationEvent);
-			if (isNoWork()
+			if (currentWorkDay.isNoWork()
 					&& !creationEvent.getType().getCategory().equals(EventCategory.NOT_INFLUENCE_ON_WORKED_TIME)) {
 				startWork();
 			}
@@ -166,40 +165,13 @@ public class CurrentDayFrameModel implements Serializable {
 	}
 
 	/**
-	 * Проверяет находится ли текущий день в {@linkplain WorkDayState состоянии} "Не работал".
-	 *
-	 * @return <strong>true</strong> - если состояние текущего дня "Не работал".
-	 */
-	public boolean isNoWork() {
-		return currentWorkDay != null && currentWorkDay.getState().equals(WorkDayState.NO_WORK);
-	}
-
-	/**
-	 * Проверяет находится ли текущий день в {@linkplain WorkDayState состоянии} "На работе".
-	 *
-	 * @return <strong>true</strong> - если состояние текущего дня "На работе".
-	 */
-	public boolean isWorking() {
-		return currentWorkDay != null && currentWorkDay.getState().equals(WorkDayState.WORKING);
-	}
-
-	/**
-	 * Проверяет находится ли текущий день в {@linkplain WorkDayState состоянии} "Отработал".
-	 *
-	 * @return <strong>true</strong> - если состояние текущего дня "Отработал".
-	 */
-	public boolean isWorked() {
-		return currentWorkDay != null && currentWorkDay.getState().equals(WorkDayState.WORKED);
-	}
-
-	/**
 	 * Возвращает время прихода на работу для текущего рабочего дня. Если рабочий день не начался возвращает шаблон для
 	 * пустого времени "__:__".
 	 *
 	 * @return Время прихода на работу для текущего рабочего дня в формате <strong>HH:MM</strong>.
 	 */
 	public String getComingTime() {
-		return currentWorkDay != null && !isNoWork()
+		return currentWorkDay != null && !currentWorkDay.isNoWork()
 				? DateFormatService.toHHMM(currentWorkDay.getComingTime().getTime()) : "__:__";
 	}
 
@@ -214,8 +186,8 @@ public class CurrentDayFrameModel implements Serializable {
 	 * @return Время ухода с работы для текущего рабочего дня в формате <strong>HH:MM</strong>.
 	 */
 	public String getOutTime() {
-		if (currentWorkDay != null && !isNoWork()) {
-			return isWorked() ? getRealOutTime() : getPossibleOutTime();
+		if (currentWorkDay != null && !currentWorkDay.isNoWork()) {
+			return currentWorkDay.isWorked() ? getRealOutTime() : getPossibleOutTime();
 		} else {
 			return "__:__";
 		}
@@ -244,7 +216,7 @@ public class CurrentDayFrameModel implements Serializable {
 	 * Инициализирует информацию о текущем рабочем дне, если ее нет.
 	 */
 	private void initCurrentWorkDay() {
-		currentWorkDay = wdDAO.getCurrentDayInfo(new Date(), SessionUtil.getWorker());
+		currentWorkDay = wdDAO.getWorkDay(new Date(), SessionUtil.getWorker());
 	}
 
 	/**
@@ -279,7 +251,7 @@ public class CurrentDayFrameModel implements Serializable {
 	 * @return Возможное время ухода в милисекундах.
 	 */
 	private Long getPossibleOutTimeInMSecond() {
-		return currentWorkDay != null && !isNoWork() ? currentWorkDay.getComingTime().getTimeInMillis()
+		return currentWorkDay != null && !currentWorkDay.isNoWork() ? currentWorkDay.getComingTime().getTimeInMillis()
 				+ currentWorkDay.getDay().getType().getWorkTimeInMSecond() : 0L;
 	}
 
