@@ -1,5 +1,7 @@
 package org.onbrains.component.statistic;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.faces.component.FacesComponent;
@@ -18,7 +20,8 @@ public class StatisticModel extends UINamingContainer {
 
 	public List<StatisticValue> getValues() {
 		List<StatisticValue> values = (List<StatisticValue>) getAttributes().get(VALUES);
-		for (StatisticValue value : values) {
+        List<StatisticValue> allValues = new ArrayList<>(values);
+        for (StatisticValue value : allValues) {
 			if (value.getCount() == 0) {
 				values.remove(value);
 			}
