@@ -105,6 +105,21 @@ public class DateFormatService implements Serializable {
 	}
 
 	/**
+	 * Получает из даты информацию о дне недели.
+	 *
+	 * @param date
+	 *            Преобразуемая дата
+	 * @return Информация о дате в формате 'EEEEE'.
+	 */
+	public static String toEEEEE(Date date) {
+		if (date == null) {
+			return null;
+		}
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEEEE", dateFormatSymbols);
+		return simpleDateFormat.format(date);
+	}
+
+	/**
 	 * Получает из даты информацию о дате, месяце и годе.
 	 *
 	 * @param date

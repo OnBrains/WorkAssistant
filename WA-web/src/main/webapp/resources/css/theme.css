@@ -6,3 +6,10 @@ body {
     border: none;
     background: none;
 }
+
+h4 {
+    font-style: italic;
+    border-bottom: 1px solid rgb(200, 200, 200);
+    margin-bottom: 15px;
+    margin-top: 15px;
+}

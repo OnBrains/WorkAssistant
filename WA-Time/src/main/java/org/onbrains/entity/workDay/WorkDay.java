@@ -33,6 +33,7 @@ import org.onbrains.entity.day.Day;
 import org.onbrains.entity.event.Event;
 import org.onbrains.entity.event.EventCategory;
 import org.onbrains.entity.worker.Worker;
+import org.onbrains.utils.parsing.DateFormatService;
 
 /**
  * @author Naumov Oleg on 21.03.2015 21:20.
@@ -231,6 +232,14 @@ public class WorkDay extends SuperClass {
 	 */
 	public Long getDeltaTime() {
 		return Math.abs(getWorkingTime() - day.getType().getWorkTimeInMSecond());
+	}
+
+	public String getComingTimeValue() {
+		return !isNoWork() ? DateFormatService.toHHMM(comingTime.getTime()) : "__:__";
+	}
+
+	public String getOutTimeValue() {
+		return isWorked() ? DateFormatService.toHHMM(outTime.getTime()) : "__:__";
 	}
 
 	// *****************************************************************************************************************
