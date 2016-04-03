@@ -75,7 +75,7 @@
                         <p:column headerText="Можно не отрабатывать" style="width: 10%; text-align: center">
                             <p:cellEditor>
                                 <f:facet name="output">
-                                    <h:outputText value="#{dateFormat.mSecToHHMM(eventType.notWorkingTime)}"/>
+                                    <h:outputText value="#{dateFormat.secToHHMM(eventType.notWorkingTime)}"/>
                                 </f:facet>
                                 <f:facet name="input">
                                     <h:panelGrid columns="2" style="margin-bottom: 10px">

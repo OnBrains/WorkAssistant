@@ -13,8 +13,8 @@ import java.text.DecimalFormat;
  */
 public class StatisticValue {
 
-	private final static Long mSecInHour = 3600000L;
-	private final static Long mSecInMinutes = 60000L;
+	private final static Long secInHour = 3600L;
+	private final static Long secInMinutes = 60L;
 
 	private long count;
 	private String title;
@@ -66,11 +66,11 @@ public class StatisticValue {
 		if (count == 0) {
 			return "00:00";
 		}
-		Long mSecondsAbs = Math.abs(count);
+		Long secondsAbs = Math.abs(count);
 		String hour;
 		String minutes;
-		long hoursFromCount = mSecondsAbs / mSecInHour;
-		long minutesFromCount = (mSecondsAbs % mSecInHour) / mSecInMinutes;
+		long hoursFromCount = secondsAbs / secInHour;
+		long minutesFromCount = (secondsAbs % secInHour) / secInMinutes;
 		hour = hoursFromCount < 10 ? "0" + hoursFromCount : "" + hoursFromCount;
 		minutes = minutesFromCount < 10 ? "0" + minutesFromCount : "" + minutesFromCount;
 		return hour + ":" + minutes;

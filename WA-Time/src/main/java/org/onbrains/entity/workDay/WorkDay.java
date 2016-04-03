@@ -4,14 +4,15 @@ import static org.onbrains.entity.event.EventCategory.INFLUENCE_ON_WORKED_TIME;
 import static org.onbrains.entity.event.EventCategory.NOT_INFLUENCE_ON_WORKED_TIME;
 import static org.onbrains.entity.workDay.WorkDayState.WORKED;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -24,8 +25,6 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
 import org.onbrains.entity.SuperClass;
@@ -34,6 +33,7 @@ import org.onbrains.entity.event.Event;
 import org.onbrains.entity.event.EventCategory;
 import org.onbrains.entity.worker.Worker;
 import org.onbrains.utils.parsing.DateFormatService;
+import org.onbrains.utils.jpa.converter.LocalDateTimeAttributeConverter;
 
 /**
  * @author Naumov Oleg on 21.03.2015 21:20.
@@ -42,11 +42,11 @@ import org.onbrains.utils.parsing.DateFormatService;
 @Entity
 @Table(name = "WORK_DAY", uniqueConstraints = { @UniqueConstraint(columnNames = { "WORKER_ID", "DAY_ID" }) })
 @NamedQueries({
-		@NamedQuery(name = WorkDay.GET_WORK_DAYS_BY_MONTH, query =
-                "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day.day, 'yyyyMM') = to_char(:month, 'yyyyMM') order by wt.day"),
-		@NamedQuery(name = WorkDay.GET_WORK_DAY, query =
-                "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day.day, 'yyyyMMdd') = to_char(:day, 'yyyyMMdd')")})
+		@NamedQuery(name = WorkDay.GET_WORK_DAYS_BY_MONTH, query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day.day, 'yyyyMM') = :month) order by wt.day"),
+		@NamedQuery(name = WorkDay.GET_WORK_DAY, query = "select wt from WorkDay wt where wt.worker = :worker and wt.day = :day") })
 public class WorkDay extends SuperClass {
+
+    private static final long serialVersionUID = 1L;
 
 	public static final String GET_WORK_DAYS_BY_MONTH = "WorkTimeDAO.getWorkDaysByMonth";
 	public static final String GET_WORK_DAY = "WorkTimeDAO.getWorkDay";
@@ -60,12 +60,14 @@ public class WorkDay extends SuperClass {
 	private Day day;
 
 	@Column(name = "COMING_TIME")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Calendar comingTime;
+//	@Temporal(TemporalType.TIMESTAMP)
+    @Convert(converter = LocalDateTimeAttributeConverter.class)
+	private LocalDateTime comingTime;
 
 	@Column(name = "OUT_TIME")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Calendar outTime;
+//	@Temporal(TemporalType.TIMESTAMP)
+    @Convert(converter = LocalDateTimeAttributeConverter.class)
+	private LocalDateTime outTime;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "STATE", length = 16, nullable = false)
@@ -179,7 +181,7 @@ public class WorkDay extends SuperClass {
 	 *            время окончания.
 	 * @return <strong>true</strong> - если данная граница допустима.
 	 */
-	public boolean isPossibleTimeBoundaryForEvent(Calendar startTime, Calendar endTime) {
+	public boolean isPossibleTimeBoundaryForEvent(LocalDateTime startTime, LocalDateTime endTime) {
 		if (!events.isEmpty())
 			for (Event event : events) {
 				if (!event.getType().getCategory().equals(EventCategory.NOT_INFLUENCE_ON_WORKED_TIME)) {
@@ -202,28 +204,28 @@ public class WorkDay extends SuperClass {
 		return calculateWorkedTime();
 	}
 
-    public Long getWorkedTime() {
-        return state.equals(WORKED) ? calculateWorkedTime() : 0;
-    }
+	public Long getWorkedTime() {
+		return state.equals(WORKED) ? calculateWorkedTime() : 0;
+	}
 
-    public Long getIdealWorkedTime() {
-        return getDay().getType().getWorkTimeInMSecond();
-    }
+	public Long getIdealWorkedTime() {
+		return getDay().getType().getWorkTimeInSecond();
+	}
 
 	/**
 	 * Определяет отработано ли все положенное время, за текущий рабочий день. Для каждого типа рабочего дня может быть
-	 * своя {@linkplain org.onbrains.entity.workDay.DayType#getWorkTimeInMSecond() номра времени}, которое положено
+	 * своя {@linkplain org.onbrains.entity.workDay.DayType#getWorkTimeInSecond() номра времени}, которое положено
 	 * отработать.
 	 *
 	 * @return <strong>true</strong> если отработанно все положенное время.
 	 */
 	public boolean isWorkedFullDay() {
-		return getWorkedTime() > day.getType().getWorkTimeInMSecond();
+		return getWorkedTime() > day.getType().getWorkTimeInSecond();
 	}
 
-    public boolean isWorkingRequiredTime() {
-        return getWorkingTime() > day.getType().getWorkTimeInMSecond();
-    }
+	public boolean isWorkingRequiredTime() {
+		return getWorkingTime() > day.getType().getWorkTimeInSecond();
+	}
 
 	/**
 	 * Вычисляет переработанное или недоработанное время.
@@ -231,7 +233,7 @@ public class WorkDay extends SuperClass {
 	 * @return Переработанное/недоработанное время в миллисекундах, если день не закончен вернет 0.
 	 */
 	public Long getDeltaTime() {
-		return Math.abs(getWorkingTime() - day.getType().getWorkTimeInMSecond());
+		return Math.abs(getWorkingTime() - day.getType().getWorkTimeInSecond());
 	}
 
 	public String getComingTimeValue() {
@@ -253,8 +255,8 @@ public class WorkDay extends SuperClass {
 	 *            время, для которого выполняется проверка.
 	 * @return <strong>true</strong> - если надо изменить.
 	 */
-	private boolean needChangeComingTimeTo(Calendar time) {
-		return comingTime != null && time.getTimeInMillis() < comingTime.getTimeInMillis();
+	private boolean needChangeComingTimeTo(LocalDateTime time) {
+		return comingTime != null && time.isBefore(comingTime);
 	}
 
 	/**
@@ -264,8 +266,8 @@ public class WorkDay extends SuperClass {
 	 *            время, для которого выполняется проверка.
 	 * @return <strong>true</strong> - если надо изменить.
 	 */
-	private boolean needChangeOutTimeTo(Calendar time) {
-		return outTime != null && time.getTimeInMillis() > outTime.getTimeInMillis();
+	private boolean needChangeOutTimeTo(LocalDateTime time) {
+		return outTime != null && time.isAfter(outTime);
 	}
 
 	/**
@@ -279,9 +281,10 @@ public class WorkDay extends SuperClass {
 	 *            время окончания.
 	 * @return <strong>true</strong> - если время находится внутри интервала.
 	 */
-	private boolean intervalInsideEvent(Event event, Calendar startTime, Calendar endTime) {
-		boolean startTimeInsideInterval = event.getStartTime().before(startTime) && event.getEndTime().after(startTime);
-		boolean endTimeInsideInterval = event.getStartTime().before(endTime) && event.getEndTime().after(endTime);
+	private boolean intervalInsideEvent(Event event, LocalDateTime startTime, LocalDateTime endTime) {
+		boolean startTimeInsideInterval = event.getStartTime().isBefore(startTime)
+				&& event.getEndTime().isAfter(startTime);
+		boolean endTimeInsideInterval = event.getStartTime().isBefore(endTime) && event.getEndTime().isAfter(endTime);
 		return startTimeInsideInterval || endTimeInsideInterval;
 	}
 
@@ -296,22 +299,23 @@ public class WorkDay extends SuperClass {
 	 *            время окончания.
 	 * @return <strong>true</strong> - если интервал события назодится в границах времени.
 	 */
-	private boolean eventInsideInterval(Event event, Calendar startTime, Calendar endTime) {
-		boolean startEventTimeInsideInterval = startTime.before(event.getStartTime())
-				&& endTime.after(event.getStartTime());
-		boolean endEventTimeInsideInterval = startTime.before(event.getEndTime()) && endTime.after(event.getEndTime());
+	private boolean eventInsideInterval(Event event, LocalDateTime startTime, LocalDateTime endTime) {
+		boolean startEventTimeInsideInterval = startTime.isBefore(event.getStartTime())
+				&& endTime.isAfter(event.getStartTime());
+		boolean endEventTimeInsideInterval = startTime.isBefore(event.getEndTime())
+				&& endTime.isAfter(event.getEndTime());
 		return startEventTimeInsideInterval || endEventTimeInsideInterval;
 	}
 
-    private Long calculateWorkedTime() {
-        Long summaryWorkedTime = 0L;
-        if (!events.isEmpty()) {
-            for (Event event : events) {
-                summaryWorkedTime = summaryWorkedTime + event.getWorkedTime();
-            }
-        }
-        return summaryWorkedTime;
-    }
+	private Long calculateWorkedTime() {
+		Long summaryWorkedTime = 0L;
+		if (!events.isEmpty()) {
+			for (Event event : events) {
+				summaryWorkedTime = summaryWorkedTime + event.getWorkedTime();
+			}
+		}
+		return summaryWorkedTime;
+	}
 
 	// *****************************************************************************************************************
 	// Simple getters and setters
@@ -345,11 +349,11 @@ public class WorkDay extends SuperClass {
 	 *
 	 * @return Время начала рабочего дня.
 	 */
-	public Calendar getComingTime() {
+	public LocalDateTime getComingTime() {
 		return comingTime;
 	}
 
-	public void setComingTime(Calendar comingTime) {
+	public void setComingTime(LocalDateTime comingTime) {
 		this.comingTime = comingTime;
 	}
 
@@ -359,11 +363,11 @@ public class WorkDay extends SuperClass {
 	 *
 	 * @return Время окончания рабочего дня.
 	 */
-	public Calendar getOutTime() {
+	public LocalDateTime getOutTime() {
 		return outTime;
 	}
 
-	public void setOutTime(Calendar outTime) {
+	public void setOutTime(LocalDateTime outTime) {
 		this.outTime = outTime;
 	}
 

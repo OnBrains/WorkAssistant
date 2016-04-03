@@ -1,8 +1,12 @@
 package org.onbrains.entity.day;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import javax.persistence.Column;
+//import javax.persistence.Convert;
+//import javax.persistence.Converter;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -16,6 +20,7 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.BatchSize;
 import org.onbrains.entity.SuperClass;
 import org.onbrains.entity.workDay.DayType;
+import org.onbrains.utils.jpa.converter.LocalDateAttributeConverter;
 
 /**
  * @author Naumov Oleg on 27.07.2015 20:15. <br/>
@@ -28,24 +33,27 @@ import org.onbrains.entity.workDay.DayType;
 @BatchSize(size = 31)
 public class Day extends SuperClass {
 
+    private static final long serialVersionUID = 1L;
+
 	public static final String GET_DAYS_BY_MONTH = "getDaysByMonth";
 
-	@Temporal(TemporalType.DATE)
 	@Column(name = "DAY", nullable = false)
-	private Date day;
+    @Convert(converter = LocalDateAttributeConverter.class)
+//    @Temporal(TemporalType.DATE)
+	private LocalDate day;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false, length = 16)
+	@Column(name = "TYPE", nullable = false, length = 16)
 	private DayType type;
 
 	public Day() {
 	}
 
-	public Date getDay() {
+	public LocalDate getDay() {
 		return day;
 	}
 
-	public void setDay(Date day) {
+	public void setDay(LocalDate day) {
 		this.day = day;
 	}
 

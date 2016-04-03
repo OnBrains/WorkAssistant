@@ -50,14 +50,33 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
-            <version>3.6.9.Final</version>
+            <version>5.0.7.Final</version>
         </dependency>
 
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>3.6.9.Final</version>
-            <scope>provided</scope>
+            <version>5.0.7.Final</version>
+
+            <exclusions>
+                <exclusion>
+                    <groupId>antlr</groupId>
+                    <artifactId>antlr</artifactId>
+                </exclusion>
+            </exclusions>
+            <!--<scope>provided</scope>-->
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>5.2.3.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-java8</artifactId>
+            <version>5.0.7.Final</version>
         </dependency>
 
         <dependency>

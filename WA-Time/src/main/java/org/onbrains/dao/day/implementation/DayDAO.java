@@ -7,7 +7,8 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.Serializable;
-import java.util.Date;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -22,7 +23,7 @@ public class DayDAO implements DayDAOInterface, Serializable {
 	private EntityManager em;
 
 	@Override
-	public List<Day> getDaysByMonth(Date month) {
-		return em.createNamedQuery(Day.GET_DAYS_BY_MONTH, Day.class).setParameter("month", month).getResultList();
+	public List<Day> getDaysByMonth(LocalDate month) {
+		return em.createNamedQuery(Day.GET_DAYS_BY_MONTH, Day.class).setParameter("month", Date.valueOf(month)).getResultList();
 	}
 }

@@ -1,5 +1,6 @@
 package org.onbrains.viewModel.workDay.monthStatistic;
 
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -21,11 +22,10 @@ public class CurrentMonthStatisticService extends MonthStatisticService {
 
 	@Override
 	protected void initRawData() {
-		Calendar currentDay = Calendar.getInstance();
-        currentDay.add(Calendar.DATE, -1);
+		LocalDate currentDay = LocalDate.now().minusDays(1);
 		for (WorkDay workDay : workDays) {
 			idealWorkedTimeForMonth = idealWorkedTimeForMonth + workDay.getIdealWorkedTime();
-			if (workDay.getDay().getDay().before(currentDay.getTime())) {
+			if (workDay.getDay().getDay().isBefore(currentDay)) {
 				realWorkedTime = realWorkedTime + workDay.getWorkedTime();
 				idealWorkedTimeUpToCurrentDay = idealWorkedTimeUpToCurrentDay + workDay.getIdealWorkedTime();
 			}

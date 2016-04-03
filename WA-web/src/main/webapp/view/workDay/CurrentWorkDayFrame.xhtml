@@ -59,31 +59,35 @@
                     <p:commandButton icon="ui-icon-trash" action="#{currentDayFrameModel.removeEvent(dayEvent)}"
                                      update="current_day_form, :month_info_form"/>
                 </p:column>
+
                 <p:column headerText="Начало" style="text-align: center; width: 20%;">
                     <p:cellEditor>
                         <f:facet name="output">
-                            <h:outputText value="#{dateFormat.toHHMM(dayEvent.startTime.time)}"/>
+                            <h:outputText value="#{dateFormat.toHHMM(dayEvent.startTime)}"/>
                         </f:facet>
                         <f:facet name="input">
-                            <pe:timePicker value="#{dayEvent.startTime.time}" mode="popup"/>
+                            <pe:timePicker value="#{dayEvent.startTimeValue}"/>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
+
                 <p:column headerText="Окончание" style="text-align: center; width: 20%;">
                     <p:cellEditor>
                         <f:facet name="output">
-                            <h:outputText value="#{dayEvent.state == 'END' ? dateFormat.toHHMM(dayEvent.endTime.time) : null}"/>
+                            <h:outputText value="#{dayEvent.state == 'END' ? dateFormat.toHHMM(dayEvent.endTime) : null}"/>
                         </f:facet>
                         <f:facet name="input">
-                            <pe:timePicker value="#{dayEvent.endTime.time}"
-                                           mode="popup" minHour="#{currentDayFrameModel.getMinHourForEndEvent(dayEvent)}"/>
+                            <pe:timePicker value="#{dayEvent.endTimeValue}" minHour="#{currentDayFrameModel.getMinHourForEndEvent(dayEvent)}"/>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
+
                 <p:column style="text-align: center; width: 12%;">
                     <p:rowEditor/>
                 </p:column>
+
             </p:dataTable>
+
         </p:fieldset>
     </h:form>
 

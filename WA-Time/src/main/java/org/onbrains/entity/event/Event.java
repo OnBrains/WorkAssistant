@@ -2,12 +2,26 @@ package org.onbrains.entity.event;
 
 import static org.onbrains.entity.event.EventState.END;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 import org.onbrains.entity.SuperClass;
+import org.onbrains.utils.jpa.converter.LocalDateAttributeConverter;
+import org.onbrains.utils.jpa.converter.LocalDateTimeAttributeConverter;
 
 /**
  * События которые могут происходить в течении рабочего дня. Описание {@linkplain EventType типов событий}. Одно событие
@@ -24,9 +38,9 @@ import org.onbrains.entity.SuperClass;
 @Table(name = "EVENT")
 public class Event extends SuperClass {
 
-	@Temporal(TemporalType.DATE)
 	@Column(name = "DAY", nullable = false)
-	private Date day;
+	@Convert(converter = LocalDateAttributeConverter.class)
+	private LocalDate day;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "TYPE_ID", nullable = false)
@@ -39,12 +53,12 @@ public class Event extends SuperClass {
 	private String description;
 
 	@Column(name = "START_TIME", nullable = false)
-	@Temporal(TemporalType.TIMESTAMP)
-	private Calendar startTime;
+	@Convert(converter = LocalDateTimeAttributeConverter.class)
+	private LocalDateTime startTime;
 
 	@Column(name = "END_TIME", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
-	private Calendar endTime;
+	@Convert(converter = LocalDateTimeAttributeConverter.class)
+	private LocalDateTime endTime;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "STATE", nullable = false, length = 16)
@@ -53,7 +67,7 @@ public class Event extends SuperClass {
 	protected Event() {
 	}
 
-	public Event(Date day, EventType type, String title, Calendar startTime) {
+	public Event(LocalDate day, EventType type, String title, LocalDateTime startTime) {
 		this.day = day;
 		this.type = type;
 		this.title = title;
@@ -67,10 +81,25 @@ public class Event extends SuperClass {
 	// *****************************************************************************************************************
 
 	public Long getWorkedTime() {
-//		if (getState().equals(EventState.END)) {
-			return calculationWorkedTime();
-//		}
-//		return 0L;
+		return calculationWorkedTime();
+	}
+
+	// FIXME WA-10
+	public Date getStartTimeValue() {
+		return Date.from(startTime.atZone(ZoneId.systemDefault()).toInstant());
+	}
+
+	public void setStartTimeValue(Date startTimeValue) {
+		setStartTime(LocalDateTime.ofInstant(startTimeValue.toInstant(), ZoneId.systemDefault()));
+	}
+
+	// FIXME WA-10
+	public Date getEndTimeValue() {
+		return Date.from(endTime.atZone(ZoneId.systemDefault()).toInstant());
+	}
+
+	public void setEndTimeValue(Date endTimeValue) {
+		setEndTime(LocalDateTime.ofInstant(endTimeValue.toInstant(), ZoneId.systemDefault()));
 	}
 
 	// *****************************************************************************************************************
@@ -88,10 +117,9 @@ public class Event extends SuperClass {
 		switch (type.getCategory()) {
 		case INFLUENCE_ON_WORKED_TIME:
 			if (state.equals(END)) {
-				return endTime.getTimeInMillis() - startTime.getTimeInMillis();
+				return Duration.between(startTime, endTime).getSeconds();
 			} else {
-				long currentTimeInMillis = Calendar.getInstance().getTimeInMillis();
-				return currentTimeInMillis - startTime.getTimeInMillis();
+				return Duration.between(startTime, LocalDateTime.now()).getSeconds();
 			}
 		case WITH_FIXED_WORKED_TIME:
 			return state.equals(END) ? type.getNotWorkingTime() : 0L;
@@ -107,11 +135,11 @@ public class Event extends SuperClass {
 	/**
 	 * @return День, в который происходит событие.
 	 */
-	public Date getDay() {
+	public LocalDate getDay() {
 		return day;
 	}
 
-	public void setDay(Date day) {
+	public void setDay(LocalDate day) {
 		this.day = day;
 	}
 
@@ -151,22 +179,22 @@ public class Event extends SuperClass {
 	/**
 	 * @return Время начала события.
 	 */
-	public Calendar getStartTime() {
+	public LocalDateTime getStartTime() {
 		return startTime;
 	}
 
-	public void setStartTime(Calendar startTime) {
+	public void setStartTime(LocalDateTime startTime) {
 		this.startTime = startTime;
 	}
 
 	/**
 	 * @return Время окончания события.
 	 */
-	public Calendar getEndTime() {
+	public LocalDateTime getEndTime() {
 		return endTime;
 	}
 
-	public void setEndTime(Calendar endTime) {
+	public void setEndTime(LocalDateTime endTime) {
 		this.endTime = endTime;
 	}
 

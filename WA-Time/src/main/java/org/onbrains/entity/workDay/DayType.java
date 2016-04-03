@@ -9,21 +9,24 @@ package org.onbrains.entity.workDay;
  *         <li>Выходной</li>
  *         <li>Сокращенный день</li>
  *         </ul>
- *         Для типа дня можно задать {@linkplain #getWorkTimeInMSecond() время}, которое необходимо отработать и
+ *         Для типа дня можно задать {@linkplain #getWorkTimeInSecond() время}, которое необходимо отработать и
  *         {@linkplain #getPathToIcon() иконку}
  */
 public enum DayType {
 
-	WORK_DAY("Рабочий день", 30600000L, ""), HOLIDAY("Выходной", 0L, ""), SHORT_WORK_DAY("Сокращенный день", 27000000L,
-			"img/dayType/short_work_day.png");
+	//@formatter:off
+	WORK_DAY        ("Рабочий день", 30600L, ""),
+    HOLIDAY         ("Выходной", 0L, ""),
+    SHORT_WORK_DAY  ("Сокращенный день", 28800L, "img/dayType/short_work_day.png");
+    // @formatter:on
 
 	private String desc;
-	private Long workTimeInMSecond;
+	private Long workTimeInSecond;
 	private String pathToIcon;
 
-	private DayType(String desc, Long workTimeInMSecond, String pathToIcon) {
+	private DayType(String desc, Long workTimeInSecond, String pathToIcon) {
 		this.desc = desc;
-		this.workTimeInMSecond = workTimeInMSecond;
+		this.workTimeInSecond = workTimeInSecond;
 		this.pathToIcon = pathToIcon;
 	}
 
@@ -39,8 +42,8 @@ public enum DayType {
 	/**
 	 * @return Время, которое необходимо отработать в рабочий день данного типа.
 	 */
-	public Long getWorkTimeInMSecond() {
-		return workTimeInMSecond;
+	public Long getWorkTimeInSecond() {
+		return workTimeInSecond;
 	}
 
 	/**

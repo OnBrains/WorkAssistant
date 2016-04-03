@@ -37,7 +37,7 @@
                             <p:commandButton id="previous_month" value="#{timeJournalViewModel.nameForPreviousMonth}"
                                              action="#{timeJournalViewModel.previousMonth}" styleClass="float-left margin-5-px"
                                              update=":month_info_form, :month_statistic, :month_action"/>
-                            <h:outputText value="#{dateFormat.toMMMMMYYYY(timeJournalViewModel.selectedMonth.time)}"
+                            <h:outputText value="#{dateFormat.toMMMMMYYYY(timeJournalViewModel.selectedMonth)}"
                                           styleClass="vertical-align-sub"/>
                             <p:commandButton id="next_month" value="#{timeJournalViewModel.nameForNextMonth}"
                                              action="#{timeJournalViewModel.nextMonth}" styleClass="float-right margin-5-px"
@@ -58,28 +58,28 @@
                             <f:facet name="header">
                                 <h:graphicImage name="img/clock/clock_play.png" title="Начало рабочего дня"/>
                             </f:facet>
-                            <h:outputText value="#{dateFormat.toHHMM(workDay.comingTime.time)}"/>
+                            <!--<h:outputText value="#{dateFormat.toHHMM(workDay.comingTime)}"/>-->
                         </p:column>
 
                         <p:column id="end_work_day_id" styleClass="align-center width-10">
                             <f:facet name="header">
                                 <h:graphicImage name="img/clock/clock_stop.png" title="Окончание рабочего дня"/>
                             </f:facet>
-                            <h:outputText value="#{dateFormat.toHHMM(workDay.outTime.time)}" rendered="#{workDay.worked}"/>
+                            <!--<h:outputText value="#{dateFormat.toHHMM(workDay.outTime)}" rendered="#{workDay.worked}"/>-->
                         </p:column>
 
                         <p:column id="summary_work_day_id" styleClass="align-center width-10">
                             <f:facet name="header">
                                 <h:graphicImage name="img/clock/clock_link.png" title="Отработанное время"/>
                             </f:facet>
-                            <h:outputText value="#{dateFormat.mSecToHHMM(workDay.workedTime)}" rendered="#{workDay.worked}"/>
+                            <!--<h:outputText value="#{dateFormat.secToHHMM(workDay.workedTime)}" rendered="#{workDay.worked}"/>-->
                         </p:column>
 
                         <p:column id="delta_work_day_id" styleClass="align-center width-10">
                             <f:facet name="header">
                                 <h:graphicImage name="img/clock/clock_add.png" title="Переработано/Недоработано"/>
                             </f:facet>
-                            <h:outputText value="#{dateFormat.mSecToHHMM(workDay.getDeltaTime())}" rendered="#{workDay.worked}"
+                            <h:outputText value="#{dateFormat.secToHHMM(workDay.getDeltaTime())}" rendered="#{workDay.worked}"
                                           style="#{timeJournalViewModel.getDeltaTimeStyle(workDay)}"/>
                         </p:column>
 

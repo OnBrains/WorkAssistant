@@ -1,5 +1,6 @@
 package org.onbrains.dao.workDay;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -12,8 +13,8 @@ import org.onbrains.entity.worker.Worker;
 
 public interface WorkDayDAOInterface {
 
-	public WorkDay getWorkDay(Date day, Worker currentWorker);
+	public WorkDay getWorkDay(LocalDate day, Worker currentWorker);
 
-	public List<WorkDay> getWorkDaysByMonth(Date month, Worker currentWorker);
+	public List<WorkDay> getWorkDaysByMonth(LocalDate month, Worker currentWorker);
 
 }

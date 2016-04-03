@@ -1,8 +1,9 @@
 package org.onbrains.entity.worker;
 
 import org.onbrains.entity.SuperClass;
+import org.onbrains.utils.jpa.converter.LocalDateAttributeConverter;
 
-import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Date;
 
 import javax.persistence.*;
@@ -28,15 +29,16 @@ public class Worker extends SuperClass {
     private String surname;
 
     @Column(name = "BIRTHDAY", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date birthday;
+//    @Temporal(TemporalType.DATE)
+    @Convert(converter = LocalDateAttributeConverter.class)
+    private LocalDate birthday;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "SEX", nullable = false, length = 16)
     private WorkerSex sex;
 
     @Column(name = "MOBILE_PHONE", nullable = true, length = 32)
-    private String modilePhone;
+    private String mobilePhone;
 
     @Column(name = "EMAIL", nullable = false, length = 64)
     private String email;
@@ -44,7 +46,7 @@ public class Worker extends SuperClass {
     public Worker() {
     }
 
-    public Worker(String family, String firstName, String surname, Date birthday, WorkerSex sex, String email) {
+    public Worker(String family, String firstName, String surname, LocalDate birthday, WorkerSex sex, String email) {
         this.family = family;
         this.firstName = firstName;
         this.surname = surname;
@@ -77,11 +79,11 @@ public class Worker extends SuperClass {
         this.surname = surname;
     }
 
-    public Date getBirthday() {
+    public LocalDate getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(Date birthday) {
+    public void setBirthday(LocalDate birthday) {
         this.birthday = birthday;
     }
 
@@ -93,12 +95,12 @@ public class Worker extends SuperClass {
         this.sex = sex;
     }
 
-    public String getModilePhone() {
-        return modilePhone;
+    public String getMobilePhone() {
+        return mobilePhone;
     }
 
-    public void setModilePhone(String modilePhone) {
-        this.modilePhone = modilePhone;
+    public void setMobilePhone(String mobilePhone) {
+        this.mobilePhone = mobilePhone;
     }
 
     public String getEmail() {

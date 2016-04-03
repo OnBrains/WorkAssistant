@@ -2,6 +2,7 @@ package org.onbrains.dao.day;
 
 import org.onbrains.entity.day.Day;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -10,5 +11,5 @@ import java.util.List;
  */
 public interface DayDAOInterface {
 
-	public List<Day> getDaysByMonth(Date month);
+	public List<Day> getDaysByMonth(LocalDate month);
 }

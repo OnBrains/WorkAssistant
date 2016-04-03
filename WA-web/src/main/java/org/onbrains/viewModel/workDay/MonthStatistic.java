@@ -36,14 +36,14 @@ public class MonthStatistic implements Serializable {
 			for (WorkDay wd : workDaysByMonthType) {
 				realWorkedTime = realWorkedTime + wd.getWorkingTime();
 				idealWorkedTimeByCurrentDay = idealWorkedTimeByCurrentDay
-						+ wd.getDay().getType().getWorkTimeInMSecond();
+						+ wd.getDay().getType().getWorkTimeInSecond();
 			}
 			if (workDaysByMonthType.equals(workDays)) {
 				idealWorkedTimeByAllMonth = idealWorkedTimeByCurrentDay;
 			} else {
 				for (WorkDay wd : workDays) {
 					idealWorkedTimeByAllMonth = idealWorkedTimeByAllMonth
-							+ wd.getDay().getType().getWorkTimeInMSecond();
+							+ wd.getDay().getType().getWorkTimeInSecond();
 				}
 			}
 		}

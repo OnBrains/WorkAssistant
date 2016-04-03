@@ -1,8 +1,10 @@
 package org.onbrains.viewModel.workDay;
 
+import static org.onbrains.utils.parsing.DateFormatService.toMMMMMYYYY;
+
 import java.io.Serializable;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.temporal.ChronoField;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,7 +21,6 @@ import org.onbrains.entity.day.Day;
 import org.onbrains.entity.workDay.DayType;
 import org.onbrains.entity.workDay.WorkDay;
 import org.onbrains.service.SessionUtil;
-import org.onbrains.utils.parsing.DateFormatService;
 import org.onbrains.viewModel.workDay.monthStatistic.CurrentMonthStatisticService;
 import org.onbrains.viewModel.workDay.monthStatistic.MonthStatisticService;
 
@@ -42,7 +43,7 @@ public class TimeJournalViewModel implements Serializable {
 
 	private MonthStatisticService statisticService;
 
-	private Calendar selectedMonth = Calendar.getInstance();
+	private LocalDate selectedMonth = LocalDate.now();
 	private List<WorkDay> worDays;
 	private WorkDay currentWorkDay;
 
@@ -56,7 +57,7 @@ public class TimeJournalViewModel implements Serializable {
 	 * Увеличивает значение выбранного месяца на один месяц.
 	 */
 	public void nextMonth() {
-		selectedMonth.add(Calendar.MONTH, 1);
+		selectedMonth.plusMonths(1);
 		initWorkDays();
 		initStatisticService();
 	}
@@ -67,17 +68,15 @@ public class TimeJournalViewModel implements Serializable {
 	 * @return Название следующего месяца.
 	 */
 	public String getNameForNextMonth() {
-		Calendar nextMonth = Calendar.getInstance();
-		nextMonth.setTime(getSelectedMonth().getTime());
-		nextMonth.add(Calendar.MONTH, 1);
-		return DateFormatService.toMMMMMYYYY(nextMonth.getTime());
+		LocalDate nextMonth = getSelectedMonth().plusMonths(1);
+		return toMMMMMYYYY(nextMonth);
 	}
 
 	/**
 	 * Уменьшает значение выбранного месяца на один месяц.
 	 */
 	public void previousMonth() {
-		selectedMonth.add(Calendar.MONTH, -1);
+		selectedMonth.minusMonths(1);
 		initWorkDays();
 		initStatisticService();
 	}
@@ -88,10 +87,8 @@ public class TimeJournalViewModel implements Serializable {
 	 * @return Название предыдущего месяце.
 	 */
 	public String getNameForPreviousMonth() {
-		Calendar previousMonth = Calendar.getInstance();
-		previousMonth.setTime(getSelectedMonth().getTime());
-		previousMonth.add(Calendar.MONTH, -1);
-		return DateFormatService.toMMMMMYYYY(previousMonth.getTime());
+		LocalDate previousMonth = getSelectedMonth().minusMonths(1);
+		return toMMMMMYYYY(previousMonth);
 	}
 
 	/**
@@ -100,7 +97,7 @@ public class TimeJournalViewModel implements Serializable {
 	 * заведена только часть рабочих дней.
 	 */
 	public void createWorkDays() {
-		List<Day> daysBySelectedMonth = dDAO.getDaysByMonth(getSelectedMonth().getTime());
+		List<Day> daysBySelectedMonth = dDAO.getDaysByMonth(getSelectedMonth());
 		for (Day day : daysBySelectedMonth) {
 			em.persist(new WorkDay(SessionUtil.getWorker(), day));
 		}
@@ -143,9 +140,9 @@ public class TimeJournalViewModel implements Serializable {
 		return "";
 	}
 
-    public String getDeltaTimeStyle(WorkDay workDay) {
-        return workDay.isWorkedFullDay() ? "color: green;" : "color: red;";
-    }
+	public String getDeltaTimeStyle(WorkDay workDay) {
+		return workDay.isWorkedFullDay() ? "color: green;" : "color: red;";
+	}
 
 	// *****************************************************************************************************************
 	// Private methods
@@ -153,7 +150,7 @@ public class TimeJournalViewModel implements Serializable {
 
 	private WorkDay getCurrentDay() {
 		if (currentWorkDay == null) {
-			currentWorkDay = wdDAO.getWorkDay(new Date(), SessionUtil.getWorker());
+			currentWorkDay = wdDAO.getWorkDay(LocalDate.now(), SessionUtil.getWorker());
 		}
 		return currentWorkDay;
 	}
@@ -164,9 +161,9 @@ public class TimeJournalViewModel implements Serializable {
 	 */
 	private void initWorkDays() {
 		if (selectedMonth == null) {
-			selectedMonth = Calendar.getInstance();
+			selectedMonth = LocalDate.now();
 		}
-		worDays = wdDAO.getWorkDaysByMonth(getSelectedMonth().getTime(), SessionUtil.getWorker());
+		worDays = wdDAO.getWorkDaysByMonth(getSelectedMonth(), SessionUtil.getWorker());
 	}
 
 	private void initStatisticService() {
@@ -177,9 +174,10 @@ public class TimeJournalViewModel implements Serializable {
 	}
 
 	private boolean isCurrentMonth() {
-		Calendar currentMonth = Calendar.getInstance();
-		return currentMonth.get(Calendar.YEAR) == selectedMonth.get(Calendar.YEAR)
-				&& currentMonth.get(Calendar.MONTH) == selectedMonth.get(Calendar.MONTH);
+		// Calendar currentMonth = Calendar.getInstance();
+		LocalDate currentMonth = LocalDate.now();
+		return currentMonth.get(ChronoField.YEAR) == selectedMonth.get(ChronoField.YEAR)
+				&& currentMonth.get(ChronoField.MONTH_OF_YEAR) == selectedMonth.get(ChronoField.MONTH_OF_YEAR);
 	}
 
 	// *****************************************************************************************************************
@@ -191,11 +189,11 @@ public class TimeJournalViewModel implements Serializable {
 	 *
 	 * @return Значение текущего месяца в формате Calendar.
 	 */
-	public Calendar getSelectedMonth() {
+	public LocalDate getSelectedMonth() {
 		return selectedMonth;
 	}
 
-	public void setSelectedMonth(Calendar selectedMonth) {
+	public void setSelectedMonth(LocalDate selectedMonth) {
 		this.selectedMonth = selectedMonth;
 	}
 

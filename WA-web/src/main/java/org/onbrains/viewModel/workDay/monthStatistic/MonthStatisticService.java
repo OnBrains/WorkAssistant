@@ -1,6 +1,7 @@
 package org.onbrains.viewModel.workDay.monthStatistic;
 
-import java.util.Calendar;
+import java.time.LocalDate;
+import java.time.temporal.ChronoField;
 import java.util.List;
 
 import org.onbrains.entity.workDay.WorkDay;
@@ -37,7 +38,7 @@ public class MonthStatisticService {
 
 	protected void initRawData() {
 		for (WorkDay workDay : workDays) {
-			idealWorkedTimeForMonth = idealWorkedTimeForMonth + workDay.getDay().getType().getWorkTimeInMSecond();
+			idealWorkedTimeForMonth = idealWorkedTimeForMonth + workDay.getDay().getType().getWorkTimeInSecond();
 			if (workDay.isWorked()) {
 				realWorkedTime = realWorkedTime + workDay.getWorkedTime();
 			}
@@ -65,12 +66,11 @@ public class MonthStatisticService {
 	}
 
 	private boolean isFutureMonth() {
-		Calendar currentDate = Calendar.getInstance();
-		Calendar selectedMonth = Calendar.getInstance();
-		selectedMonth.setTime(workDays.get(0).getDay().getDay());
-		return currentDate.get(Calendar.YEAR) < selectedMonth.get(Calendar.YEAR)
-				|| (currentDate.get(Calendar.YEAR) == selectedMonth.get(Calendar.YEAR)
-						&& currentDate.get(Calendar.MONTH) < selectedMonth.get(Calendar.MONTH));
+		LocalDate currentDate = LocalDate.now();
+		LocalDate selectedMonth = workDays.get(0).getDay().getDay();
+		return currentDate.get(ChronoField.YEAR) < selectedMonth.get(ChronoField.YEAR)
+				|| (currentDate.get(ChronoField.YEAR) == selectedMonth.get(ChronoField.YEAR)
+						&& currentDate.get(ChronoField.MONTH_OF_YEAR) < selectedMonth.get(ChronoField.MONTH_OF_YEAR));
 	}
 
 	public long getWorkedTime() {

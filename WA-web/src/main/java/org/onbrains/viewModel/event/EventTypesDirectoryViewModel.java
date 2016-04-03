@@ -12,14 +12,10 @@ import org.primefaces.model.DefaultTreeNode;
 import org.primefaces.model.TreeNode;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.SessionScoped;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
-import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +28,8 @@ import java.util.List;
 @ViewScoped
 public class EventTypesDirectoryViewModel implements Serializable {
 
-	private static final long MILLIS_IN_MINUTE = 60000;
-	private static final long MILLIS_IN_HOUR = 3600000;
+	private static final long SEC_IN_MINUTE = 60;
+	private static final long SEC_IN_HOUR = 3600;
 
 	@Inject
 	private EntityManagerUtils em;
@@ -108,15 +104,15 @@ public class EventTypesDirectoryViewModel implements Serializable {
 	// *****************************************************************************************************************
 
 	private Long calculationNoWorkingTime() {
-		return convertToMillisFromSelectedHour() + convertToMillisFromSelectedMinute();
+		return convertToSecondFromSelectedHour() + convertToSecondFromSelectedMinute();
 	}
 
-	private Long convertToMillisFromSelectedHour() {
-		return selectedNoWorkHour * MILLIS_IN_HOUR;
+	private Long convertToSecondFromSelectedHour() {
+		return selectedNoWorkHour * SEC_IN_HOUR;
 	}
 
-	private Long convertToMillisFromSelectedMinute() {
-		return selectedNoWorkMinute * MILLIS_IN_MINUTE;
+	private Long convertToSecondFromSelectedMinute() {
+		return selectedNoWorkMinute * SEC_IN_MINUTE;
 	}
 
 	private void initializationCategoryNode() {
