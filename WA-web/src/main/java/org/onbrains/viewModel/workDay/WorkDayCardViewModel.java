@@ -16,6 +16,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoField;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
@@ -50,7 +53,7 @@ public class WorkDayCardViewModel implements Serializable {
         if (selectedWorkDay != null) {
             if (!selectedWorkDay.isNoWork()) {
                 long workedTime = selectedWorkDay.isWorkingRequiredTime()
-                        ? selectedWorkDay.getDay().getType().getWorkTimeInMSecond() : selectedWorkDay.getWorkingTime();
+                        ? selectedWorkDay.getDay().getType().getWorkTimeInSecond() : selectedWorkDay.getWorkingTime();
                 workDayStatistic.add(new StatisticValue(workedTime, "Отработано", "#4da9f1"));
             }
             workDayStatistic.add(selectedWorkDay.isWorkingRequiredTime()
@@ -62,14 +65,14 @@ public class WorkDayCardViewModel implements Serializable {
 
     public void onRowEdit(RowEditEvent event) {
         Event editionEvent = (Event) event.getObject();
-        Calendar startTime = formationCorrectTime(editionEvent.getStartTime(), editionEvent.getDay());
-        Calendar endTime = formationCorrectTime(editionEvent.getEndTime(), editionEvent.getDay());
+        LocalDateTime startTime = formationCorrectTime(editionEvent.getStartTime(), editionEvent.getDay());
+        LocalDateTime endTime = formationCorrectTime(editionEvent.getEndTime(), editionEvent.getDay());
         if (selectedWorkDay.isPossibleTimeBoundaryForEvent(startTime, endTime)) {
             editionEvent.setStartTime(startTime);
             editionEvent.setEndTime(endTime);
             selectedWorkDay.changeTimeBy(editionEvent);
             em.merge(selectedWorkDay);
-            if (editionEvent.getState().equals(END) && editionEvent.getEndTime().before(editionEvent.getStartTime())) {
+            if (editionEvent.getState().equals(END) && editionEvent.getEndTime().isBefore(editionEvent.getStartTime())) {
                 Notification.warn("Невозможно сохранить изменения", "Время окончания события больше времени начала");
             } else {
                 em.merge(editionEvent);
@@ -86,15 +89,12 @@ public class WorkDayCardViewModel implements Serializable {
     }
 
     public int getMinHourForEndEvent(Event event) {
-        return event.getStartTime().get(Calendar.HOUR_OF_DAY);
+        return event.getStartTime().get(ChronoField.HOUR_OF_DAY);
     }
 
-    private Calendar formationCorrectTime(Calendar time, Date day) {
-        Calendar correctTime = Calendar.getInstance();
-        correctTime.setTime(day);
-        correctTime.set(Calendar.HOUR_OF_DAY, time.get(Calendar.HOUR_OF_DAY));
-        correctTime.set(Calendar.MINUTE, time.get(Calendar.MINUTE));
-        return correctTime;
+    private LocalDateTime formationCorrectTime(LocalDateTime time, LocalDate day) {
+        time.withDayOfMonth(day.getDayOfMonth());
+        return time;
     }
 
     public WorkDay getSelectedWorkDay() {

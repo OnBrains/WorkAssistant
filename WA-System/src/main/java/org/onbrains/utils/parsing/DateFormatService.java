@@ -107,12 +107,12 @@ public class DateFormatService implements Serializable {
 	 *            Преобразуемая дата
 	 * @return Информация о дате в формате 'EEEEE'.
 	 */
-	public static String toEEEEE(Date date) {
+	public static String toEEEEE(LocalDate date) {
 		if (date == null) {
 			return null;
 		}
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEEEE", dateFormatSymbols);
-		return simpleDateFormat.format(date);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEEE");
+		return formatter.format(date);
 	}
 
 	/**
