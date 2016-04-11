@@ -41,9 +41,11 @@
             </pe:layout>
         </ui:insert>
 
-        <p:growl id="msg_warn" for="arg_msg_for_warn" showDetail="true" sticky="true"/>
-        <p:growl id="msg_info" for="arg_msg_for_info" showDetail="true"/>
-        <p:growl id="msg_error" showDetail="true" autoUpdate="true" sticky="true" redisplay="false"/>
+        <div style="z-index: 2000">
+            <p:growl id="msg_warn" for="msg_for_warn" showDetail="true" sticky="true"/>
+            <p:growl id="msg_info" for="msg_for_info" showDetail="true"/>
+            <p:growl id="msg_error" showDetail="true" autoUpdate="true" sticky="true" redisplay="false"/>
+        </div>
     </h:body>
 
 </f:view>

@@ -32,8 +32,8 @@ import org.onbrains.entity.day.Day;
 import org.onbrains.entity.event.Event;
 import org.onbrains.entity.event.EventCategory;
 import org.onbrains.entity.worker.Worker;
-import org.onbrains.utils.parsing.DateFormatService;
 import org.onbrains.utils.jpa.converter.LocalDateTimeAttributeConverter;
+import org.onbrains.utils.parsing.DateFormatService;
 
 /**
  * @author Naumov Oleg on 21.03.2015 21:20.
@@ -46,7 +46,7 @@ import org.onbrains.utils.jpa.converter.LocalDateTimeAttributeConverter;
 		@NamedQuery(name = WorkDay.GET_WORK_DAY, query = "select wt from WorkDay wt where wt.worker = :worker and wt.day = :day") })
 public class WorkDay extends SuperClass {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
 	public static final String GET_WORK_DAYS_BY_MONTH = "WorkTimeDAO.getWorkDaysByMonth";
 	public static final String GET_WORK_DAY = "WorkTimeDAO.getWorkDay";
@@ -60,20 +60,18 @@ public class WorkDay extends SuperClass {
 	private Day day;
 
 	@Column(name = "COMING_TIME")
-//	@Temporal(TemporalType.TIMESTAMP)
-    @Convert(converter = LocalDateTimeAttributeConverter.class)
+	@Convert(converter = LocalDateTimeAttributeConverter.class)
 	private LocalDateTime comingTime;
 
 	@Column(name = "OUT_TIME")
-//	@Temporal(TemporalType.TIMESTAMP)
-    @Convert(converter = LocalDateTimeAttributeConverter.class)
+	@Convert(converter = LocalDateTimeAttributeConverter.class)
 	private LocalDateTime outTime;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "STATE", length = 16, nullable = false)
 	private WorkDayState state = WorkDayState.NO_WORK;
 
-	@ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.REMOVE })
+	@ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE })
 	@JoinTable(name = "WORK_DAY_EVENT", joinColumns = { @JoinColumn(name = "WORK_DAY_ID") }, inverseJoinColumns = {
 			@JoinColumn(name = "EVENT_ID") })
 	@OrderBy(value = "startTime desc")
@@ -140,16 +138,24 @@ public class WorkDay extends SuperClass {
 	 * @return Сообщение об ошибки, если невозможно добавить событие или пустую строку если событие добавлено.
 	 */
 	public String addEvent(Event additionEvent) {
-		if (!additionEvent.getType().getCategory().equals(NOT_INFLUENCE_ON_WORKED_TIME)) {
-			if (isPossibleTimeBoundaryForEvent(additionEvent.getStartTime(), additionEvent.getEndTime())) {
-				changeTimeBy(additionEvent);
-			} else {
-				return "Пересечение временых интервалов у событий";
-			}
+		if (!additionEvent.getType().getCategory().equals(NOT_INFLUENCE_ON_WORKED_TIME)
+				&& isPossibleTimeBoundaryForEvent(additionEvent.getStartTime(), additionEvent.getEndTime())) {
+			events.add(additionEvent);
+			changeTimeBy(additionEvent);
+		} else {
+			return "Пересечение временых интервалов у событий";
 		}
-		events.add(additionEvent);
 		Collections.sort(events, new EventComparator());
 		return "";
+	}
+
+	public void removeEvent(Event removingEvent) {
+		getEvents().remove(removingEvent);
+		if (getEvents().isEmpty()) {
+			setComingTime(null);
+			setOutTime(null);
+			setState(WorkDayState.NO_WORK);
+		}
 	}
 
 	/**
@@ -256,7 +262,7 @@ public class WorkDay extends SuperClass {
 	 * @return <strong>true</strong> - если надо изменить.
 	 */
 	private boolean needChangeComingTimeTo(LocalDateTime time) {
-		return comingTime != null && time.isBefore(comingTime);
+		return getEvents().size() == 1 || (comingTime != null && time.isBefore(comingTime));
 	}
 
 	/**
@@ -267,7 +273,7 @@ public class WorkDay extends SuperClass {
 	 * @return <strong>true</strong> - если надо изменить.
 	 */
 	private boolean needChangeOutTimeTo(LocalDateTime time) {
-		return outTime != null && time.isAfter(outTime);
+		return getEvents().size() == 1 || (outTime != null && time.isAfter(outTime));
 	}
 
 	/**

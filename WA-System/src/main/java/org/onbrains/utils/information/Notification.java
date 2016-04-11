@@ -1,14 +1,13 @@
 package org.onbrains.utils.information;
 
-import org.primefaces.context.RequestContext;
-
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
+
+import org.primefaces.context.RequestContext;
 
 /**
  * @author Naumov Oleg on 26.04.2015 20:58.
  */
-
 public class Notification {
 
 	public static void info(String summary, String detail) {

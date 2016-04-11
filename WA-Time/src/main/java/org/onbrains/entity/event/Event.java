@@ -6,7 +6,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Calendar;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -71,8 +71,8 @@ public class Event extends SuperClass {
 		this.day = day;
 		this.type = type;
 		this.title = title;
-		this.startTime = startTime;
-		this.endTime = startTime;
+		this.startTime = startTime.truncatedTo(ChronoUnit.MINUTES);
+		this.endTime = startTime.truncatedTo(ChronoUnit.MINUTES);
 		this.state = EventState.NOT_END;
 	}
 
@@ -184,7 +184,7 @@ public class Event extends SuperClass {
 	}
 
 	public void setStartTime(LocalDateTime startTime) {
-		this.startTime = startTime;
+		this.startTime = startTime.truncatedTo(ChronoUnit.MINUTES);
 	}
 
 	/**
@@ -195,7 +195,7 @@ public class Event extends SuperClass {
 	}
 
 	public void setEndTime(LocalDateTime endTime) {
-		this.endTime = endTime;
+		this.endTime = endTime.truncatedTo(ChronoUnit.MINUTES);
 	}
 
 	public EventState getState() {

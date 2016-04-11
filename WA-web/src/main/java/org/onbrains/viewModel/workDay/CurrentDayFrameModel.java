@@ -45,47 +45,48 @@ public class CurrentDayFrameModel implements Serializable {
 	@Inject
 	private EventTypeDAOInterface etDAO;
 
-	private WorkDay currentWorkDay;
+	private WorkDay workDay;
 	private EventType selectedEventType;
 
 	@PostConstruct
 	public void postConstruct() {
-		if (currentWorkDay == null) {
+		if (workDay == null) {
 			initCurrentWorkDay();
 		}
 	}
 
 	public List<StatisticValue> getWorkDayStatistic() {
 		List<StatisticValue> workDayStatistic = new LinkedList<>();
-		if (currentWorkDay != null) {
-			if (!currentWorkDay.isNoWork()) {
-				long workedTime = currentWorkDay.isWorkingRequiredTime()
-						? currentWorkDay.getDay().getType().getWorkTimeInSecond() : currentWorkDay.getWorkingTime();
+		if (workDay != null) {
+			if (!workDay.isNoWork()) {
+				long workedTime = workDay.isWorkingRequiredTime() ? workDay.getDay().getType().getWorkTimeInSecond()
+						: workDay.getWorkingTime();
 				workDayStatistic.add(new StatisticValue(workedTime, "Отработано", "#4da9f1"));
 			}
-			workDayStatistic.add(currentWorkDay.isWorkingRequiredTime()
-					? new StatisticValue(currentWorkDay.getDeltaTime(), "Переработок", "green")
-					: new StatisticValue(currentWorkDay.getDeltaTime(), "Осталось", "chocolate"));
+			workDayStatistic.add(
+					workDay.isWorkingRequiredTime() ? new StatisticValue(workDay.getDeltaTime(), "Переработок", "green")
+							: new StatisticValue(workDay.getDeltaTime(), "Осталось", "chocolate"));
 		}
 		return workDayStatistic;
 	}
 
 	public void onRowEdit(RowEditEvent event) {
-		Event editionEvent = (Event) event.getObject();
-		LocalDateTime startTime = formationCorrectTime(editionEvent.getStartTime(), editionEvent.getDay());
-		LocalDateTime endTime = formationCorrectTime(editionEvent.getEndTime(), editionEvent.getDay());
-		if (currentWorkDay.isPossibleTimeBoundaryForEvent(startTime, endTime)) {
-			editionEvent.setStartTime(startTime);
-			editionEvent.setEndTime(endTime);
-			currentWorkDay.changeTimeBy(editionEvent);
-			em.merge(currentWorkDay);
-			if (editionEvent.getState().equals(END)
-					&& editionEvent.getEndTime().isBefore(editionEvent.getStartTime())) {
-				Notification.warn("Невозможно сохранить изменения", "Время окончания события больше времени начала");
-			} else {
-				em.merge(editionEvent);
-			}
+		Event editableEvent = (Event) event.getObject();
+		LocalDateTime startTime = fixDate(editableEvent.getStartTime(), editableEvent.getDay());
+		LocalDateTime endTime = fixDate(editableEvent.getEndTime(), editableEvent.getDay());
+		if (editableEvent.getState().equals(END) && startTime.isAfter(endTime)) {
+			Notification.warn("Невозможно сохранить изменения", "Время окончания события больше времени начала");
+			refreshEvent(editableEvent);
+			return;
+		}
+		if (workDay.isPossibleTimeBoundaryForEvent(startTime, endTime)) {
+			editableEvent.setStartTime(startTime);
+			editableEvent.setEndTime(endTime);
+			workDay.changeTimeBy(editableEvent);
+			em.merge(workDay);
+			em.merge(editableEvent);
 		} else {
+			refreshEvent(editableEvent);
 			Notification.warn("Невозможно сохранить изменения", "Пересечение временых интервалов у событий");
 		}
 	}
@@ -96,8 +97,8 @@ public class CurrentDayFrameModel implements Serializable {
 	 * @return <strong>true</strong> - если можно.
 	 */
 	public boolean canStopEvent() {
-		return currentWorkDay != null && !currentWorkDay.getEvents().isEmpty()
-				&& currentWorkDay.getLastWorkEvent().getState().equals(NOT_END);
+		return workDay != null && !workDay.getEvents().isEmpty()
+				&& workDay.getLastWorkEvent().getState().equals(NOT_END);
 	}
 
 	/**
@@ -107,16 +108,16 @@ public class CurrentDayFrameModel implements Serializable {
 	 */
 	public void startEvent() {
 		stopLastActiveEvent();
-		Event creationEvent = new Event(currentWorkDay.getDay().getDay(), selectedEventType,
-				selectedEventType.getTitle(), LocalDateTime.now());
-		String addEventMessage = currentWorkDay.addEvent(creationEvent);
+		Event creationEvent = new Event(workDay.getDay().getDay(), selectedEventType, selectedEventType.getTitle(),
+				LocalDateTime.now());
+		String addEventMessage = workDay.addEvent(creationEvent);
 		if (Objects.equals(addEventMessage, "")) {
 			em.persist(creationEvent);
-			if (currentWorkDay.isNoWork()
+			if (workDay.isNoWork()
 					&& !creationEvent.getType().getCategory().equals(EventCategory.NOT_INFLUENCE_ON_WORKED_TIME)) {
 				startWork();
 			}
-			em.merge(currentWorkDay);
+			em.merge(workDay);
 		} else {
 			Notification.warn("Невозможно создать событие", addEventMessage);
 		}
@@ -126,32 +127,27 @@ public class CurrentDayFrameModel implements Serializable {
 	/**
 	 * Проставляет время окончания для последнего события, которое влияет на отработанное время, текущего дня.
 	 */
-	// FIXME: заканчивать событие надо если создается событие влияющее на рабочее время
 	public void stopLastActiveEvent() {
-		Event lastWorkEvent = currentWorkDay.getLastWorkEvent();
-		if (!currentWorkDay.getEvents().isEmpty() && lastWorkEvent.getState().equals(NOT_END)) {
+		Event lastWorkEvent = workDay.getLastWorkEvent();
+		if (!workDay.getEvents().isEmpty() && lastWorkEvent.getState().equals(NOT_END)) {
 			lastWorkEvent.setEndTime(LocalDateTime.now());
 			lastWorkEvent.setState(END);
 			em.merge(lastWorkEvent);
 		}
 	}
 
-	// FIXME: разобраться почему не работает каскадное изменение. Должно происходить удаление события из БД при удалении
-	// его из коллекции.
 	public void removeEvent(Event removingEvent) {
-		currentWorkDay.getEvents().remove(removingEvent);
-		em.merge(currentWorkDay);
-		em.remove(em.merge(removingEvent));
+		workDay.removeEvent(removingEvent);
+		em.merge(workDay);
+		em.remove(removingEvent);
 	}
 
 	/**
 	 * Проставляет информацию о начале рабочего дня, в качестве времени прихода на работу проставляется текущее время.
 	 */
-	// FIXME: Перед началом рабочего дня надо проверять, нет ли уже события влияющего на отработанное время, с таким
-	// временным интервалом
 	private void startWork() {
-		currentWorkDay.setComingTime(currentWorkDay.getLastWorkEvent().getStartTime());
-		currentWorkDay.setState(WorkDayState.WORKING);
+		workDay.setComingTime(workDay.getLastWorkEvent().getStartTime());
+		workDay.setState(WorkDayState.WORKING);
 	}
 
 	/**
@@ -162,9 +158,9 @@ public class CurrentDayFrameModel implements Serializable {
 	// временным интервалом
 	public void endWork() {
 		stopLastActiveEvent();
-		currentWorkDay.setOutTime(currentWorkDay.getLastWorkEvent().getEndTime());
-		currentWorkDay.setState(WorkDayState.WORKED);
-		em.merge(currentWorkDay);
+		workDay.setOutTime(workDay.getLastWorkEvent().getEndTime());
+		workDay.setState(WorkDayState.WORKED);
+		em.merge(workDay);
 	}
 
 	/**
@@ -173,23 +169,24 @@ public class CurrentDayFrameModel implements Serializable {
 	 *
 	 * @return Время прихода на работу для текущего рабочего дня в формате <strong>HH:MM</strong>.
 	 */
-	public String getComingTime() {
-		return currentWorkDay != null && !currentWorkDay.isNoWork() ? toHHMM(currentWorkDay.getComingTime()) : "__:__";
+	public String getComingTimeValue() {
+		return workDay != null && !workDay.isNoWork() ? toHHMM(workDay.getComingTime()) : "__:__";
 	}
 
 	/**
 	 * Возвращает время ухода с работы для текущего рабочего дня.
 	 * <ul>
 	 * <li>Если рабочий день не начался, то возвращает шаблон для пустого времени "__:__"</li>
-	 * <li>Если рабочий день не закончен, то возвращает {@linkplain #getPossibleOutTime() возможное время ухода}</li>
-	 * <li>Если рабочий день окончен, то возвращает {@linkplain #getRealOutTime() реальное время ухода}</li>
+	 * <li>Если рабочий день не закончен, то возвращает {@linkplain #getPossibleOutTimeValue() возможное время ухода}
+	 * </li>
+	 * <li>Если рабочий день окончен, то возвращает {@linkplain #getRealOutTimeValue() реальное время ухода}</li>
 	 * </ul>
 	 *
 	 * @return Время ухода с работы для текущего рабочего дня в формате <strong>HH:MM</strong>.
 	 */
-	public String getOutTime() {
-		if (currentWorkDay != null && !currentWorkDay.isNoWork()) {
-			return currentWorkDay.isWorked() ? getRealOutTime() : getPossibleOutTime();
+	public String getOutTimeValue() {
+		if (workDay != null && !workDay.isNoWork()) {
+			return workDay.isWorked() ? getRealOutTimeValue() : getPossibleOutTimeValue();
 		} else {
 			return "__:__";
 		}
@@ -202,8 +199,13 @@ public class CurrentDayFrameModel implements Serializable {
 	 * @return Заголовок для блока управления текущим рабочим днем.
 	 */
 	public String getLegendValue() {
-		return currentWorkDay != null
-				? toDDEE(currentWorkDay.getDay().getDay()) + " - " + currentWorkDay.getState().getDesc() : "Не найдено";
+		return workDay != null ? toDDEE(workDay.getDay().getDay()) + " - " + workDay.getState().getDesc()
+				: "Не найдено";
+	}
+
+	public String getTimeInfo() {
+		return String.format("Начало: %s, %s %s", getComingTimeValue(), workDay.isWorked() ? "окончание" : "можно уйти",
+				getOutTimeValue());
 	}
 
 	// *****************************************************************************************************************
@@ -218,7 +220,13 @@ public class CurrentDayFrameModel implements Serializable {
 	 * Инициализирует информацию о текущем рабочем дне, если ее нет.
 	 */
 	private void initCurrentWorkDay() {
-		currentWorkDay = wdDAO.getWorkDay(LocalDate.now(), SessionUtil.getWorker());
+		workDay = wdDAO.getWorkDay(LocalDate.now(), SessionUtil.getWorker());
+	}
+
+	private void refreshEvent(Event event) {
+		Event oldEventValue = em.find(Event.class, event.getId());
+		event.setStartTime(oldEventValue.getStartTime());
+		event.setEndTime(oldEventValue.getEndTime());
 	}
 
 	/**
@@ -231,15 +239,15 @@ public class CurrentDayFrameModel implements Serializable {
 	 *            день года.
 	 * @return Корректное время с корректной датой.
 	 */
-	private LocalDateTime formationCorrectTime(LocalDateTime time, LocalDate day) {
+	private LocalDateTime fixDate(LocalDateTime time, LocalDate day) {
 		return LocalDateTime.of(day.getYear(), day.getMonth(), day.getDayOfMonth(), time.getHour(), time.getMinute());
 	}
 
 	/**
 	 * @return Реальное время ухода для текущего рабочего дня в формате <strong>HH:MM</strong>.
 	 */
-	private String getRealOutTime() {
-		return toHHMM(currentWorkDay.getOutTime());
+	private String getRealOutTimeValue() {
+		return toHHMM(workDay.getOutTime());
 	}
 
 	/**
@@ -248,17 +256,17 @@ public class CurrentDayFrameModel implements Serializable {
 	 *
 	 * @return Возможное время ухода в милисекундах.
 	 */
-	private String getPossibleOutTime() {
-		return currentWorkDay != null && !currentWorkDay.isNoWork()
-				? toHHMM(currentWorkDay.getComingTime().plusSeconds(currentWorkDay.getIdealWorkedTime())) : "__:__";
+	private String getPossibleOutTimeValue() {
+		return workDay != null && !workDay.isNoWork()
+				? toHHMM(workDay.getComingTime().plusSeconds(workDay.getIdealWorkedTime())) : "__:__";
 	}
 
 	// *****************************************************************************************************************
 	// Simple getters and setters
 	// *****************************************************************************************************************
 
-	public WorkDay getCurrentWorkDay() {
-		return currentWorkDay;
+	public WorkDay getWorkDay() {
+		return workDay;
 	}
 
 	public EventType getSelectedEventType() {
