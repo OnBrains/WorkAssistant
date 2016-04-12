@@ -36,7 +36,7 @@ import org.primefaces.event.RowEditEvent;
  */
 @Named
 @ViewScoped
-public class CurrentDayFrameModel implements Serializable {
+public class CurrentWorkDayFrameModel implements Serializable {
 
 	@Inject
 	private EntityManagerUtils em;
