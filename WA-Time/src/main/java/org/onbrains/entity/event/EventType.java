@@ -11,6 +11,18 @@ import javax.persistence.UniqueConstraint;
 
 import org.onbrains.entity.SuperClass;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.Date;
+
+import static org.onbrains.utils.parsing.DateFormatService.SEC_IN_HOUR;
+import static org.onbrains.utils.parsing.DateFormatService.SEC_IN_MINUTE;
+import static org.onbrains.utils.parsing.DateFormatService.secToHour;
+import static org.onbrains.utils.parsing.DateFormatService.secToMinutes;
+
 /**
  * @author Naumov Oleg on 18.04.2015 13:41.
  *         <p/>
@@ -106,6 +118,19 @@ public class EventType extends SuperClass {
 		this.category = category;
 	}
 
+    public Date getNoWorkingTimeValue() {
+        LocalTime time = LocalTime.of(secToHour(notWorkingTime).intValue(), secToMinutes(notWorkingTime).intValue());
+        return Date.from(time.atDate(LocalDate.of(2016, 1, 1)).atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    public void setNoWorkingTimeValue(Date newTime) {
+        if (newTime != null) {
+            LocalTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(newTime.getTime()), ZoneId.systemDefault())
+                    .toLocalTime();
+            setNotWorkingTime(time.getMinute() * SEC_IN_MINUTE + time.getHour() * SEC_IN_HOUR);
+        }
+    }
+
 	/**
 	 * Для событий, время которых не идет в зачет отработанного возможно указать, какое количество времени разрещается
 	 * не отрабатывать.
@@ -143,7 +168,7 @@ public class EventType extends SuperClass {
 	/**
 	 * Флаг активности типа события. Деактивированные типы нельзя использовать, они хранятся только для истории уже
 	 * созданных событий.
-	 * 
+	 *
 	 * @return <strong>true</strong> - если тип активен.
 	 */
 	public boolean isActive() {

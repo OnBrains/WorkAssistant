@@ -1,5 +1,7 @@
 package org.onbrains.dao;
 
+import org.hibernate.exception.ConstraintViolationException;
+
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -9,7 +11,7 @@ import java.io.Serializable;
  * Локальный <strong>EntityManager</strong>, который можно использовать не в <strong>EJB</strong> бинах, для выполнения
  * <strong>CRUD</strong> операций.
  * <p/>
- * Created by Oleg Naumov on 16.12.2015.
+ * @author Naumov Oleg on 16.12.2015.
  */
 @Stateless
 public class EntityManagerUtils implements Serializable {
@@ -39,5 +41,19 @@ public class EntityManagerUtils implements Serializable {
 	public <T> T find(Class<T> clazz, Object object) {
 		return entityManager.find(clazz, object);
 	}
+
+    /**
+     * Получает сообщение об ошибке для конкретного исключения.
+     */
+    public String formationMessageFrom(Exception ex) {
+        Throwable t = ex.getCause();
+        while (t != null) {
+            t = t.getCause();
+            if (t instanceof ConstraintViolationException) {
+                return t.getCause() != null ? t.getCause().getMessage() : t.getMessage();
+            }
+        }
+        return ex.getMessage();
+    }
 
 }

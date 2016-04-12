@@ -74,7 +74,7 @@
             </p:panel>
 
             <wa:statistic id="work_day_statistic" statisticValues="#{currentDayFrameModel.workDayStatistic}"
-                          rendered="#{!currentDayFrameModel.currentWorkDay.noWork}"/>
+                          rendered="#{!currentDayFrameModel.workDay.noWork}"/>
 
             <p:dataTable id="work_day_events_table" value="#{workDayCardViewModel.selectedWorkDay.events}"
                          var="dayEvent" editable="true" styleClass="padding-top-10-px">

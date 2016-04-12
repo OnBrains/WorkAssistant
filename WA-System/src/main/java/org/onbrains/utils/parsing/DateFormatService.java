@@ -19,8 +19,8 @@ import javax.inject.Named;
 @SessionScoped
 public class DateFormatService implements Serializable {
 
-	private final static Long SEC_IN_HOUR = 3600L;
-	private final static Long SEC_IN_MINUTE = 60L;
+	public final static Long SEC_IN_HOUR = 3600L;
+	public final static Long SEC_IN_MINUTE = 60L;
 
 	/**
 	 * Получает из даты информацию о времени.
@@ -41,7 +41,7 @@ public class DateFormatService implements Serializable {
 	 *            Количество миллисекунд.
 	 * @return Количество часов.
 	 */
-	private static Long secToHour(Long seconds) {
+	public static Long secToHour(Long seconds) {
 		return seconds / SEC_IN_HOUR;
 	}
 
@@ -52,7 +52,7 @@ public class DateFormatService implements Serializable {
 	 *            Количество миллисекунд.
 	 * @return Количество минут.
 	 */
-	private static Long secToMinutes(Long seconds) {
+	public static Long secToMinutes(Long seconds) {
 		return (seconds % SEC_IN_HOUR) / SEC_IN_MINUTE;
 	}
 

@@ -11,6 +11,7 @@
 
             <pe:layoutPane position="west" size="340" resizable="false">
                 <h:form id="event_types_category_form">
+
                     <p:fieldset legend="Влияние на отработанное время">
                         <p:tree id="event_types_category_tree" value="#{eventTypesDirectory.categoryNode}" var="categoryNode"
                                 selectionMode="single">
@@ -21,23 +22,25 @@
                             </p:treeNode>
                         </p:tree>
                     </p:fieldset>
+
                 </h:form>
             </pe:layoutPane>
 
             <pe:layoutPane position="center">
                 <h:form id="event_types_directory_form">
+
                     <p:dataTable id="event_types_directory_table" value="#{eventTypesDirectory.typesBySelectedCategory}"
-                                 var="eventType" editable="true" style="margin-top: 16px;">
+                                 var="eventType" editable="true" styleClass="padding-top-15-px">
 
                         <p:ajax event="rowEdit" listener="#{eventTypesDirectory.onRowEdit}"/>
 
                         <f:facet name="header">
-                            <p:commandButton id="event_type_creation_button" value="Создать" icon="fa fa-plus-circle" process="@this"
-                                             style="float: right; margin: 5px;" action="#{eventTypesDirectory.onCreationTypeStart()}"
+                            <p:commandButton id="event_type_creation_button" icon="fa fa-plus" process="@this"
+                                             styleClass="float-right margin-5-px" action="#{eventTypesDirectory.openCreationDialog()}"
                                              oncomplete="PF('creationEventTypeDialogVar').show();"/>
                         </f:facet>
 
-                        <p:column headerText="Активность" style="width: 10%; text-align: center;">
+                        <p:column headerText="Активность" styleClass="width-10 align-center">
                             <p:cellEditor>
                                 <f:facet name="output">
                                     <h:selectBooleanCheckbox value="#{eventType.active}" disabled="true"/>
@@ -47,70 +50,55 @@
                                 </f:facet>
                             </p:cellEditor>
                         </p:column>
-                        <p:column headerText="Наименование" style="width: 20%;">
+
+                        <p:column headerText="Наименование" styleClass="width-20">
                             <p:cellEditor>
                                 <f:facet name="output">
                                     <h:outputText value="#{eventType.title}"/>
                                 </f:facet>
                                 <f:facet name="input">
-                                    <p:inputText value="#{eventType.title}" style="width: 80%;" required="true"
+                                    <p:inputText value="#{eventType.title}" styleClass="width-80" required="true"
                                                  maxlength="64" requiredMessage="Не заполнена информация о наименовании типа"/>
                                 </f:facet>
                             </p:cellEditor>
                         </p:column>
-                        <p:column headerText="Влияет на рабочее время" style="width: 15%; text-align: center">
-                            <p:cellEditor>
-                                <f:facet name="output">
-                                    <h:outputText value="#{eventType.category.desc}" disabled="true"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:selectOneMenu value="#{eventType.category}" required="true" style="width: 90%;"
-                                                     requiredMessage="Не заполнена информация о влиянии события на рабочее время">
-                                        <f:selectItems value="#{eventTypesDirectory.getEventCategories()}" var="eventCategory"
-                                                       itemLabel="#{eventCategory.desc}"/>
-                                    </p:selectOneMenu>
-                                </f:facet>
-                            </p:cellEditor>
-                        </p:column>
-                        <p:column headerText="Можно не отрабатывать" style="width: 10%; text-align: center">
+
+                        <p:column headerText="Можно не отрабатывать" styleClass="width-15 align-center"
+                                  rendered="#{eventTypesDirectory.selectedCategory eq 'WITH_FIXED_WORKED_TIME'}">
                             <p:cellEditor>
                                 <f:facet name="output">
                                     <h:outputText value="#{dateFormat.secToHHMM(eventType.notWorkingTime)}"/>
                                 </f:facet>
                                 <f:facet name="input">
-                                    <h:panelGrid columns="2" style="margin-bottom: 10px">
-                                        <h:selectOneMenu id="possible_hours" value="#{eventTypesDirectory.selectedNoWorkHour}"
-                                                         required="true" requiredMessage="Не заполена информация о кол-ве часов">
-                                            <f:selectItem itemLabel="Часов" itemValue=""/>
-                                            <f:selectItems value="#{eventTypesDirectory.possibleHours}" var="hour" itemLabel="#{hour}"/>
-                                        </h:selectOneMenu>
-                                        <h:selectOneMenu id="possible_minutes" value="#{eventTypesDirectory.selectedNoWorkMinute}"
-                                                         required="false" requiredMessage="Не заполена информация о кол-ве минут">
-                                            <f:selectItem itemLabel="Минут" itemValue=""/>
-                                            <f:selectItems value="#{eventTypesDirectory.possibleMinutes}" var="minute" itemLabel="#{minute}"/>
-                                        </h:selectOneMenu>
-                                    </h:panelGrid>
+                                        <pe:timePicker value="#{eventType.noWorkingTimeValue}"/>
                                 </f:facet>
                             </p:cellEditor>
                         </p:column>
-                        <p:column headerText="Описание" style="width: 30%;">
+
+                        <p:column headerText="Описание" styleClass="width-30">
                             <p:cellEditor>
                                 <f:facet name="output">
                                     <h:outputText value="#{eventType.description}"/>
                                 </f:facet>
                                 <f:facet name="input">
-                                    <p:inputTextarea value="#{eventType.description}" style="width: 90%;" rows="2" maxlength="512"/>
+                                    <p:inputTextarea value="#{eventType.description}" styleClass="width-90" rows="2" maxlength="512"/>
                                 </f:facet>
                             </p:cellEditor>
                         </p:column>
-                        <p:column style="width: 5%; text-align: center;">
+
+                        <p:column styleClass="width-20-px align-center">
                             <p:rowEditor/>
                         </p:column>
-                        <p:column style="text-align: center; width: 5%;">
+
+                        <p:column styleClass="align-center width-20-px">
                             <p:commandButton icon="ui-icon-trash" action="#{eventTypesDirectory.removeType(eventType)}"
-                                             update="event_types_directory_table"/>
+                                             update="event_types_directory_table">
+                                <p:confirm header="Подтверждения удаления типа события" icon="ui-icon-alert"
+                                           message="Вы действительно хотите удалить тип события: '#{eventType.title}'?"/>
+                            </p:commandButton>
                         </p:column>
                     </p:dataTable>
+
                 </h:form>
             </pe:layoutPane>
 

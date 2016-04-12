@@ -1,5 +1,16 @@
 package org.onbrains.viewModel.event;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.EJBTransactionRolledbackException;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.commons.lang3.StringUtils;
 import org.onbrains.dao.EntityManagerUtils;
 import org.onbrains.dao.workDayEvent.EventTypeDAOInterface;
 import org.onbrains.entity.event.EventCategory;
@@ -11,33 +22,18 @@ import org.primefaces.event.RowEditEvent;
 import org.primefaces.model.DefaultTreeNode;
 import org.primefaces.model.TreeNode;
 
-import javax.annotation.PostConstruct;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.persistence.PersistenceException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author Naumov Oleg on 30.08.2015 15:30.
  */
-
 @Named(value = "eventTypesDirectory")
 @ViewScoped
 public class EventTypesDirectoryViewModel implements Serializable {
-
-	private static final long SEC_IN_MINUTE = 60;
-	private static final long SEC_IN_HOUR = 3600;
 
 	@Inject
 	private EntityManagerUtils em;
 	@Inject
 	private EventTypeDAOInterface etDAO;
 
-	private long selectedNoWorkHour = 0;
-	private long selectedNoWorkMinute = 0;
 	private List<EventType> allTypes = new ArrayList<>();
 
 	private TreeNode categoryNode;
@@ -47,12 +43,11 @@ public class EventTypesDirectoryViewModel implements Serializable {
 
 	@PostConstruct
 	public void postConstruct() {
-		initializationCategoryNode();
+		initCategoryNode();
 	}
 
 	public void onRowEdit(RowEditEvent event) {
 		EventType editionEventType = (EventType) event.getObject();
-		editionEventType.setNotWorkingTime(calculationNoWorkingTime());
 		em.merge(editionEventType);
 	}
 
@@ -61,7 +56,7 @@ public class EventTypesDirectoryViewModel implements Serializable {
 		buildResultTypesBy((EventCategory) selectedCategoryNode.getData());
 	}
 
-	public void onCreationTypeStart() {
+	public void openCreationDialog() {
 		EventCategory category = selectedCategoryNode == null ? EventCategory.INFLUENCE_ON_WORKED_TIME
 				: (EventCategory) selectedCategoryNode.getData();
 		newEventType = new EventType(category);
@@ -69,26 +64,23 @@ public class EventTypesDirectoryViewModel implements Serializable {
 	}
 
 	public void createType() {
-		newEventType.setNotWorkingTime(calculationNoWorkingTime());
 		em.persist(newEventType);
 		allTypes.add(newEventType);
 		buildResultTypesBy((EventCategory) selectedCategoryNode.getData());
 		cleanParams();
 	}
 
-	public void cancelCreationType() {
-		cleanParams();
+	public void cleanParams() {
+		newEventType = null;
 	}
 
-	// FIXME: без flush нельзя пойтать Exception
 	public void removeType(EventType removingType) {
 		try {
-            typesBySelectedCategory.remove(removingType);
 			em.remove(em.merge(removingType));
-//			em.flush();
-		} catch (PersistenceException constraintException) {
-			Notification.warn(String.format("Невозможну удалить тип: %s", removingType.getTitle()),
-					"Данный тип имеет зависимые записи");
+            typesBySelectedCategory.remove(removingType);
+		} catch (EJBTransactionRolledbackException ex) {
+			Notification.error(String.format("Невозможну удалить тип: %s", removingType.getTitle()),
+					em.formationMessageFrom(ex));
 		}
 	}
 
@@ -99,23 +91,15 @@ public class EventTypesDirectoryViewModel implements Serializable {
 		return allTypes;
 	}
 
+	public String getSelectedCategory() {
+		return selectedCategoryNode != null ? selectedCategoryNode.getData().toString() : StringUtils.EMPTY;
+	}
+
 	// *****************************************************************************************************************
 	// Block with privates methods
 	// *****************************************************************************************************************
 
-	private Long calculationNoWorkingTime() {
-		return convertToSecondFromSelectedHour() + convertToSecondFromSelectedMinute();
-	}
-
-	private Long convertToSecondFromSelectedHour() {
-		return selectedNoWorkHour * SEC_IN_HOUR;
-	}
-
-	private Long convertToSecondFromSelectedMinute() {
-		return selectedNoWorkMinute * SEC_IN_MINUTE;
-	}
-
-	private void initializationCategoryNode() {
+	private void initCategoryNode() {
 		categoryNode = new DefaultTreeNode("root", null);
 		for (EventCategory category : EventCategory.values()) {
 			new DefaultTreeNode(category, categoryNode);
@@ -131,50 +115,12 @@ public class EventTypesDirectoryViewModel implements Serializable {
 		}
 	}
 
-	private void cleanParams() {
-		newEventType = null;
-		selectedNoWorkHour = 0;
-		selectedNoWorkMinute = 0;
-	}
-
 	// *****************************************************************************************************************
 	// Simple Getters and Setters
 	// *****************************************************************************************************************
 
-	public List<Integer> getPossibleHours() {
-		List<Integer> possibleHours = new ArrayList<>();
-		for (int hour = 0; hour < 25; hour++) {
-			possibleHours.add(hour);
-		}
-		return possibleHours;
-	}
-
-	public List<Integer> getPossibleMinutes() {
-		List<Integer> possibleMinutes = new ArrayList<>();
-		for (int minute = 0; minute < 61; minute++) {
-			possibleMinutes.add(minute);
-		}
-		return possibleMinutes;
-	}
-
 	public EventCategory[] getEventCategories() {
 		return EventCategory.values();
-	}
-
-	public long getSelectedNoWorkHour() {
-		return selectedNoWorkHour;
-	}
-
-	public void setSelectedNoWorkHour(long selectedNoWorkHour) {
-		this.selectedNoWorkHour = selectedNoWorkHour;
-	}
-
-	public long getSelectedNoWorkMinute() {
-		return selectedNoWorkMinute;
-	}
-
-	public void setSelectedNoWorkMinute(long selectedNoWorkMinute) {
-		this.selectedNoWorkMinute = selectedNoWorkMinute;
 	}
 
 	public TreeNode getCategoryNode() {

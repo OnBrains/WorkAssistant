@@ -31,8 +31,16 @@
                     </ui:insert>
 
                 <pe:layoutPane id="content_body" position="center">
+
                     <ui:insert name="body"/>
+
                     <ui:insert name="dialogs"/>
+
+                    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                        <p:commandButton value="Да" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                        <p:commandButton value="Нет" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                    </p:confirmDialog>
+
                 </pe:layoutPane>
 
                 <pe:layoutPane position="south" resizable="false" closable="false">
