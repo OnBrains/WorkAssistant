@@ -3,13 +3,10 @@ package org.onbrains.viewModel.workDay;
 import static org.onbrains.entity.event.EventState.END;
 import static org.onbrains.entity.event.EventState.NOT_END;
 import static org.onbrains.utils.parsing.DateFormatService.toDDEE;
-import static org.onbrains.utils.parsing.DateFormatService.toHHMM;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -18,7 +15,6 @@ import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.onbrains.component.statistic.StatisticValue;
 import org.onbrains.dao.EntityManagerUtils;
 import org.onbrains.dao.workDay.WorkDayDAOInterface;
 import org.onbrains.dao.workDayEvent.EventTypeDAOInterface;
@@ -29,14 +25,15 @@ import org.onbrains.entity.workDay.WorkDay;
 import org.onbrains.entity.workDay.WorkDayState;
 import org.onbrains.service.SessionUtil;
 import org.onbrains.utils.information.Notification;
-import org.primefaces.event.RowEditEvent;
 
 /**
  * @author Naumov Oleg on 04.08.2015 21:40.
  */
 @Named
 @ViewScoped
-public class CurrentWorkDayFrameModel implements Serializable {
+public class CurrentWorkDayFrameModel extends WorkDayFrameModel {
+
+	private static final long serialVersionUID = 1715730076561263624L;
 
 	@Inject
 	private EntityManagerUtils em;
@@ -45,49 +42,12 @@ public class CurrentWorkDayFrameModel implements Serializable {
 	@Inject
 	private EventTypeDAOInterface etDAO;
 
-	private WorkDay workDay;
 	private EventType selectedEventType;
 
 	@PostConstruct
 	public void postConstruct() {
 		if (workDay == null) {
 			initCurrentWorkDay();
-		}
-	}
-
-	public List<StatisticValue> getWorkDayStatistic() {
-		List<StatisticValue> workDayStatistic = new LinkedList<>();
-		if (workDay != null) {
-			if (!workDay.isNoWork()) {
-				long workedTime = workDay.isWorkingRequiredTime() ? workDay.getDay().getType().getWorkTimeInSecond()
-						: workDay.getWorkingTime();
-				workDayStatistic.add(new StatisticValue(workedTime, "Отработано", "#4da9f1"));
-			}
-			workDayStatistic.add(
-					workDay.isWorkingRequiredTime() ? new StatisticValue(workDay.getDeltaTime(), "Переработок", "green")
-							: new StatisticValue(workDay.getDeltaTime(), "Осталось", "chocolate"));
-		}
-		return workDayStatistic;
-	}
-
-	public void onRowEdit(RowEditEvent event) {
-		Event editableEvent = (Event) event.getObject();
-		LocalDateTime startTime = fixDate(editableEvent.getStartTime(), editableEvent.getDay());
-		LocalDateTime endTime = fixDate(editableEvent.getEndTime(), editableEvent.getDay());
-		if (editableEvent.getState().equals(END) && startTime.isAfter(endTime)) {
-			Notification.warn("Невозможно сохранить изменения", "Время окончания события больше времени начала");
-			refreshEvent(editableEvent);
-			return;
-		}
-		if (workDay.isPossibleTimeBoundaryForEvent(startTime, endTime)) {
-			editableEvent.setStartTime(startTime);
-			editableEvent.setEndTime(endTime);
-			workDay.changeTimeBy(editableEvent);
-			em.merge(workDay);
-			em.merge(editableEvent);
-		} else {
-			refreshEvent(editableEvent);
-			Notification.warn("Невозможно сохранить изменения", "Пересечение временых интервалов у событий");
 		}
 	}
 
@@ -136,12 +96,6 @@ public class CurrentWorkDayFrameModel implements Serializable {
 		}
 	}
 
-	public void removeEvent(Event removingEvent) {
-		workDay.removeEvent(removingEvent);
-		em.merge(workDay);
-		em.remove(removingEvent);
-	}
-
 	/**
 	 * Проставляет информацию о начале рабочего дня, в качестве времени прихода на работу проставляется текущее время.
 	 */
@@ -161,35 +115,6 @@ public class CurrentWorkDayFrameModel implements Serializable {
 		workDay.setOutTime(workDay.getLastWorkEvent().getEndTime());
 		workDay.setState(WorkDayState.WORKED);
 		em.merge(workDay);
-	}
-
-	/**
-	 * Возвращает время прихода на работу для текущего рабочего дня. Если рабочий день не начался возвращает шаблон для
-	 * пустого времени "__:__".
-	 *
-	 * @return Время прихода на работу для текущего рабочего дня в формате <strong>HH:MM</strong>.
-	 */
-	public String getComingTimeValue() {
-		return workDay != null && !workDay.isNoWork() ? toHHMM(workDay.getComingTime()) : "__:__";
-	}
-
-	/**
-	 * Возвращает время ухода с работы для текущего рабочего дня.
-	 * <ul>
-	 * <li>Если рабочий день не начался, то возвращает шаблон для пустого времени "__:__"</li>
-	 * <li>Если рабочий день не закончен, то возвращает {@linkplain #getPossibleOutTimeValue() возможное время ухода}
-	 * </li>
-	 * <li>Если рабочий день окончен, то возвращает {@linkplain #getRealOutTimeValue() реальное время ухода}</li>
-	 * </ul>
-	 *
-	 * @return Время ухода с работы для текущего рабочего дня в формате <strong>HH:MM</strong>.
-	 */
-	public String getOutTimeValue() {
-		if (workDay != null && !workDay.isNoWork()) {
-			return workDay.isWorked() ? getRealOutTimeValue() : getPossibleOutTimeValue();
-		} else {
-			return "__:__";
-		}
 	}
 
 	/**
@@ -221,44 +146,6 @@ public class CurrentWorkDayFrameModel implements Serializable {
 	 */
 	private void initCurrentWorkDay() {
 		workDay = wdDAO.getWorkDay(LocalDate.now(), SessionUtil.getWorker());
-	}
-
-	private void refreshEvent(Event event) {
-		Event oldEventValue = em.find(Event.class, event.getId());
-		event.setStartTime(oldEventValue.getStartTime());
-		event.setEndTime(oldEventValue.getEndTime());
-	}
-
-	/**
-	 * Из за того, что Primefaces проставляет 1970г если использовать компонент для ввода только времени необходимо
-	 * формировать корректное значение времени.
-	 *
-	 * @param time
-	 *            корректное время.
-	 * @param day
-	 *            день года.
-	 * @return Корректное время с корректной датой.
-	 */
-	private LocalDateTime fixDate(LocalDateTime time, LocalDate day) {
-		return LocalDateTime.of(day.getYear(), day.getMonth(), day.getDayOfMonth(), time.getHour(), time.getMinute());
-	}
-
-	/**
-	 * @return Реальное время ухода для текущего рабочего дня в формате <strong>HH:MM</strong>.
-	 */
-	private String getRealOutTimeValue() {
-		return toHHMM(workDay.getOutTime());
-	}
-
-	/**
-	 * Вычисляет возможное время ухода для текущего рабочего дня, как сумму {@linkplain WorkDay#getComingTime() время
-	 * прихода} + {@linkplain org.onbrains.entity.workDay.DayType#getWorkTimeInSecond() время которое надо отработать}.
-	 *
-	 * @return Возможное время ухода в милисекундах.
-	 */
-	private String getPossibleOutTimeValue() {
-		return workDay != null && !workDay.isNoWork()
-				? toHHMM(workDay.getComingTime().plusSeconds(workDay.getIdealWorkedTime())) : "__:__";
 	}
 
 	// *****************************************************************************************************************

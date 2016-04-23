@@ -9,11 +9,14 @@
 
     <ui:define name="body">
         <h:form>
+
+            <f:event listener="#{workDayCardViewModel.preRender()}" type="preRenderComponent" />
+
             <p:panel position="center" resizable="true">
                 <div class="ui-grid ui-grid-responsive">
 
                     <div class="ui-grid-row">
-                        <div class="ui-grid-col-6">
+                        <div class="ui-grid-col-6 padding-right-5-px">
                             <h4>Основная информация</h4>
 
                             <div class="ui-grid-row">
@@ -21,7 +24,7 @@
                                     <p:outputLabel for="day" value="День:"/>
                                 </div>
                                 <div class="ui-grid-col-2">
-                                    <h:outputText id="day" value="#{workDayCardViewModel.selectedWorkDay.day.day}"/>
+                                    <h:outputText id="day" value="#{workDayCardViewModel.workDay.day.day}"/>
                                 </div>
                             </div>
 
@@ -30,7 +33,7 @@
                                     <p:outputLabel for="day_of_week" value="День недели:"/>
                                 </div>
                                 <div class="ui-grid-col-2">
-                                    <h:outputText id="day_of_week" value="#{dateFormat.toEEEEE(workDayCardViewModel.selectedWorkDay.day.day)}"/>
+                                    <h:outputText id="day_of_week" value="#{dateFormat.toEEEEE(workDayCardViewModel.workDay.day.day)}"/>
                                 </div>
                             </div>
 
@@ -39,13 +42,13 @@
                                     <p:outputLabel for="day_type" value="Тип дня:"/>
                                 </div>
                                 <div class="ui-grid-col-2">
-                                    <h:outputText id="day_type" value="#{workDayCardViewModel.selectedWorkDay.day.type.desc}"/>
+                                    <h:outputText id="day_type" value="#{workDayCardViewModel.workDay.day.type.desc}"/>
                                 </div>
                             </div>
 
                         </div>
 
-                        <div class="ui-grid-col-6">
+                        <div class="ui-grid-col-6 padding-left-5-px">
                             <h4>Отработанное время</h4>
 
                             <div class="ui-grid-row">
@@ -53,8 +56,8 @@
                                     <p:outputLabel for="work_time" value="Рабочее время:"/>
                                 </div>
                                 <div class="ui-grid-col-2">
-                                    <h:outputText id="work_time" value="с #{workDayCardViewModel.selectedWorkDay.comingTimeValue}
-                                     по #{workDayCardViewModel.selectedWorkDay.outTimeValue}"/>
+                                    <h:outputText id="work_time" value="с #{workDayCardViewModel.workDay.comingTimeValue}
+                                     по #{workDayCardViewModel.workDay.outTimeValue}"/>
                                 </div>
                             </div>
 
@@ -63,7 +66,7 @@
                                     <p:outputLabel for="work_day_state" value="Состояние:"/>
                                 </div>
                                 <div class="ui-grid-col-2">
-                                    <h:outputText id="work_day_state" value="#{workDayCardViewModel.selectedWorkDay.state.desc}"/>
+                                    <h:outputText id="work_day_state" value="#{workDayCardViewModel.workDay.state.desc}"/>
                                 </div>
                              </div>
 
@@ -73,10 +76,10 @@
                 </div>
             </p:panel>
 
-            <wa:statistic id="work_day_statistic" statisticValues="#{currentDayFrameModel.workDayStatistic}"
-                          rendered="#{!currentDayFrameModel.workDay.noWork}"/>
+            <wa:statistic id="work_day_statistic" statisticValues="#{workDayCardViewModel.workDayStatistic}"
+                          rendered="#{!currentWorkDayFrameModel.workDay.noWork}"/>
 
-            <p:dataTable id="work_day_events_table" value="#{workDayCardViewModel.selectedWorkDay.events}"
+            <p:dataTable id="work_day_events_table" value="#{workDayCardViewModel.workDay.events}"
                          var="dayEvent" editable="true" styleClass="padding-top-10-px">
 
                 <p:ajax event="rowEdit" listener="#{workDayCardViewModel.onRowEdit}"/>
@@ -90,27 +93,30 @@
                     <p:commandButton icon="ui-icon-trash" action="#{workDayCardViewModel.removeEvent(dayEvent)}"
                                      update="@form"/>
                 </p:column>
+
                 <p:column headerText="Начало" style="text-align: center; width: 20%;">
                     <p:cellEditor>
                         <f:facet name="output">
-                            <h:outputText value="#{dateFormat.toHHMM(dayEvent.startTime.time)}"/>
+                            <h:outputText value="#{dateFormat.toHHMM(dayEvent.startTime)}"/>
                         </f:facet>
                         <f:facet name="input">
-                            <pe:timePicker value="#{dayEvent.startTime.time}" mode="popup"/>
+                            <pe:timePicker value="#{dayEvent.startTimeValue}" mode="popup"/>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
+
                 <p:column headerText="Окончание" style="text-align: center; width: 20%;">
                     <p:cellEditor>
                         <f:facet name="output">
-                            <h:outputText value="#{dayEvent.state == 'END' ? dateFormat.toHHMM(dayEvent.endTime.time) : null}"/>
+                            <h:outputText value="#{dayEvent.state == 'END' ? dateFormat.toHHMM(dayEvent.endTime) : null}"/>
                         </f:facet>
                         <f:facet name="input">
-                            <pe:timePicker value="#{dayEvent.endTime.time}"
+                            <pe:timePicker value="#{dayEvent.endTimeValue}"
                                            mode="popup" minHour="#{workDayCardViewModel.getMinHourForEndEvent(dayEvent)}"/>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
+
                 <p:column style="text-align: center; width: 12%;">
                     <p:rowEditor/>
                 </p:column>

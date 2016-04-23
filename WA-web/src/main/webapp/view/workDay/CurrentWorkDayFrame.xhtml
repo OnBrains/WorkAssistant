@@ -4,62 +4,62 @@
               xmlns:wa="http://onbrains.org/wa">
 
     <h:form id="current_day_form">
-        <p:fieldset legend="#{currentDayFrameModel.legendValue}">
+        <p:fieldset legend="#{currentWorkDayFrameModel.legendValue}">
 
-            <p:poll interval="60" stop="#{!currentDayFrameModel.workDay.working}" update="current_work_day_statistic"/>
+            <p:poll interval="60" stop="#{!currentWorkDayFrameModel.workDay.working}" update="current_work_day_statistic"/>
 
             <p:outputPanel id="current_work_day_statistic">
-                <wa:statistic statisticValues="#{currentDayFrameModel.workDayStatistic}"/>
+                <wa:statistic statisticValues="#{currentWorkDayFrameModel.workDayStatistic}"/>
             </p:outputPanel>
 
             <p:remoteCommand name="onRowEdit" update="current_day_events_table:work_day_time_info current_work_day_statistic"/>
 
-            <p:dataTable id="current_day_events_table" value="#{currentDayFrameModel.workDay.events}" var="dayEvent"
+            <p:dataTable id="current_day_events_table" value="#{currentWorkDayFrameModel.workDay.events}" var="dayEvent"
                          editable="true" scrollable="true" scrollHeight="100" styleClass="padding-top-10-px">
 
-                <p:ajax event="rowEdit" listener="#{currentDayFrameModel.onRowEdit}" oncomplete="onRowEdit()"/>
+                <p:ajax event="rowEdit" listener="#{currentWorkDayFrameModel.onRowEdit}" oncomplete="onRowEdit()"/>
 
                 <f:facet name="header">
                     <div class="ui-grid ui-grid-responsive">
                         <div class="ui-grid-row">
 
                             <p:outputPanel id="work_day_time_info" styleClass="ui-grid-col-8 align-left padding-top-15-px">
-                                <h:outputText value="#{currentDayFrameModel.timeInfo}"/>
+                                <h:outputText value="#{currentWorkDayFrameModel.timeInfo}"/>
                             </p:outputPanel>
 
                             <div class="ui-grid-col-4 align-right">
                                 <!--Начать событие-->
                                 <p:commandLink id="start_event_button" title="Начать событие" styleClass="padding-right-10-px"
-                                               rendered="#{!currentDayFrameModel.workDay.worked}">
+                                               rendered="#{!currentWorkDayFrameModel.workDay.worked}">
                                     <h:graphicImage name="img/clock/clock_play.png"/>
                                 </p:commandLink>
 
                                 <p:overlayPanel id="event_types_panel" for="start_event_button" hideEffect="fade"
-                                                rendered="#{!currentDayFrameModel.workDay.worked}">
-                                    <h:selectOneMenu id="event_type" value="#{currentDayFrameModel.selectedEventType}"
+                                                rendered="#{!currentWorkDayFrameModel.workDay.worked}">
+                                    <h:selectOneMenu id="event_type" value="#{currentWorkDayFrameModel.selectedEventType}"
                                                      styleClass="width-150-px" converter="#{persistentEntityConverter}">
 
                                         <f:selectItem itemLabel="Тип события" itemValue=""/>
 
-                                        <f:selectItems value="#{currentDayFrameModel.eventTypes}" var="selectedEventType"
+                                        <f:selectItems value="#{currentWorkDayFrameModel.eventTypes}" var="selectedEventType"
                                                        itemLabel="#{selectedEventType.title}"/>
 
-                                        <p:ajax event="change" listener="#{currentDayFrameModel.startEvent()}"
+                                        <p:ajax event="change" listener="#{currentWorkDayFrameModel.startEvent()}"
                                                 update="current_day_form :month_info_form"/>
 
                                     </h:selectOneMenu>
                                 </p:overlayPanel>
 
                                 <!--Закончить событие-->
-                                <p:commandLink id="stop_event_button" title="Закончить событие" action="#{currentDayFrameModel.stopLastActiveEvent()}"
-                                               disabled="#{!currentDayFrameModel.canStopEvent()}" rendered="#{!currentDayFrameModel.workDay.worked}"
+                                <p:commandLink id="stop_event_button" title="Закончить событие" action="#{currentWorkDayFrameModel.stopLastActiveEvent()}"
+                                               disabled="#{!currentWorkDayFrameModel.canStopEvent()}" rendered="#{!currentWorkDayFrameModel.workDay.worked}"
                                                update="current_day_form, :month_info_form" styleClass="padding-right-10-px">
                                     <h:graphicImage name="img/clock/clock_pause.png"/>
                                 </p:commandLink>
 
                                 <!--Закончить РД-->
-                                <p:commandLink id="stop_work_day_button" title="Закончить рабочий день" action="#{currentDayFrameModel.endWork()}"
-                                               rendered="#{!currentDayFrameModel.workDay.worked}" update="current_day_form, :month_info_form">
+                                <p:commandLink id="stop_work_day_button" title="Закончить рабочий день" action="#{currentWorkDayFrameModel.endWork()}"
+                                               rendered="#{!currentWorkDayFrameModel.workDay.worked}" update="current_day_form, :month_info_form">
                                     <h:graphicImage name="img/clock/clock_stop.png"/>
                                 </p:commandLink>
 
@@ -70,7 +70,7 @@
 
                 <p:column headerText="Событие" styleClass="with_delete_button width-50">
                     <h:outputText value="#{dayEvent.type.title}"/>
-                    <p:commandButton icon="ui-icon-trash" action="#{currentDayFrameModel.removeEvent(dayEvent)}"
+                    <p:commandButton icon="ui-icon-trash" action="#{currentWorkDayFrameModel.removeEvent(dayEvent)}"
                                      update="current_day_form, :month_info_form"/>
                 </p:column>
 
@@ -91,7 +91,7 @@
                             <h:outputText value="#{dayEvent.state == 'END' ? dateFormat.toHHMM(dayEvent.endTime) : null}"/>
                         </f:facet>
                         <f:facet name="input">
-                            <pe:timePicker value="#{dayEvent.endTimeValue}" minHour="#{currentDayFrameModel.getMinHourForEndEvent(dayEvent)}"/>
+                            <pe:timePicker value="#{dayEvent.endTimeValue}" minHour="#{currentWorkDayFrameModel.getMinHourForEndEvent(dayEvent)}"/>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
