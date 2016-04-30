@@ -7,7 +7,8 @@ import org.onbrains.entity.worker.Worker;
  */
 public interface LoginDAOInterface {
 
-    public Worker checkLogin(String login, String password);
-    public boolean isLoginUsed(String login);
+	public Worker checkLogin(String loginName, String password);
+
+	public boolean isLoginUsed(String login);
 
 }

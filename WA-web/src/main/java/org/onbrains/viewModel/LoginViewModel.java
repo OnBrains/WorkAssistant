@@ -1,24 +1,25 @@
 package org.onbrains.viewModel;
 
-import org.onbrains.dao.worker.LoginDAOInterface;
-import org.onbrains.entity.worker.Login;
-import org.onbrains.entity.worker.Worker;
-import org.onbrains.service.SessionUtil;
-import org.onbrains.utils.information.Notification;
+import java.io.Serializable;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
-import java.io.Serializable;
+
+import org.onbrains.dao.worker.LoginDAOInterface;
+import org.onbrains.entity.worker.Worker;
+import org.onbrains.service.SessionUtil;
+import org.onbrains.utils.information.Notification;
 
 /**
  * @author Naumov Oleg on 04.04.2015 19:54.
  */
-
 @ManagedBean
 @SessionScoped
 public class LoginViewModel implements Serializable {
+
+	private static final long serialVersionUID = 2505422498261747842L;
 
 	@Inject
 	private LoginDAOInterface ld;
@@ -35,11 +36,6 @@ public class LoginViewModel implements Serializable {
 			session.setAttribute("worker", worker);
 			return "home";
 		} else {
-			// FacesContext.getCurrentInstance().addMessage(
-			// null,
-			// new FacesMessage(FacesMessage.SEVERITY_WARN,
-			// "Ошибка при авторизации",
-			// "Повторите попытку входа"));
 			Notification.info("Ошибка при авторизации", "Повторите попытку входа");
 			return "login";
 		}
@@ -55,11 +51,9 @@ public class LoginViewModel implements Serializable {
 		return SessionUtil.getWorker();
 	}
 
-	/**
-	 * ****************************************************************************************************************
-	 * Simple getters and setters
-	 * ****************************************************************************************************************
-	 */
+	// *****************************************************************************************************************
+	// Simple getters and setters
+	// *****************************************************************************************************************
 
 	public String getLogin() {
 		return login;
@@ -74,8 +68,7 @@ public class LoginViewModel implements Serializable {
 	}
 
 	public void setPassword(String password) {
-		String hashPassword = Login.pref + password;
-		this.password = String.valueOf(hashPassword.hashCode());
+		this.password = password;
 	}
 
 }
