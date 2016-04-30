@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.ejb.Stateless;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -24,11 +23,13 @@ import org.primefaces.event.RowEditEvent;
 /**
  * @author Naumov Oleg on 12.04.2016.
  */
+@Named
+@ViewScoped
 public class WorkDayFrameModel implements Serializable {
 
-    private static final long serialVersionUID = 3087806454501024801L;
+	private static final long serialVersionUID = 3087806454501024801L;
 
-    @Inject
+	@Inject
 	private EntityManagerUtils em;
 
 	protected WorkDay workDay;
@@ -38,7 +39,6 @@ public class WorkDayFrameModel implements Serializable {
 	}
 
 	public List<StatisticValue> getWorkDayStatistic() {
-
 		List<StatisticValue> workDayStatistic = new LinkedList<>();
 		if (workDay != null) {
 			if (!workDay.isNoWork()) {
@@ -67,7 +67,7 @@ public class WorkDayFrameModel implements Serializable {
 			editableEvent.setEndTime(endTime);
 			workDay.changeTimeBy(editableEvent);
 			em.merge(workDay);
-			em.merge(editableEvent);
+//			em.merge(editableEvent);
 		} else {
 			refreshEvent(editableEvent);
 			Notification.warn("Невозможно сохранить изменения", "Пересечение временых интервалов у событий");

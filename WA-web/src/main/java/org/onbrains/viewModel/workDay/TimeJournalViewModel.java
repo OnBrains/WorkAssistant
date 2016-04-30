@@ -21,7 +21,6 @@ import org.onbrains.entity.day.Day;
 import org.onbrains.entity.workDay.DayType;
 import org.onbrains.entity.workDay.WorkDay;
 import org.onbrains.service.SessionUtil;
-import org.onbrains.utils.information.Notification;
 import org.onbrains.viewModel.workDay.monthStatistic.CurrentMonthStatisticService;
 import org.onbrains.viewModel.workDay.monthStatistic.MonthStatisticService;
 

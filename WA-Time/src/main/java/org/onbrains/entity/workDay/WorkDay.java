@@ -46,7 +46,7 @@ import org.onbrains.utils.parsing.DateFormatService;
 		@NamedQuery(name = WorkDay.GET_WORK_DAY, query = "select wt from WorkDay wt where wt.worker = :worker and wt.day = :day") })
 public class WorkDay extends SuperClass {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 7775018608493817569L;
 
 	public static final String GET_WORK_DAYS_BY_MONTH = "WorkTimeDAO.getWorkDaysByMonth";
 	public static final String GET_WORK_DAY = "WorkTimeDAO.getWorkDay";
@@ -71,9 +71,11 @@ public class WorkDay extends SuperClass {
 	@Column(name = "STATE", length = 16, nullable = false)
 	private WorkDayState state = WorkDayState.NO_WORK;
 
-	@ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE })
-	@JoinTable(name = "WORK_DAY_EVENT", joinColumns = { @JoinColumn(name = "WORK_DAY_ID") }, inverseJoinColumns = {
-			@JoinColumn(name = "EVENT_ID") })
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinTable(name = "WORK_DAY_EVENT", joinColumns = {
+			@JoinColumn(name = "WORK_DAY_ID", nullable = false) }, inverseJoinColumns = {
+					@JoinColumn(name = "EVENT_ID", nullable = false) }, uniqueConstraints = {
+							@UniqueConstraint(columnNames = { "WORK_DAY_ID", "EVENT_ID" }) })
 	@OrderBy(value = "startTime desc")
 	private List<Event> events = new ArrayList<>();
 
@@ -140,7 +142,7 @@ public class WorkDay extends SuperClass {
 	public String addEvent(Event additionEvent) {
 		if (!additionEvent.getType().getCategory().equals(NOT_INFLUENCE_ON_WORKED_TIME)
 				&& isPossibleTimeBoundaryForEvent(additionEvent.getStartTime(), additionEvent.getEndTime())) {
-			events.add(additionEvent);
+			getEvents().add(additionEvent);
 			changeTimeBy(additionEvent);
 		} else {
 			return "Пересечение временых интервалов у событий";

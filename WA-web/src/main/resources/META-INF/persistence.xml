@@ -19,7 +19,7 @@
             <property name="current_session_context_class" value="thread"/>
             <property name="hibernate.cache.use_second_level_cache" value="true"/>
             <property name="hibernate.cache.use_query_cache" value="true"/>
-            <property name="hibernate.show_sql" value="true"/>
+            <!--<property name="hibernate.show_sql" value="true"/>-->
             <property name="hibernate.format_sql" value="true"/>
             <!--<property name="hibernate.hbm2ddl.auto" value="update"/>-->
             <property name="hibernate.connection.autocommit" value="true"/>
@@ -28,4 +28,4 @@
         </properties>
     </persistence-unit>
 
-</persistence> 
+</persistence>

@@ -9,8 +9,7 @@
 
     <ui:define name="body">
 
-            <pe:layoutPane id="current_work_day_panel" position="west" closable="true" resizable="false" size="480"
-                           minSize="480">
+            <pe:layoutPane id="current_work_day_panel" position="west" closable="true" resizable="false" size="480" minSize="480">
                 <ui:include src="/view/workDay/CurrentWorkDayFrame.xhtml"/>
             </pe:layoutPane>
 
@@ -46,34 +45,34 @@
                         </f:facet>
 
                         <p:column headerText="Тип дня" width="10%">
-                            <h:link value="#{workDay.day.type.desc}" outcome="WorkDayCardView.xhtml">
-                                <f:param name="workDay" value="#{workDay}"/>
-                            </h:link>
+                            <h:outputText value="#{workDay.day.type.desc}" rendered="#{workDay.day.type eq 'SHORT_WORK_DAY'}"/>
                         </p:column>
 
                         <p:column headerText="День" styleClass="align-center">
-                            <h:outputText value="#{dateFormat.toDDEE(workDay.day.day)}"/>
+                            <h:link value="#{dateFormat.toDDEE(workDay.day.day)}" outcome="WorkDayCardView.xhtml">
+                                <f:param name="workDay" value="#{workDay}"/>
+                            </h:link>
                         </p:column>
 
                         <p:column id="start_work_day_id" styleClass="align-center width-10">
                             <f:facet name="header">
                                 <h:graphicImage name="img/clock/clock_play.png" title="Начало рабочего дня"/>
                             </f:facet>
-                            <!--<h:outputText value="#{dateFormat.toHHMM(workDay.comingTime)}"/>-->
+                            <h:outputText value="#{dateFormat.toHHMM(workDay.comingTime)}"/>
                         </p:column>
 
                         <p:column id="end_work_day_id" styleClass="align-center width-10">
                             <f:facet name="header">
                                 <h:graphicImage name="img/clock/clock_stop.png" title="Окончание рабочего дня"/>
                             </f:facet>
-                            <!--<h:outputText value="#{dateFormat.toHHMM(workDay.outTime)}" rendered="#{workDay.worked}"/>-->
+                            <h:outputText value="#{dateFormat.toHHMM(workDay.outTime)}" rendered="#{workDay.worked}"/>
                         </p:column>
 
                         <p:column id="summary_work_day_id" styleClass="align-center width-10">
                             <f:facet name="header">
                                 <h:graphicImage name="img/clock/clock_link.png" title="Отработанное время"/>
                             </f:facet>
-                            <!--<h:outputText value="#{dateFormat.secToHHMM(workDay.workedTime)}" rendered="#{workDay.worked}"/>-->
+                            <h:outputText value="#{dateFormat.secToHHMM(workDay.workedTime)}" rendered="#{workDay.worked}"/>
                         </p:column>
 
                         <p:column id="delta_work_day_id" styleClass="align-center width-10">

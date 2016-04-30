@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -16,10 +17,12 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.onbrains.entity.SuperClass;
+import org.onbrains.entity.workDay.WorkDay;
 import org.onbrains.utils.jpa.converter.LocalDateAttributeConverter;
 import org.onbrains.utils.jpa.converter.LocalDateTimeAttributeConverter;
 
@@ -38,7 +41,9 @@ import org.onbrains.utils.jpa.converter.LocalDateTimeAttributeConverter;
 @Table(name = "EVENT")
 public class Event extends SuperClass {
 
-	@Column(name = "DAY", nullable = false)
+    private static final long serialVersionUID = 7713501051336165237L;
+
+    @Column(name = "DAY", nullable = false)
 	@Convert(converter = LocalDateAttributeConverter.class)
 	private LocalDate day;
 

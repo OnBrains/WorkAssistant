@@ -37,7 +37,7 @@
                         <f:facet name="header">
                             <p:commandButton id="event_type_creation_button" icon="fa fa-plus" process="@this"
                                              styleClass="float-right margin-5-px" action="#{eventTypesDirectory.openCreationDialog()}"
-                                             oncomplete="PF('creationEventTypeDialogVar').show();"/>
+                                             oncomplete="PF('creationEventTypeDialogVar').show();" title="Создать тип события"/>
                         </f:facet>
 
                         <p:column headerText="Активность" styleClass="width-10 align-center">
