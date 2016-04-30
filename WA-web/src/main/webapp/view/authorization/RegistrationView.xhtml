@@ -1,0 +1,46 @@
+<ui:composition template="/view/overall/View.xhtml" xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html" xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core">
+
+    <ui:define name="header">
+        <title>Регистрация</title>
+    </ui:define>
+
+    <ui:define name="mainMenu">
+        <ui:param name="hideMenuPanel" value="true"/>
+    </ui:define>
+
+    <ui:define name="body">
+        <h:form id="registration_form">
+
+            <p:panel header="Регистрация" styleClass="registration_panel">
+
+                <h:panelGrid columns="2" cellpadding="5">
+                    <p:outputLabel for="username" value="Логин:"/>
+                    <p:inputText id="username" value="#{registrationViewModel.login}" required="true"
+                                 maxlength="32" style="width: 240px;">
+                        <f:validateRegex pattern="^[a-zA-Z-_]+$"/>
+                    </p:inputText>
+
+                    <p:outputLabel for="password" value="Пароль:"/>
+                    <p:password id="password" value="#{registrationViewModel.password}" required="true" feedback="true"
+                                maxlength="32" style="width: 240px;"/>
+
+                    <p:outputLabel for="repeate_password" value="Подтверждение:" />
+                    <p:password id="repeate_password" value="#{registrationViewModel.repeatPassword}" required="true"
+                                maxlength="32" style="width: 240px;"/>
+
+                    <f:facet name="footer">
+                        <div class="align-right">
+                            <p:commandButton value="Зарегестрироваться" action="#{registrationViewModel.createWorker()}"
+                                             update="registration_form" ajax="true"/>
+                        </div>
+                    </f:facet>
+                </h:panelGrid>
+
+            </p:panel>
+
+        </h:form>
+    </ui:define>
+
+</ui:composition>

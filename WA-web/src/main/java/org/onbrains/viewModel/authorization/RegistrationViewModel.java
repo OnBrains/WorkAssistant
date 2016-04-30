@@ -1,48 +1,46 @@
 package org.onbrains.viewModel.authorization;
 
-import org.onbrains.dao.EntityManagerUtils;
-import org.onbrains.dao.worker.LoginDAOInterface;
-import org.onbrains.dao.worker.WorkerDAOInterface;
-import org.onbrains.entity.worker.Login;
-import org.onbrains.entity.worker.Worker;
-import org.onbrains.entity.worker.WorkerSex;
-import org.onbrains.service.SessionUtil;
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.List;
 
+import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import javax.inject.Named;
 import javax.servlet.http.HttpSession;
-import javax.transaction.Transactional;
-import java.io.Serializable;
+
+import org.onbrains.dao.EntityManagerUtils;
+import org.onbrains.dao.day.DayDAOInterface;
+import org.onbrains.dao.worker.LoginDAOInterface;
+import org.onbrains.entity.day.Day;
+import org.onbrains.entity.workDay.WorkDay;
+import org.onbrains.entity.worker.Login;
+import org.onbrains.entity.worker.Worker;
+import org.onbrains.service.SessionUtil;
 
 /**
  * @author Naumov Oleg on 19.04.2015 17:53.
  */
-
-@ManagedBean
+@Named
 @RequestScoped
 public class RegistrationViewModel implements Serializable {
+
+	private static final long serialVersionUID = 1424337630727020939L;
 
 	@Inject
 	private EntityManagerUtils em;
 	@Inject
 	LoginDAOInterface lDAO;
 	@Inject
-	WorkerDAOInterface wDAO;
+	private DayDAOInterface dDAO;
 
 	private String login;
 	private String password;
 	private String repeatPassword;
 
 	private Worker newWorker = new Worker();
-
-	public WorkerSex[] getWorkerSexs() {
-		return WorkerSex.values();
-	}
 
 	public String createWorker() {
 		if (lDAO.isLoginUsed(login)) {
@@ -53,13 +51,18 @@ public class RegistrationViewModel implements Serializable {
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN,
 					"Ошибка при регистрации", "Неправильное подтверждение пароля"));
 			return "";
-		} else {
-			em.persist(newWorker);
-			em.persist(new Login(login, password, newWorker));
-			login();
-			return "home";
 		}
+		newWorker.setFirstName(login);
+		em.persist(newWorker);
+		em.persist(new Login(login, password, newWorker));
+		createWorkDays();
+		login();
+		return "home";
 	}
+
+	// *****************************************************************************************************************
+	// Private methods
+	// *****************************************************************************************************************
 
 	private void login() {
 		HttpSession session = SessionUtil.getSession();
@@ -67,6 +70,17 @@ public class RegistrationViewModel implements Serializable {
 		session.setAttribute("workerId", newWorker.getId());
 		session.setAttribute("worker", newWorker);
 	}
+
+	private void createWorkDays() {
+		List<Day> daysBySelectedMonth = dDAO.getDaysByMonth(LocalDate.now());
+		for (Day day : daysBySelectedMonth) {
+			em.persist(new WorkDay(newWorker, day));
+		}
+	}
+
+	// *****************************************************************************************************************
+	// Simple getters and setters
+	// *****************************************************************************************************************
 
 	public String getLogin() {
 		return login;
@@ -81,8 +95,7 @@ public class RegistrationViewModel implements Serializable {
 	}
 
 	public void setPassword(String password) {
-		String hashPassword = Login.pref + password;
-		this.password = String.valueOf(hashPassword.hashCode());
+		this.password = password;
 	}
 
 	public String getRepeatPassword() {
@@ -90,16 +103,7 @@ public class RegistrationViewModel implements Serializable {
 	}
 
 	public void setRepeatPassword(String repeatPassword) {
-		String hashPassword = Login.pref + repeatPassword;
-		this.repeatPassword = String.valueOf(hashPassword.hashCode());
-	}
-
-	public Worker getNewWorker() {
-		return newWorker;
-	}
-
-	public void setNewWorker(Worker newWorker) {
-		this.newWorker = newWorker;
+		this.repeatPassword = repeatPassword;
 	}
 
 }

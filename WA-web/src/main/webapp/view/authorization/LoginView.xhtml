@@ -1,0 +1,44 @@
+<ui:composition template="/view/overall/View.xhtml" xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html" xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core">
+
+    <ui:define name="header">
+        <title>Авторизация</title>
+    </ui:define>
+
+    <ui:define name="mainMenu">
+        <ui:param name="hideMenuPanel" value="true"/>
+    </ui:define>
+
+    <ui:define name="body">
+        <h:form id="login_form">
+
+            <p:panel header="Вход в систему" styleClass="login_panel">
+                <h:panelGrid id="login_panel" columns="2" cellpadding="5">
+
+                    <p:outputLabel for="login" value="Логин:"/>
+                    <p:inputText id="login" value="#{loginViewModel.login}" required="true" style="width: 240px;"/>
+
+                    <p:outputLabel for="password" value="Пароль:" />
+                    <p:password id="password" value="#{loginViewModel.password}" feedback="false" required="true"
+                                style="width: 240px;"/>
+
+                    <f:facet name="footer">
+                        <div class="align-right">
+                            <p:commandButton action="#{loginViewModel.checkLogin}" value="Вход" update="login_form" ajax="true"/>
+                        </div>
+                    </f:facet>
+
+                </h:panelGrid>
+
+                <p:separator/>
+
+                <p:outputPanel style="text-align: center;">
+                    <p:link outcome="RegistrationView" value="Присоединиться к WorkAssistant"/>
+                </p:outputPanel>
+            </p:panel>
+
+        </h:form>
+    </ui:define>
+
+</ui:composition>
