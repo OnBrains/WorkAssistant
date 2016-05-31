@@ -1,7 +1,6 @@
 package org.onbrains.dao.workDay.implementation;
 
 import java.io.Serializable;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -21,25 +20,24 @@ import org.onbrains.entity.worker.Worker;
 /**
  * @author Naumov Oleg on 22.03.2015 14:47.
  */
-
 @Stateless
 public class WorkDayDAO implements WorkDayDAOInterface, Serializable {
 
-	private static final long serialVersionUID = -1L;
+	private static final long serialVersionUID = 389871381513853591L;
 
 	@PersistenceContext(unitName = "WA")
 	private EntityManager em;
 
-    @Inject
-    private DayDAOInterface dDAO;
+	@Inject
+	private DayDAOInterface dDAO;
 
 	@Override
 	public WorkDay getWorkDay(LocalDate day, Worker currentWorker) {
 		WorkDay currentDay;
 		try {
-            Day d = (Day) em.createQuery("from Day where day = :ddd").setParameter("ddd", day).getSingleResult();
-			currentDay = em.createNamedQuery(WorkDay.GET_WORK_DAY, WorkDay.class)
-					.setParameter("worker", currentWorker).setParameter("day", d).getSingleResult();
+			Day d = (Day) em.createQuery("from Day where date = :ddd").setParameter("ddd", day).getSingleResult();
+			currentDay = em.createNamedQuery(WorkDay.GET_WORK_DAY, WorkDay.class).setParameter("worker", currentWorker)
+					.setParameter("day", d).getSingleResult();
 		} catch (NoResultException ex) {
 			return null;
 		}

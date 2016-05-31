@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
+import org.onbrains.entity.event.Event;
+import org.onbrains.entity.event.EventType;
 import org.onbrains.entity.workDay.WorkDay;
 import org.onbrains.entity.worker.Worker;
 

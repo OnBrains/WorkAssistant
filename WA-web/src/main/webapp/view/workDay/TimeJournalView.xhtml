@@ -24,7 +24,8 @@
                         <p:commandButton id="create_days_for_month" value="+" action="#{timeJournalViewModel.createWorkDays}"
                                          rendered="#{empty timeJournalViewModel.workDays}" styleClass="float-left margin-10-px"
                                          update=":month_info_form, :month_statistic"/>
-                        <p:commandButton value="Событие" styleClass="float-right margin-10-px" title="Данная функция еще не реализована"/>
+                        <p:commandButton value="Событие" styleClass="float-right margin-10-px" update=":month_info_form"
+                                         oncomplete="PF('eventCreationDialogVar').show();" title="Создать событие"/>
                     </p:outputPanel>
                 </h:form>
 
@@ -49,7 +50,7 @@
                         </p:column>
 
                         <p:column headerText="День" styleClass="align-center">
-                            <h:link value="#{dateFormat.toDDEE(workDay.day.day)}" outcome="WorkDayCardView.xhtml">
+                            <h:link value="#{dateFormat.toDDEE(workDay.day.date)}" outcome="WorkDayCardView.xhtml">
                                 <f:param name="workDay" value="#{workDay}"/>
                             </h:link>
                         </p:column>
@@ -91,6 +92,12 @@
                 </h:form>
             </pe:layoutPane>
 
+    </ui:define>
+
+    <ui:define name="dialogs">
+        <ui:include src="../event/EventCreationDialog.xhtml">
+            <ui:param name="canCreateInterval" value="true"/>
+        </ui:include>
     </ui:define>
 
 </ui:composition>

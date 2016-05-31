@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -17,7 +16,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -41,11 +39,15 @@ import org.onbrains.utils.jpa.converter.LocalDateTimeAttributeConverter;
 @Table(name = "EVENT")
 public class Event extends SuperClass {
 
-    private static final long serialVersionUID = 7713501051336165237L;
+	private static final long serialVersionUID = 7713501051336165237L;
 
-    @Column(name = "DAY", nullable = false)
+	@Column(name = "DAY", nullable = false)
 	@Convert(converter = LocalDateAttributeConverter.class)
 	private LocalDate day;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "WORK_DAY_ID", nullable = false)
+	private WorkDay workDay;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "TYPE_ID", nullable = false)
@@ -56,6 +58,9 @@ public class Event extends SuperClass {
 
 	@Column(name = "DESCRIPTION", nullable = true, length = 512)
 	private String description;
+
+	@Column(name = "FULL_DAY")
+	private Boolean fullDay;
 
 	@Column(name = "START_TIME", nullable = false)
 	@Convert(converter = LocalDateTimeAttributeConverter.class)
@@ -72,8 +77,9 @@ public class Event extends SuperClass {
 	protected Event() {
 	}
 
-	public Event(LocalDate day, EventType type, String title, LocalDateTime startTime) {
-		this.day = day;
+	public Event(WorkDay workDay, EventType type, String title, LocalDateTime startTime) {
+		this.day = workDay.getDay().getDate();
+		this.workDay = workDay;
 		this.type = type;
 		this.title = title;
 		this.startTime = startTime.truncatedTo(ChronoUnit.MINUTES);
@@ -81,9 +87,21 @@ public class Event extends SuperClass {
 		this.state = EventState.NOT_END;
 	}
 
+	public Event(WorkDay workDay, EventType type, String title, Boolean fullDay, LocalDateTime startTime,
+			LocalDateTime endTime) {
+		this(workDay, type, title, startTime);
+		this.fullDay = fullDay;
+		this.endTime = endTime;
+		this.state = EventState.END;
+	}
+
 	// *****************************************************************************************************************
 	// Service methods
 	// *****************************************************************************************************************
+
+	public EventCategory getCategory() {
+		return type.getCategory();
+	}
 
 	public Long getWorkedTime() {
 		return calculationWorkedTime();
@@ -122,7 +140,7 @@ public class Event extends SuperClass {
 		switch (type.getCategory()) {
 		case INFLUENCE_ON_WORKED_TIME:
 			if (state.equals(END)) {
-				return Duration.between(startTime, endTime).getSeconds();
+				return fullDay ? workDay.getIdealWorkedTime() : Duration.between(startTime, endTime).getSeconds();
 			} else {
 				return Duration.between(startTime, LocalDateTime.now()).getSeconds();
 			}
@@ -146,6 +164,14 @@ public class Event extends SuperClass {
 
 	public void setDay(LocalDate day) {
 		this.day = day;
+	}
+
+	public WorkDay getWorkDay() {
+		return workDay;
+	}
+
+	public void setWorkDay(WorkDay workDay) {
+		this.workDay = workDay;
 	}
 
 	/**

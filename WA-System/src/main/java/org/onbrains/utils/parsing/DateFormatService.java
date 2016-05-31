@@ -1,11 +1,14 @@
 package org.onbrains.utils.parsing;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,6 +24,28 @@ public class DateFormatService implements Serializable {
 
 	public final static Long SEC_IN_HOUR = 3600L;
 	public final static Long SEC_IN_MINUTE = 60L;
+
+	/**
+	 * Из за того, что Primefaces проставляет 1970г если использовать компонент для ввода только времени необходимо
+	 * формировать корректное значение времени.
+	 *
+	 * @param time
+	 *            корректное время.
+	 * @param day
+	 *            день года.
+	 * @return Корректное время с корректной датой.
+	 */
+    public static LocalDateTime fixDate(LocalDateTime time, LocalDate day) {
+		return LocalDateTime.of(day.getYear(), day.getMonth(), day.getDayOfMonth(), time.getHour(), time.getMinute());
+	}
+
+    public static Date localDateToDate(LocalDate localDate) {
+        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
+
+    public static LocalDate dateToLocalDate(Date date) {
+        return Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+    }
 
 	/**
 	 * Получает из даты информацию о времени.

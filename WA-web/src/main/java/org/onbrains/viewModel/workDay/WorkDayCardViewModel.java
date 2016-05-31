@@ -10,6 +10,7 @@ import javax.inject.Named;
 import org.onbrains.dao.EntityManagerUtils;
 import org.onbrains.entity.event.Event;
 import org.onbrains.entity.workDay.WorkDay;
+import org.onbrains.viewModel.event.EventCreationDialog;
 
 /**
  * @author Naumov Oleg on 09.10.2015 21:42.
@@ -22,18 +23,19 @@ public class WorkDayCardViewModel extends WorkDayFrameModel {
 
 	@Inject
 	private EntityManagerUtils em;
+	@Inject
+	private EventCreationDialog eventCreationDialog;
 
 	public void preRender() {
 		setWorkDay(initWorkDay());
 	}
 
-	// @PostConstruct
-	// public void postConstruct() {
-	// workDay = initWorkDay();
-	// }
-
 	public int getMinHourForEndEvent(Event event) {
 		return event.getStartTime().get(ChronoField.HOUR_OF_DAY);
+	}
+
+	public void onEventCreationDialogOpen() {
+		eventCreationDialog.setWorkDay(workDay);
 	}
 
 	// *****************************************************************************************************************

@@ -8,7 +8,7 @@
     </ui:define>
 
     <ui:define name="body">
-        <h:form>
+        <h:form id="work_day_info_form">
 
             <f:event listener="#{workDayCardViewModel.preRender()}" type="preRenderComponent" />
 
@@ -24,7 +24,7 @@
                                     <p:outputLabel for="day" value="День:"/>
                                 </div>
                                 <div class="ui-grid-col-2">
-                                    <h:outputText id="day" value="#{workDayCardViewModel.workDay.day.day}"/>
+                                    <h:outputText id="day" value="#{workDayCardViewModel.workDay.day.date}"/>
                                 </div>
                             </div>
 
@@ -33,7 +33,7 @@
                                     <p:outputLabel for="day_of_week" value="День недели:"/>
                                 </div>
                                 <div class="ui-grid-col-2">
-                                    <h:outputText id="day_of_week" value="#{dateFormat.toEEEEE(workDayCardViewModel.workDay.day.day)}"/>
+                                    <h:outputText id="day_of_week" value="#{dateFormat.toEEEEE(workDayCardViewModel.workDay.day.date)}"/>
                                 </div>
                             </div>
 
@@ -66,7 +66,21 @@
                                     <p:outputLabel for="work_day_state" value="Состояние:"/>
                                 </div>
                                 <div class="ui-grid-col-2">
-                                    <h:outputText id="work_day_state" value="#{workDayCardViewModel.workDay.state.desc}"/>
+                                    <p:inplace editor="true" emptyLabel="-">
+                                        <p:ajax event="save" listener="#{workDayCardViewModel.onWorkDayEdit()}" update="@this"/>
+
+                                        <f:facet name="output">
+                                            <h:outputText id="work_day_state" value="#{workDayCardViewModel.workDay.state.desc}"/>
+                                        </f:facet>
+
+                                        <f:facet name="input">
+                                            <p:selectOneMenu value="#{workDayCardViewModel.workDay.state}" style="width: 200px;">
+                                                <f:selectItems value="#{workDayCardViewModel.workDayStates}" var="workDayState"
+                                                               itemValue="#{workDayState}" itemLabel="#{workDayState.desc}" update="work_day_statistic"/>
+                                            </p:selectOneMenu>
+                                        </f:facet>
+
+                                    </p:inplace>
                                 </div>
                              </div>
 
@@ -76,8 +90,10 @@
                 </div>
             </p:panel>
 
-            <wa:statistic id="work_day_statistic" statisticValues="#{workDayCardViewModel.workDayStatistic}"
-                          rendered="#{!currentWorkDayFrameModel.workDay.noWork}"/>
+            <p:outputPanel id="work_day_statistic_panel">
+                <wa:statistic id="work_day_statistic" statisticValues="#{workDayCardViewModel.workDayStatistic}"
+                              rendered="#{!currentWorkDayFrameModel.workDay.noWork}"/>
+            </p:outputPanel>
 
             <p:dataTable id="work_day_events_table" value="#{workDayCardViewModel.workDay.events}"
                          var="dayEvent" editable="true" styleClass="padding-top-10-px">
@@ -86,15 +102,23 @@
 
                 <f:facet name="header">
                     Список событий
+
+                    <p:commandButton id="event_creation_button" icon="fa fa-plus" process="@this"
+                                     styleClass="float-right margin-5-px" onclick="#{workDayCardViewModel.onEventCreationDialogOpen()}"
+                                     oncomplete="PF('eventCreationDialogVar').show();" title="Создать событие"/>
                 </f:facet>
 
                 <p:column headerText="Тип" style="width: 48%;" styleClass="with_delete_button">
                     #{dayEvent.type.title}
                     <p:commandButton icon="ui-icon-trash" action="#{workDayCardViewModel.removeEvent(dayEvent)}"
-                                     update="@form"/>
+                                     update="work_day_events_table :work_day_info_form:work_day_statistic_panel :work_day_info_form:work_time :work_day_info_form:work_day_state"/>
                 </p:column>
 
-                <p:column headerText="Начало" style="text-align: center; width: 20%;">
+                <p:column style="text-align: center; width: 20%;">
+                    <f:facet name="header">
+                        <h:graphicImage name="img/clock/clock_play.png" title="Начало события"/>
+                    </f:facet>
+
                     <p:cellEditor>
                         <f:facet name="output">
                             <h:outputText value="#{dateFormat.toHHMM(dayEvent.startTime)}"/>
@@ -106,6 +130,10 @@
                 </p:column>
 
                 <p:column headerText="Окончание" style="text-align: center; width: 20%;">
+                    <f:facet name="header">
+                        <h:graphicImage name="img/clock/clock_stop.png" title="Окончание события"/>
+                    </f:facet>
+
                     <p:cellEditor>
                         <f:facet name="output">
                             <h:outputText value="#{dayEvent.state == 'END' ? dateFormat.toHHMM(dayEvent.endTime) : null}"/>
@@ -117,13 +145,21 @@
                     </p:cellEditor>
                 </p:column>
 
-                <p:column style="text-align: center; width: 12%;">
+                <p:column style="text-align: center; width: 20px;">
                     <p:rowEditor/>
                 </p:column>
             </p:dataTable>
 
         </h:form>
 
+    </ui:define>
+
+    <ui:define name="dialogs">
+        <ui:include src="../event/EventCreationDialog.xhtml">
+            <ui:param name="canCreateInterval" value="false"/>
+            <ui:param name="disabledStartDay" value="true"/>
+            <ui:param name="update_params" value=":work_day_info_form:work_day_statistic_panel :work_day_info_form:work_time :work_day_info_form:work_day_events_table"/>
+        </ui:include>
     </ui:define>
 
 </ui:composition>

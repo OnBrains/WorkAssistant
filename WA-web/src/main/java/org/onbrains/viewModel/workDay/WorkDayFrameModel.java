@@ -1,10 +1,10 @@
 package org.onbrains.viewModel.workDay;
 
 import static org.onbrains.entity.event.EventState.END;
+import static org.onbrains.utils.parsing.DateFormatService.fixDate;
 import static org.onbrains.utils.parsing.DateFormatService.toHHMM;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +17,7 @@ import org.onbrains.component.statistic.StatisticValue;
 import org.onbrains.dao.EntityManagerUtils;
 import org.onbrains.entity.event.Event;
 import org.onbrains.entity.workDay.WorkDay;
+import org.onbrains.entity.workDay.WorkDayState;
 import org.onbrains.utils.information.Notification;
 import org.primefaces.event.RowEditEvent;
 
@@ -66,18 +67,24 @@ public class WorkDayFrameModel implements Serializable {
 			editableEvent.setStartTime(startTime);
 			editableEvent.setEndTime(endTime);
 			workDay.changeTimeBy(editableEvent);
+			em.merge(editableEvent);
 			em.merge(workDay);
-//			em.merge(editableEvent);
 		} else {
 			refreshEvent(editableEvent);
 			Notification.warn("Невозможно сохранить изменения", "Пересечение временых интервалов у событий");
 		}
 	}
 
+    public void onWorkDayEdit() {
+        em.merge(workDay);
+    }
+
 	public void removeEvent(Event removingEvent) {
-		workDay.removeEvent(removingEvent);
-		em.merge(workDay);
-		em.remove(removingEvent);
+//		em.remove(removingEvent);
+//        em.flush();
+        workDay.removeEvent(removingEvent);
+        em.merge(workDay);
+        em.remove(removingEvent);
 	}
 
 	/**
@@ -104,29 +111,14 @@ public class WorkDayFrameModel implements Serializable {
 	public String getOutTimeValue() {
 		if (workDay != null && !workDay.isNoWork()) {
 			return workDay.isWorked() ? getRealOutTimeValue() : getPossibleOutTimeValue();
-		} else {
-			return "__:__";
 		}
+		return "__:__";
 	}
 
 	private void refreshEvent(Event event) {
 		Event oldEventValue = em.find(Event.class, event.getId());
 		event.setStartTime(oldEventValue.getStartTime());
 		event.setEndTime(oldEventValue.getEndTime());
-	}
-
-	/**
-	 * Из за того, что Primefaces проставляет 1970г если использовать компонент для ввода только времени необходимо
-	 * формировать корректное значение времени.
-	 *
-	 * @param time
-	 *            корректное время.
-	 * @param day
-	 *            день года.
-	 * @return Корректное время с корректной датой.
-	 */
-	private LocalDateTime fixDate(LocalDateTime time, LocalDate day) {
-		return LocalDateTime.of(day.getYear(), day.getMonth(), day.getDayOfMonth(), time.getHour(), time.getMinute());
 	}
 
 	/**
@@ -146,5 +138,9 @@ public class WorkDayFrameModel implements Serializable {
 		return workDay != null && !workDay.isNoWork()
 				? toHHMM(workDay.getComingTime().plusSeconds(workDay.getIdealWorkedTime())) : "__:__";
 	}
+
+    public WorkDayState[] getWorkDayStates() {
+        return WorkDayState.values();
+    }
 
 }
