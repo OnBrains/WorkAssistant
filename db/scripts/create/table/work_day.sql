@@ -6,7 +6,8 @@ CREATE
     day_id      NUMBER NOT NULL,
     coming_time DATE,
     out_time    DATE,
-    state       VARCHAR2(16) NOT NULL
+    state       VARCHAR2(16) NOT NULL,
+    description VARCHAR2(256)
   );
   
 ALTER TABLE work_day ADD CONSTRAINT fk_wd_to_worker FOREIGN KEY (worker_id) REFERENCES worker (id);
@@ -25,3 +26,4 @@ COMMENT ON column work_day.day_id IS 'Ссылка на день';
 COMMENT ON column work_day.coming_time IS 'Время начала рабочего дня';
 COMMENT ON column work_day.out_time IS 'Время окончания рабочего дня';
 COMMENT ON column work_day.state IS 'Состояние рабочего дня';
+COMMENT ON column work_day.description IS 'Примечаине рабочего дня';
