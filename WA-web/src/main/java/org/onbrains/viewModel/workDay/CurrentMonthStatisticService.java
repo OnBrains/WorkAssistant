@@ -1,11 +1,10 @@
-package org.onbrains.viewModel.workDay.monthStatistic;
+package org.onbrains.viewModel.workDay;
 
 import java.time.LocalDate;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import org.onbrains.entity.workDay.WorkDay;
+import org.onbrains.viewModel.workDay.monthStatistic.MonthStatisticService;
 
 /**
  * Сервис для расчёта статистики отработанного времени для текущего месяца.
@@ -25,7 +24,7 @@ public class CurrentMonthStatisticService extends MonthStatisticService {
 		LocalDate currentDay = LocalDate.now().minusDays(1);
 		for (WorkDay workDay : workDays) {
 			idealWorkedTimeForMonth = idealWorkedTimeForMonth + workDay.getIdealWorkedTime();
-			if (workDay.getDay().getDay().isBefore(currentDay)) {
+			if (workDay.getDay().getDate().isBefore(currentDay)) {
 				realWorkedTime = realWorkedTime + workDay.getWorkedTime();
 				idealWorkedTimeUpToCurrentDay = idealWorkedTimeUpToCurrentDay + workDay.getIdealWorkedTime();
 			}

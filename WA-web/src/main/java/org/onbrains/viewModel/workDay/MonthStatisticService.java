@@ -1,4 +1,4 @@
-package org.onbrains.viewModel.workDay.monthStatistic;
+package org.onbrains.viewModel.workDay;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
@@ -67,7 +67,7 @@ public class MonthStatisticService {
 
 	private boolean isFutureMonth() {
 		LocalDate currentDate = LocalDate.now();
-		LocalDate selectedMonth = workDays.get(0).getDay().getDay();
+		LocalDate selectedMonth = workDays.get(0).getDay().getDate();
 		return currentDate.get(ChronoField.YEAR) < selectedMonth.get(ChronoField.YEAR)
 				|| (currentDate.get(ChronoField.YEAR) == selectedMonth.get(ChronoField.YEAR)
 						&& currentDate.get(ChronoField.MONTH_OF_YEAR) < selectedMonth.get(ChronoField.MONTH_OF_YEAR));
