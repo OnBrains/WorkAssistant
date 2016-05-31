@@ -1,20 +1,20 @@
 package org.onbrains.dao;
 
-import org.hibernate.exception.ConstraintViolationException;
-
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.io.Serializable;
+
+import org.hibernate.exception.ConstraintViolationException;
 
 /**
  * Локальный <strong>EntityManager</strong>, который можно использовать не в <strong>EJB</strong> бинах, для выполнения
  * <strong>CRUD</strong> операций.
  * <p/>
+ * 
  * @author Naumov Oleg on 16.12.2015.
  */
 @Stateless
-public class EntityManagerUtils implements Serializable {
+public class EntityManagerUtils {
 
 	@PersistenceContext(unitName = "WA")
 	private EntityManager entityManager;
@@ -42,18 +42,26 @@ public class EntityManagerUtils implements Serializable {
 		return entityManager.find(clazz, object);
 	}
 
-    /**
-     * Получает сообщение об ошибке для конкретного исключения.
-     */
-    public String formationMessageFrom(Exception ex) {
-        Throwable t = ex.getCause();
-        while (t != null) {
-            t = t.getCause();
-            if (t instanceof ConstraintViolationException) {
-                return t.getCause() != null ? t.getCause().getMessage() : t.getMessage();
-            }
-        }
-        return ex.getMessage();
-    }
+	public boolean contains(Object object) {
+		return entityManager.contains(object);
+	}
+
+	public void flush() {
+		entityManager.flush();
+	}
+
+	/**
+	 * Получает сообщение об ошибке для конкретного исключения.
+	 */
+	public String formationMessageFrom(Exception ex) {
+		Throwable t = ex.getCause();
+		while (t != null) {
+			t = t.getCause();
+			if (t instanceof ConstraintViolationException) {
+				return t.getCause() != null ? t.getCause().getMessage() : t.getMessage();
+			}
+		}
+		return ex.getMessage();
+	}
 
 }

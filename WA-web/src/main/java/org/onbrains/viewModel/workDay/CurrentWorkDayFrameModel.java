@@ -1,5 +1,6 @@
 package org.onbrains.viewModel.workDay;
 
+import static org.onbrains.entity.event.EventCategory.NOT_INFLUENCE_ON_WORKED_TIME;
 import static org.onbrains.entity.event.EventState.END;
 import static org.onbrains.entity.event.EventState.NOT_END;
 import static org.onbrains.utils.parsing.DateFormatService.toDDEE;
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.faces.view.ViewScoped;
@@ -19,7 +21,6 @@ import org.onbrains.dao.EntityManagerUtils;
 import org.onbrains.dao.workDay.WorkDayDAOInterface;
 import org.onbrains.dao.workDayEvent.EventTypeDAOInterface;
 import org.onbrains.entity.event.Event;
-import org.onbrains.entity.event.EventCategory;
 import org.onbrains.entity.event.EventType;
 import org.onbrains.entity.workDay.WorkDay;
 import org.onbrains.entity.workDay.WorkDayState;
@@ -42,6 +43,7 @@ public class CurrentWorkDayFrameModel extends WorkDayFrameModel {
 	@Inject
 	private EventTypeDAOInterface etDAO;
 
+	private List<EventType> possibleEventTypes;
 	private EventType selectedEventType;
 
 	@PostConstruct
@@ -68,16 +70,14 @@ public class CurrentWorkDayFrameModel extends WorkDayFrameModel {
 	 */
 	public void startEvent() {
 		stopLastActiveEvent();
-		Event creationEvent = new Event(workDay.getDay().getDay(), selectedEventType, selectedEventType.getTitle(),
-				LocalDateTime.now());
+		Event creationEvent = new Event(workDay, selectedEventType, selectedEventType.getTitle(), LocalDateTime.now());
 		String addEventMessage = workDay.addEvent(creationEvent);
 		if (Objects.equals(addEventMessage, "")) {
 			em.persist(creationEvent);
-			if (workDay.isNoWork()
-					&& !creationEvent.getType().getCategory().equals(EventCategory.NOT_INFLUENCE_ON_WORKED_TIME)) {
+			if (workDay.isNoWork() && !creationEvent.getType().getCategory().equals(NOT_INFLUENCE_ON_WORKED_TIME)) {
 				startWork();
 			}
-			em.merge(workDay);
+//			em.merge(workDay);
 		} else {
 			Notification.warn("Невозможно создать событие", addEventMessage);
 		}
@@ -108,8 +108,6 @@ public class CurrentWorkDayFrameModel extends WorkDayFrameModel {
 	 * Проставляет информацию об окончании рабочего дня, в качестве времени окончания проставляется текущее время. Так
 	 * же создается {@linkplain Event событие}, которое характерезует собой интервал рабочего времени.
 	 */
-	// FIXME: Перед окончанием рабочего дня надо проверять, нет ли уже события влияющего на отработанное время, с таким
-	// временным интервалом
 	public void endWork() {
 		stopLastActiveEvent();
 		workDay.setOutTime(workDay.getLastWorkEvent().getEndTime());
@@ -124,7 +122,7 @@ public class CurrentWorkDayFrameModel extends WorkDayFrameModel {
 	 * @return Заголовок для блока управления текущим рабочим днем.
 	 */
 	public String getLegendValue() {
-		return workDay != null ? toDDEE(workDay.getDay().getDay()) + " - " + workDay.getState().getDesc()
+		return workDay != null ? toDDEE(workDay.getDay().getDate()) + " - " + workDay.getState().getDesc()
 				: "Не найдено";
 	}
 
@@ -164,8 +162,13 @@ public class CurrentWorkDayFrameModel extends WorkDayFrameModel {
 		this.selectedEventType = selectedEventType;
 	}
 
-	public List<EventType> getEventTypes() {
-		return etDAO.getEventTypes(true);
+	public List<EventType> getPossibleEventTypes() {
+		if (possibleEventTypes == null) {
+			possibleEventTypes = etDAO.getEventTypes(true).stream()
+					.filter(eventType -> !eventType.getCategory().equals(NOT_INFLUENCE_ON_WORKED_TIME))
+					.collect(Collectors.toList());
+		}
+		return possibleEventTypes;
 	}
 
 	public int getMinHourForEndEvent(Event event) {

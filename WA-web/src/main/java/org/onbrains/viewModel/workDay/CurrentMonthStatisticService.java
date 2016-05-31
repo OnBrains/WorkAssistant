@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.onbrains.entity.workDay.WorkDay;
-import org.onbrains.viewModel.workDay.monthStatistic.MonthStatisticService;
 
 /**
  * Сервис для расчёта статистики отработанного времени для текущего месяца.

@@ -41,7 +41,7 @@
 
                                         <f:selectItem itemLabel="Тип события" itemValue=""/>
 
-                                        <f:selectItems value="#{currentWorkDayFrameModel.eventTypes}" var="selectedEventType"
+                                        <f:selectItems value="#{currentWorkDayFrameModel.possibleEventTypes}" var="selectedEventType"
                                                        itemLabel="#{selectedEventType.title}"/>
 
                                         <p:ajax event="change" listener="#{currentWorkDayFrameModel.startEvent()}"

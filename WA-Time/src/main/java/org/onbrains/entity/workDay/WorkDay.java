@@ -18,11 +18,10 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -38,12 +37,11 @@ import org.onbrains.utils.parsing.DateFormatService;
 /**
  * @author Naumov Oleg on 21.03.2015 21:20.
  */
-
 @Entity
 @Table(name = "WORK_DAY", uniqueConstraints = { @UniqueConstraint(columnNames = { "WORKER_ID", "DAY_ID" }) })
 @NamedQueries({
-		@NamedQuery(name = WorkDay.GET_WORK_DAYS_BY_MONTH, query = "select wt from WorkDay wt where wt.worker = :worker and to_char(wt.day.day, 'yyyyMM') = :month) order by wt.day"),
-		@NamedQuery(name = WorkDay.GET_WORK_DAY, query = "select wt from WorkDay wt where wt.worker = :worker and wt.day = :day") })
+		@NamedQuery(name = WorkDay.GET_WORK_DAYS_BY_MONTH, query = "from WorkDay wd where wd.worker = :worker and to_char(wd.day.date, 'yyyyMM') = :month order by wd.day"),
+		@NamedQuery(name = WorkDay.GET_WORK_DAY, query = "from WorkDay wd where wd.worker = :worker and wd.day = :day") })
 public class WorkDay extends SuperClass {
 
 	private static final long serialVersionUID = 7775018608493817569L;
@@ -71,11 +69,7 @@ public class WorkDay extends SuperClass {
 	@Column(name = "STATE", length = 16, nullable = false)
 	private WorkDayState state = WorkDayState.NO_WORK;
 
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinTable(name = "WORK_DAY_EVENT", joinColumns = {
-			@JoinColumn(name = "WORK_DAY_ID", nullable = false) }, inverseJoinColumns = {
-					@JoinColumn(name = "EVENT_ID", nullable = false) }, uniqueConstraints = {
-							@UniqueConstraint(columnNames = { "WORK_DAY_ID", "EVENT_ID" }) })
+	@OneToMany(mappedBy = "workDay", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OrderBy(value = "startTime desc")
 	private List<Event> events = new ArrayList<>();
 
@@ -121,11 +115,8 @@ public class WorkDay extends SuperClass {
 
 	public Event getLastWorkEvent() {
 		if (!events.isEmpty()) {
-			for (Event event : events) {
-				if (!event.getType().getCategory().equals(NOT_INFLUENCE_ON_WORKED_TIME)) {
-					return event;
-				}
-			}
+			return events.stream().filter(event -> !event.getCategory().equals(NOT_INFLUENCE_ON_WORKED_TIME)).findFirst()
+					.orElse(null);
 		}
 		return null;
 	}
@@ -245,11 +236,11 @@ public class WorkDay extends SuperClass {
 	}
 
 	public String getComingTimeValue() {
-		return !isNoWork() ? DateFormatService.toHHMM(comingTime) : "__:__";
+		return comingTime != null ? DateFormatService.toHHMM(comingTime) : "__:__";
 	}
 
 	public String getOutTimeValue() {
-		return isWorked() ? DateFormatService.toHHMM(outTime) : "__:__";
+		return outTime != null ? DateFormatService.toHHMM(outTime) : "__:__";
 	}
 
 	// *****************************************************************************************************************

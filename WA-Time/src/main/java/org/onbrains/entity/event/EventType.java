@@ -42,9 +42,11 @@ import static org.onbrains.utils.parsing.DateFormatService.secToMinutes;
 @NamedQueries({ @NamedQuery(name = EventType.GET_EVENT_TYPES, query = "select et from EventType et where et.active in (:activeFlags)") })
 public class EventType extends SuperClass {
 
+    private static final long serialVersionUID = -9195101972489510318L;
+
 	public static final String GET_EVENT_TYPES = "EventType.getEventTypes";
 
-	@Column(name = "TITLE", nullable = false, length = 64)
+    @Column(name = "TITLE", nullable = false, length = 64)
 	private String title;
 
 	@Column(name = "DESCRIPTION", nullable = true, length = 512)

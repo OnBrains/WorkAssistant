@@ -10,12 +10,10 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
-import javax.faces.convert.FacesConverter;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.onbrains.dao.EntityManagerUtils;
-import org.onbrains.entity.SuperClass;
 
 /**
  * @author Naumov Oleg on 23.08.2015 19:05.
@@ -23,6 +21,8 @@ import org.onbrains.entity.SuperClass;
 @Stateless
 @Named
 public class PersistentEntityConverter implements Converter, Serializable {
+
+	private static final long serialVersionUID = 4485845747851160456L;
 
 	private static final Pattern SERIALIZED_FORMAT = Pattern.compile("(.*)\\-([0-9]+)");
 

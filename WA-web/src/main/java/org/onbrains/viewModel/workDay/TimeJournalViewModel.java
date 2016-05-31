@@ -21,8 +21,6 @@ import org.onbrains.entity.day.Day;
 import org.onbrains.entity.workDay.DayType;
 import org.onbrains.entity.workDay.WorkDay;
 import org.onbrains.service.SessionUtil;
-import org.onbrains.viewModel.workDay.monthStatistic.CurrentMonthStatisticService;
-import org.onbrains.viewModel.workDay.monthStatistic.MonthStatisticService;
 
 /**
  * Модель для списка рабочих дней месяца.
@@ -34,7 +32,9 @@ import org.onbrains.viewModel.workDay.monthStatistic.MonthStatisticService;
 @ViewScoped
 public class TimeJournalViewModel implements Serializable {
 
-	@Inject
+    private static final long serialVersionUID = -1583291517175344735L;
+
+    @Inject
 	private EntityManagerUtils em;
 	@Inject
 	private WorkDayDAOInterface wdDAO;
