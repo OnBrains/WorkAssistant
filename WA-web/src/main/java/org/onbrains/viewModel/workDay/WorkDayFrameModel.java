@@ -80,11 +80,11 @@ public class WorkDayFrameModel implements Serializable {
     }
 
 	public void removeEvent(Event removingEvent) {
-//		em.remove(removingEvent);
+		em.remove(removingEvent);
 //        em.flush();
         workDay.removeEvent(removingEvent);
         em.merge(workDay);
-        em.remove(removingEvent);
+//        em.remove(removingEvent);
 	}
 
 	/**

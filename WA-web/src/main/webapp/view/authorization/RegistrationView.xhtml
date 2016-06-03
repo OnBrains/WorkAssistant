@@ -19,7 +19,7 @@
                     <p:outputLabel for="username" value="Логин:"/>
                     <p:inputText id="username" value="#{registrationViewModel.login}" required="true"
                                  maxlength="32" style="width: 240px;">
-                        <f:validateRegex pattern="^[a-zA-Z-_]+$"/>
+                        <f:validateRegex pattern="^[a-zA-Z-_.]+$"/>
                     </p:inputText>
 
                     <p:outputLabel for="password" value="Пароль:"/>

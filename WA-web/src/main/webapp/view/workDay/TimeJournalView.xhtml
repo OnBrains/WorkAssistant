@@ -59,14 +59,14 @@
                             <f:facet name="header">
                                 <h:graphicImage name="img/clock/clock_play.png" title="Начало рабочего дня"/>
                             </f:facet>
-                            <h:outputText value="#{dateFormat.toHHMM(workDay.comingTime)}"/>
+                            <h:outputText value="#{!workDay.noWork ? dateFormat.toHHMM(workDay.comingTime) : null}"/>
                         </p:column>
 
                         <p:column id="end_work_day_id" styleClass="align-center width-10">
                             <f:facet name="header">
                                 <h:graphicImage name="img/clock/clock_stop.png" title="Окончание рабочего дня"/>
                             </f:facet>
-                            <h:outputText value="#{dateFormat.toHHMM(workDay.outTime)}" rendered="#{workDay.worked}"/>
+                            <h:outputText value="#{workDay.worked ? dateFormat.toHHMM(workDay.outTime) : null}" rendered="#{workDay.worked}"/>
                         </p:column>
 
                         <p:column id="summary_work_day_id" styleClass="align-center width-10">

@@ -67,7 +67,8 @@
                                 </div>
                                 <div class="ui-grid-col-2">
                                     <p:inplace editor="true" emptyLabel="-">
-                                        <p:ajax event="save" listener="#{workDayCardViewModel.onWorkDayEdit()}" update="@this"/>
+                                        <p:ajax event="save" listener="#{workDayCardViewModel.onWorkDayEdit()}"
+                                                update="work_time work_day_statistic_panel work_day_events_table"/>
 
                                         <f:facet name="output">
                                             <h:outputText id="work_day_state" value="#{workDayCardViewModel.workDay.state.desc}"/>
@@ -76,7 +77,7 @@
                                         <f:facet name="input">
                                             <p:selectOneMenu value="#{workDayCardViewModel.workDay.state}" style="width: 200px;">
                                                 <f:selectItems value="#{workDayCardViewModel.workDayStates}" var="workDayState"
-                                                               itemValue="#{workDayState}" itemLabel="#{workDayState.desc}" update="work_day_statistic"/>
+                                                               itemValue="#{workDayState}" itemLabel="#{workDayState.desc}"/>
                                             </p:selectOneMenu>
                                         </f:facet>
 

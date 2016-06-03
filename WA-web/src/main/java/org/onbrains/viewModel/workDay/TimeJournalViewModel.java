@@ -57,7 +57,7 @@ public class TimeJournalViewModel implements Serializable {
 	 * Увеличивает значение выбранного месяца на один месяц.
 	 */
 	public void nextMonth() {
-		selectedMonth.plusMonths(1);
+		selectedMonth = selectedMonth.plusMonths(1);
 		initWorkDays();
 		initStatisticService();
 	}
@@ -76,7 +76,7 @@ public class TimeJournalViewModel implements Serializable {
 	 * Уменьшает значение выбранного месяца на один месяц.
 	 */
 	public void previousMonth() {
-		selectedMonth.minusMonths(1);
+		selectedMonth = selectedMonth.minusMonths(1);
 		initWorkDays();
 		initStatisticService();
 	}

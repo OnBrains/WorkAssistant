@@ -77,7 +77,7 @@ public class CurrentWorkDayFrameModel extends WorkDayFrameModel {
 			if (workDay.isNoWork() && !creationEvent.getType().getCategory().equals(NOT_INFLUENCE_ON_WORKED_TIME)) {
 				startWork();
 			}
-//			em.merge(workDay);
+			em.merge(workDay);
 		} else {
 			Notification.warn("Невозможно создать событие", addEventMessage);
 		}

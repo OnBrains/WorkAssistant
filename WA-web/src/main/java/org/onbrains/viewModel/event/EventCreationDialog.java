@@ -101,7 +101,9 @@ public class EventCreationDialog implements Serializable {
 				? LocalDateTime.ofInstant(startTime.toInstant(), ZoneId.systemDefault()) : null;
 		LocalDateTime endTimeValue = endTime != null
 				? LocalDateTime.ofInstant(endTime.toInstant(), ZoneId.systemDefault()) : null;
-		workDay = wdDAO.getWorkDay(eventDay, SessionUtil.getWorker());
+		if (createInterval) {
+			workDay = wdDAO.getWorkDay(eventDay, SessionUtil.getWorker());
+		}
 		Event newEvent = new Event(workDay, eventType, eventType.getTitle(), fullDay, fixDate(startTimeValue, eventDay),
 				fixDate(endTimeValue, eventDay));
 		if (fullDay) {

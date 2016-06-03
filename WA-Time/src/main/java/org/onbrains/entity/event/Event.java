@@ -140,7 +140,7 @@ public class Event extends SuperClass {
 		switch (type.getCategory()) {
 		case INFLUENCE_ON_WORKED_TIME:
 			if (state.equals(END)) {
-				return fullDay ? workDay.getIdealWorkedTime() : Duration.between(startTime, endTime).getSeconds();
+				return Duration.between(startTime, endTime).getSeconds();
 			} else {
 				return Duration.between(startTime, LocalDateTime.now()).getSeconds();
 			}

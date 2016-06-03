@@ -236,11 +236,11 @@ public class WorkDay extends SuperClass {
 	}
 
 	public String getComingTimeValue() {
-		return comingTime != null ? DateFormatService.toHHMM(comingTime) : "__:__";
+		return !isNoWork() ? DateFormatService.toHHMM(comingTime) : "__:__";
 	}
 
 	public String getOutTimeValue() {
-		return outTime != null ? DateFormatService.toHHMM(outTime) : "__:__";
+		return isWorked() ? DateFormatService.toHHMM(outTime) : "__:__";
 	}
 
 	// *****************************************************************************************************************
