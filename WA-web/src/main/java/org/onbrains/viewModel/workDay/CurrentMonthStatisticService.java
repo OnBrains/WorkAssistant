@@ -20,10 +20,11 @@ public class CurrentMonthStatisticService extends MonthStatisticService {
 
 	@Override
 	protected void initRawData() {
-		LocalDate currentDay = LocalDate.now().minusDays(1);
+		LocalDate currentDay = LocalDate.now();
 		for (WorkDay workDay : workDays) {
 			idealWorkedTimeForMonth = idealWorkedTimeForMonth + workDay.getIdealWorkedTime();
-			if (workDay.getDay().getDate().isBefore(currentDay)) {
+			if (workDay.getDay().getDate().isBefore(currentDay)
+					|| (workDay.getDay().getDate().equals(currentDay) && workDay.isWorked())) {
 				realWorkedTime = realWorkedTime + workDay.getWorkedTime();
 				idealWorkedTimeUpToCurrentDay = idealWorkedTimeUpToCurrentDay + workDay.getIdealWorkedTime();
 			}
@@ -47,9 +48,9 @@ public class CurrentMonthStatisticService extends MonthStatisticService {
 	@Override
 	protected void initRemainderTime() {
 		if (isWorkedFullMonth()) {
-            remainderTime = 0;
+			remainderTime = 0;
 		} else {
-            remainderTime = isWorkedRequiredTime() ? Math.abs(idealWorkedTimeForMonth - realWorkedTime)
+			remainderTime = isWorkedRequiredTime() ? Math.abs(idealWorkedTimeForMonth - realWorkedTime)
 					: Math.abs(idealWorkedTimeForMonth - idealWorkedTimeUpToCurrentDay);
 		}
 	}
